@@ -48,5 +48,5 @@ docker build --tag 'tg_bot' .
 ---
 Запустите контейнер
 ```
-docker run -d 'tg_bot'
+docker run -d --restart=always 'tg_bot'
 ```
