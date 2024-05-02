@@ -1,0 +1,15 @@
+authtoken: 2UWb9NexrxN39SqyVFOv9q0uvqL_2zHam7CRVVYVCZn6LyyxM
+version: 2
+tunnels:
+  my_tunnel:
+    proto: http
+    hostname: lenient-hippo-conversely.ngrok-free.app
+    addr: money_bot:8001
+
+    # -------------------------
+    # Additional options
+    # -------------------------
+    # auth: "username:password"
+    # host_header: rewrite
+    # inspect: true
+    # bind_tls: true
