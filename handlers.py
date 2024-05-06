@@ -17,7 +17,7 @@ async def start(message: types.Message,
     Guests = Base.classes.general_models_guest
     username = message.from_user.username
     tg_id = message.from_user.id
-    guest = session.query(Guests).where(Guests.tg_id == tg_id)
+    guest = session.query(Guests).where(Guests.tg_id == tg_id).all()
     print(guest)
     if not guest:
         session.execute(insert(Guests).values(username=username,
