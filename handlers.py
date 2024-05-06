@@ -17,10 +17,13 @@ async def start(message: types.Message,
     Guests = Base.classes.general_models_guest
     username = message.from_user.username
     tg_id = message.from_user.id
-    session.execute(insert(Guests).values(username=username,
-                                          tg_id=tg_id))
-
-    start_kb = create_start_keyboard()
-    await message.answer('💱 Добро пожаловать в виртуальный обменник! 💵  Настоящая версия: MVP v.0.5 (beta 0.1). Доступен архив:',
-                         reply_markup=start_kb.as_markup())
-    await message.delete()
+    try:
+        session.execute(insert(Guests).values(username=username,
+                                            tg_id=tg_id))
+    except Exception:
+        pass
+    finally:
+        start_kb = create_start_keyboard()
+        await message.answer('💱 Добро пожаловать в виртуальный обменник! 💵  Настоящая версия: MVP v.0.5 (beta 0.1). Доступен архив:',
+                            reply_markup=start_kb.as_markup())
+        await message.delete()
