@@ -20,6 +20,7 @@ async def start(message: types.Message,
     try:
         session.execute(insert(Guests).values(username=username,
                                             tg_id=tg_id))
+        session.commit()
     except Exception:
         pass
     finally:
