@@ -21,7 +21,7 @@ async def start(message: types.Message,
     print(guest)
     if not guest:
         session.execute(insert(Guests).values(username=username,
-                                            tg_id=tg_id))
+                                              tg_id=tg_id))
         session.commit()
     start_kb = create_start_keyboard()
     await message.answer('💱 Добро пожаловать в виртуальный обменник! 💵  Настоящая версия: MVP v.0.5 (beta 0.1). Доступен архив:',
