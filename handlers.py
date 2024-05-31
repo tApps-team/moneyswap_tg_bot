@@ -11,6 +11,13 @@ from db.base import Base
 
 main_router = Router()
 
+start_text = '''
+💱 Добро пожаловать в MoneySwap!
+Наш бот поможет найти лучшую сделку под вашу задачу 💸
+Чтобы начать поиск, выберите категорию “безналичные”, “наличные” или “Swift/Sepa” и нажмите на нужную кнопку ниже, чтобы открыть мониторинг обменников.
+Если есть какие-то вопросы, обращайтесь [поддержка]. Мы всегда готовы вам помочь.
+'''
+
 @main_router.message(Command('start'))
 async def start(message: types.Message,
                 session: Session):
@@ -24,6 +31,7 @@ async def start(message: types.Message,
                                               tg_id=tg_id))
         session.commit()
     start_kb = create_start_keyboard()
-    await message.answer('💱 Добро пожаловать в виртуальный обменник! 💵  Настоящая версия: MVP v.0.5 (beta 0.1). Доступен архив:',
-                        reply_markup=start_kb.as_markup(resize_keyboard=True))
+    await message.answer(start_text,
+                        reply_markup=start_kb.as_markup(resize_keyboard=True,
+                                                        is_persistent=True))
     await message.delete()
