@@ -25,5 +25,5 @@ async def start(message: types.Message,
         session.commit()
     start_kb = create_start_keyboard()
     await message.answer('💱 Добро пожаловать в виртуальный обменник! 💵  Настоящая версия: MVP v.0.5 (beta 0.1). Доступен архив:',
-                        reply_markup=start_kb.as_markup())
+                        reply_markup=start_kb.as_markup(resize_keyboard=True))
     await message.delete()

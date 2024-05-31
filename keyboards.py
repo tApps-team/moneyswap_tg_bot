@@ -1,12 +1,12 @@
 from aiogram import types
-from aiogram.utils.keyboard import InlineKeyboardBuilder, KeyboardBuilder
+from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from aiogram.types.web_app_info import WebAppInfo
 from config import WEBAPP_URL_ONE, WEBAPP_URL_TWO, WEBAPP_URL_THREE
 
 
 
 def create_start_keyboard():
-    start_kb = KeyboardBuilder()
+    start_kb = ReplyKeyboardBuilder()
     # start_kb = InlineKeyboardBuilder()
     start_kb.add(types.KeyboardButton(text='Наличные',
                                       web_app=WebAppInfo(url='https://www.bestexchanges.world/')))
