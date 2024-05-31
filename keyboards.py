@@ -9,10 +9,10 @@ def create_start_keyboard():
     start_kb = ReplyKeyboardBuilder()
     # start_kb = InlineKeyboardBuilder()
     start_kb.add(types.KeyboardButton(text='Наличные',
-                                      web_app=WebAppInfo(url='https://www.bestexchanges.world/')))
+                                      web_app=WebAppInfo(url='https://www.bestexchanges.world/?direction=cash')))
 
     start_kb.add(types.KeyboardButton(text='Безналичные',
-                                      web_app=WebAppInfo(url='https://www.bestexchanges.world/')))
+                                      web_app=WebAppInfo(url='https://www.bestexchanges.world/?direction=noncash')))
 
     start_kb.row(types.KeyboardButton(text='Swift/Sepa'))
 
