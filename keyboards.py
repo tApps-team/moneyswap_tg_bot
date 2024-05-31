@@ -7,20 +7,11 @@ from config import WEBAPP_URL_ONE, WEBAPP_URL_TWO, WEBAPP_URL_THREE
 
 def create_start_keyboard():
     start_kb = ReplyKeyboardBuilder()
-    # start_kb = InlineKeyboardBuilder()
-    start_kb.add(types.KeyboardButton(text='Наличные',
-                                      web_app=WebAppInfo(url='https://www.bestexchanges.world/?direction=cash')))
-
+    
     start_kb.add(types.KeyboardButton(text='Безналичные',
                                       web_app=WebAppInfo(url='https://www.bestexchanges.world/?direction=noncash')))
-
+    start_kb.add(types.KeyboardButton(text='Наличные',
+                                      web_app=WebAppInfo(url='https://www.bestexchanges.world/?direction=cash')))
     start_kb.row(types.KeyboardButton(text='Swift/Sepa'))
-
-    # start_kb.add(types.InlineKeyboardButton(text='Наличные',
-    #                                         web_app=WebAppInfo(url='https://www.bestexchanges.world/')))
-    # start_kb.add(types.InlineKeyboardButton(text='Безналичные',
-    #                                         web_app=WebAppInfo(url='https://www.bestexchanges.world/')))
-    # start_kb.row(types.InlineKeyboardButton(text='Swift/Sepa',
-    #                                         callback_data='3'))
     
     return start_kb
