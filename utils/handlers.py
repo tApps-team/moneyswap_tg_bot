@@ -146,7 +146,7 @@ async def try_add_file_ids(bot: Bot,
             # _path = f'/home/skxnny/web/backup_bestexchange/django_fastapi/media/{video.video}'
             _path = f'https://api.moneyswap.online/media/{video.video}'
             print(_path)
-            video_file = types.URLInputFile(path=_path)
+            video_file = types.URLInputFile(url=_path)
             # upload video to telegram server
             loaded_video = await bot.send_video(686339126,
                                                 video_file,
@@ -163,7 +163,7 @@ async def try_add_file_ids(bot: Bot,
         if file.file_id is None:
             _path = f'https://api.moneyswap.online/media/{file.file}'
 
-            file_file = types.URLInputFile(path=_path)
+            file_file = types.URLInputFile(url=_path)
             # upload file to telegram server
             loaded_file = await bot.send_document(686339126,
                                                 file_file)
