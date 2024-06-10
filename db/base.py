@@ -10,6 +10,7 @@ Base = automap_base()
 engine = create_engine(db_url,
                        echo=True)
 
-Base.prepare(engine, reflect=True)
+# Base.prepare(engine, reflect=True)
+Base.prepare(autoload_with=engine)
 
 session = sessionmaker(engine, expire_on_commit=False)
