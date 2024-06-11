@@ -42,7 +42,7 @@ dp.include_router(main_router)
 dp.update.middleware(DbSessionMiddleware(session_pool=session))
 
 #Initialize web server
-app = FastAPI()
+app = FastAPI(docs_url='/docs_bot')
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
