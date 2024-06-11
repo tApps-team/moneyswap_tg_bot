@@ -1,13 +1,13 @@
 services:
-  ngrok:
-    image: ngrok/ngrok:latest
-    volumes:
-      - ./ngrok.yml:/etc/ngrok.yml
-    command:
-      - "start"
-      - "--all"
-      - "--config"
-      - "/etc/ngrok.yml"
+  # ngrok:
+  #   image: ngrok/ngrok:latest
+  #   volumes:
+  #     - ./ngrok.yml:/etc/ngrok.yml
+  #   command:
+  #     - "start"
+  #     - "--all"
+  #     - "--config"
+  #     - "/etc/ngrok.yml"
   
   bot:
     build: .
@@ -16,6 +16,13 @@ services:
     container_name: money_bot
     ports:
       - '8001:8001'
-    depends_on:
-      - ngrok
+    # depends_on:
+    #   - ngrok
     command: sh -c 'python main.py'
+    networks:
+      - bot_network
+
+networks:
+  bot_network:
+    name: common-network
+    external: true
