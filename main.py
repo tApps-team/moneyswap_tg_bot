@@ -3,6 +3,8 @@ import asyncio
 import uvicorn
 from uvicorn import Config, Server
 
+from starlette.middleware.cors import CORSMiddleware
+
 from fastapi import FastAPI, APIRouter
 
 from aiogram import Bot, Dispatcher, types
@@ -41,6 +43,13 @@ dp.update.middleware(DbSessionMiddleware(session_pool=session))
 
 #Initialize web server
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 event_loop = asyncio.get_event_loop()
 config = Config(app=app,
                 loop=event_loop,
