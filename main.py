@@ -59,7 +59,7 @@ server = Server(config)
 
 
 fast_api_router = APIRouter(prefix='/bot_api')
-app.include_router(fast_api_router)
+# app.include_router(fast_api_router)
 
 #For set webhook
 WEBHOOK_PATH = f'/webhook'
@@ -91,6 +91,9 @@ async def bot_webhook(update: dict):
 async def send_mass_message_for_all_users():
     await send_mass_message(bot=bot,
                             session=session())
+    
+
+app.include_router(fast_api_router)
 # fast_api_router = APIRouter()
 
 # @fast_api_router.get('/test')
