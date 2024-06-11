@@ -87,13 +87,13 @@ async def bot_webhook(update: dict):
 
 
 #Endpoint for mass send message
-@fast_api_router.get('/send_mass_message')
+@app.get('/send_mass_message')
 async def send_mass_message_for_all_users():
     await send_mass_message(bot=bot,
                             session=session())
     
 
-app.include_router(fast_api_router)
+# app.include_router(fast_api_router)
 # fast_api_router = APIRouter()
 
 # @fast_api_router.get('/test')
