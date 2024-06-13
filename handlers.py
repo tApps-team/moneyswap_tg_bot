@@ -36,6 +36,7 @@ async def start(message: types.Message,
             'last_name': message.from_user.last_name,
             'language_code': message.from_user.language_code,
             'is_premium': message.from_user.is_premium,
+            'is_active': True,
         }
         session.execute(insert(Guest).values(**value_dict))
         session.commit()
