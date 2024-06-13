@@ -228,8 +228,10 @@ async def send_mass_message(bot: Bot,
                     print('MB2', mb2)
                 guest = session.query(Guest).where(Guest.tg_id == '686339126').first()
                 if not guest.is_active:
-                   session.execute(update(Guest).where(Guest.tg_id == '686339126').values(is_active=True)) 
+                   session.execute(update(Guest).where(Guest.tg_id == '686339126').values(is_active=True))
+                   session.commit()
             except Exception:
                 session.execute(update(Guest).where(Guest.tg_id == '686339126').values(is_active=False))
-
+                session.commit()
+            
             session.close()
