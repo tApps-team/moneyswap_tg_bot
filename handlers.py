@@ -24,15 +24,22 @@ start_text = '💱<b>Добро пожаловать в MoneySwap!</b>\n\nНаш
 async def start(message: types.Message,
                 session: Session):
     Guest = Base.classes.general_models_guest
-    username = message.from_user.username
+
     tg_id = message.from_user.id
-    guest = session.query(Guest).where(Guest.tg_id == tg_id).all()
+    guest = session.query(Guest).where(Guest.tg_id == tg_id).first()
     # print(guest)
     if not guest:
-        session.execute(insert(Guest).values(username=username,
-                                              tg_id=tg_id))
+        value_dict = {
+            'username': message.from_user.username,
+            'tg_id': tg_id,
+            'first_name': message.from_user.first_name,
+            'last_name': message.from_user.last_name,
+            'language_code': message.from_user.language_code,
+            'is_premium': message.from_user.is_premium,
+        }
+        session.execute(insert(Guest).values(**value_dict))
         session.commit()
-    start_kb = create_start_keyboard(message.from_user.id)
+    start_kb = create_start_keyboard(tg_id)
     await message.answer(start_text,
                          parse_mode='html',
                         reply_markup=start_kb.as_markup(resize_keyboard=True,
