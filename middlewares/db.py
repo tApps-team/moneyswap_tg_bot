@@ -10,10 +10,11 @@ from sqlalchemy.orm import sessionmaker
 
 class DbSessionMiddleware(BaseMiddleware):
     def __init__(self,
-                 session_pool: sessionmaker):
+                 session_pool: sessionmaker,
+                 api_client: Client):
         super().__init__()
         self.session_pool = session_pool
-        # self.api_client = api_client
+        self.api_client = api_client
         # self.engine = engine
 
     async def __call__(
@@ -26,6 +27,6 @@ class DbSessionMiddleware(BaseMiddleware):
         with self.session_pool() as session:
             data["session"] = session
 
-        # data['api_client'] = self.api_client
+        data['api_client'] = self.api_client
         
         return await handler(event, data)
