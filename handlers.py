@@ -147,7 +147,7 @@ async def send_app(callback: types.CallbackQuery,
                 bot)
 
 
-@main_router.callback_query(F.data.in_(('pay_payment', 'access_payment')))
+@main_router.callback_query_handler(F.data.in_(('pay_payment', 'access_payment')))
 async def request_type_state(callback: types.CallbackQuery,
                              session: Session,
                              state: FSMContext,
