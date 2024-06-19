@@ -1,4 +1,5 @@
 from aiogram import types, Bot
+from aiogram.fsm.context import FSMContext
 
 from sqlalchemy import update
 from sqlalchemy.orm import Session
@@ -175,3 +176,22 @@ async def try_add_file_ids(bot: Bot,
             session.execute(update(MassSendFile).where(MassSendFile.id==file.id).values(file_id=file_file_id))
 
     session.commit()
+
+
+
+async def swift_sepa_data(state: FSMContext):
+    # res = []
+    data = await state.get_data()
+    request_text = 'Оплатить платеж' if data['request_type'] == 'pay' else 'Принять платеж'
+    # res.append(request_type)
+    request_type = f"Тип заявки: {request_text}"
+    country = f"Страна: {data['country']}"
+    amount = f"Сумма: {data['amount']}"
+    task_text = f"Комментарий: {data['task_text']}"
+    res = '\n'.join(
+        (request_type,
+         country,
+         amount,
+         task_text),
+        )
+    return res

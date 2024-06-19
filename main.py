@@ -3,6 +3,8 @@ import asyncio
 import uvicorn
 from uvicorn import Config, Server
 
+from pyrogram import Client
+
 from starlette.middleware.cors import CORSMiddleware
 
 from fastapi import FastAPI, APIRouter
@@ -17,7 +19,7 @@ from db.base import engine, session, Base
 
 from middlewares.db import DbSessionMiddleware
 
-from config import TOKEN, db_url, PUBLIC_URL
+from config import TOKEN, db_url, PUBLIC_URL, API_ID, API_HASH
 from handlers import main_router, send_mass_message
 
 
@@ -35,11 +37,18 @@ from handlers import main_router, send_mass_message
 #TG BOT
 bot = Bot(TOKEN, parse_mode="HTML")
 
+#####
+api_client = Client('my_account',
+                    api_id=API_ID,
+                    api_hash=API_HASH)
+#####
+
 dp = Dispatcher(storage=MemoryStorage())
 dp.include_router(main_router)
 
 #Add session and database connection in handlers 
-dp.update.middleware(DbSessionMiddleware(session_pool=session))
+dp.update.middleware(DbSessionMiddleware(session_pool=session,
+                                         api_client=api_client))
 
 #Initialize web server
 app = FastAPI(docs_url='/docs_bot')
@@ -139,23 +148,30 @@ async def send_mass_message_for_all_users():
 #     # print(w)
 
 
+#     api_client = Client('my_account',
+#                         api_id=API_ID,
+#                         api_hash=API_HASH)
+
+
 
 #     dp = Dispatcher()
 #     dp.include_router(main_router)
-#     dp.update.middleware(DbSessionMiddleware(session_pool=session))
+#     dp.update.middleware(DbSessionMiddleware(session_pool=session,
+#                                              api_client=api_client))
 
-#     engine = create_engine(db_url,
-#                            echo=True)
+#     # engine = create_engine(db_url,
+#     #                        echo=True)
 
 #     # Base.prepare(engine, reflect=True)
+    
 
 #     await bot.delete_webhook(drop_pending_updates=True)
 #     await dp.start_polling(bot)
 
 
 # if __name__ == '__main__':
-#     uvicorn.run('main:app', host='0.0.0.0', port=8001)
-#     asyncio.run(main())
+    # uvicorn.run('main:app', host='0.0.0.0', port=8001)
+    # asyncio.run(main())
     # event_loop.run_until_complete(server.serve())
 if __name__ == '__main__':
     event_loop.run_until_complete(server.serve())

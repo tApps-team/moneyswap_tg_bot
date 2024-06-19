@@ -32,3 +32,7 @@ db_url = URL.create(
     port=DB_PORT,
     database=DB_NAME,
 )
+
+# Client Bot API
+API_ID = os.environ.get('API_ID')
+API_HASH = os.environ.get('API_HASH')
