@@ -120,7 +120,7 @@ async def send_app(callback: types.CallbackQuery,
                    bot: Bot,
                    api_client: Client):
     data = await state.get_data()
-    state_procces = data.get('state_procces')
+    state_process = data.get('state_process')
     username = callback.message.from_user.username
     print(username)
     print(callback.message.chat.id)
@@ -132,7 +132,7 @@ async def send_app(callback: types.CallbackQuery,
         chat_link = await app.create_chat_invite_link(super_group.id,
                                                       name=f'HelpChat|{username}')
         await bot.send_message(super_group.id,
-                               state_procces)
+                               state_process)
 
     print(super_group)
     print(super_group.__dict__)
