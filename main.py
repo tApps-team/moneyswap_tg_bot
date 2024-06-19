@@ -38,17 +38,16 @@ from handlers import main_router, send_mass_message
 bot = Bot(TOKEN, parse_mode="HTML")
 
 #####
-api_client = Client('my_account',
-                    api_id=API_ID,
-                    api_hash=API_HASH)
+# api_client = Client('my_account',
+#                     api_id=API_ID,
+#                     api_hash=API_HASH)
 #####
 
 dp = Dispatcher(storage=MemoryStorage())
 dp.include_router(main_router)
 
 #Add session and database connection in handlers 
-dp.update.middleware(DbSessionMiddleware(session_pool=session,
-                                         api_client=api_client))
+dp.update.middleware(DbSessionMiddleware(session_pool=session))
 
 #Initialize web server
 app = FastAPI(docs_url='/docs_bot')
