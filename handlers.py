@@ -119,6 +119,8 @@ async def send_app(callback: types.CallbackQuery,
                    state: FSMContext,
                    bot: Bot,
                    api_client: Client):
+    data = await state.get_data()
+    state_procces = data.get('state_procces')
     username = callback.message.from_user.username
     print(username)
     print(callback.message.chat.id)
@@ -126,12 +128,14 @@ async def send_app(callback: types.CallbackQuery,
     print(callback.from_user.id)
 
     async with api_client as app:
-        channel = await app.create_supergroup(title=f'HelpChat|{username}')
-        chat_link = await app.create_chat_invite_link(channel.id,
+        super_group = await app.create_supergroup(title=f'HelpChat|{username}')
+        chat_link = await app.create_chat_invite_link(super_group.id,
                                                       name=f'HelpChat|{username}')
+        await bot.send_message(super_group.id,
+                               state_procces)
 
-    print(channel)
-    print(channel.__dict__)
+    print(super_group)
+    print(super_group.__dict__)
     print(chat_link.invite_link)
     # _chat = await callback.message.chat.create_invite_link(name='22qwerty')
     # _chat.invite_link
