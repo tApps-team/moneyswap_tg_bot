@@ -76,7 +76,8 @@ WEBHOOK_PATH = f'/webhook'
 @app.on_event('startup')
 async def on_startup():
     await bot.set_webhook(f"{PUBLIC_URL}{WEBHOOK_PATH}",
-                          drop_pending_updates=True)
+                          drop_pending_updates=True,
+                          allowed_updates=['message', 'callback_query'])
     
     # Base.prepare(engine, reflect=True)
 
