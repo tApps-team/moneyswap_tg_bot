@@ -131,6 +131,7 @@ async def send_app(callback: types.CallbackQuery,
         super_group = await app.create_supergroup(title=f'HelpChat|{username}')
         chat_link = await app.create_chat_invite_link(super_group.id,
                                                       name=f'HelpChat|{username}')
+    if state_process is not None:
         await bot.send_message(super_group.id,
                                state_process)
 
