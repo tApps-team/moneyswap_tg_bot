@@ -101,12 +101,14 @@ async def start_swift_sepa(message: types.Message,
 
     main_menu_msg: types.Message = data.get('main_menu_msg')
 
+    print('has_main_menu_msg?', bool(main_menu_msg))
+
     if main_menu_msg:
         try:
             await main_menu_msg.delete()
         except Exception:
             pass
-        
+
     state_msg = await message.answer('<b>Выберите тип заявки</b>',
                          reply_markup=kb.as_markup())
     
