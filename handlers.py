@@ -127,6 +127,7 @@ async def send_app(callback: types.CallbackQuery,
                    api_client: Client):
     data = await state.get_data()
     state_process = data.get('state_process')
+    state_msg: types.Message = data.get('state_msg')
     username_from_state = data.get('username')
     print('username from state', username_from_state)
     username = callback.message.from_user.username
@@ -172,7 +173,7 @@ async def send_app(callback: types.CallbackQuery,
     await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link.invite_link}',
                                   reply_markup=kb.as_markup(resize_keyboard=True,
                                                             is_persistent=True))
-    await callback.answer()
+    await bot.delete_message(callback.from_user.id, state_msg.message_id)
 
 
 @main_router.callback_query(F.data.in_(('pay_payment', 'access_payment')))
