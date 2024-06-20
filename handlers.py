@@ -32,8 +32,8 @@ async def start(message: types.Message,
                 state: FSMContext,
                 bot: Bot,
                 text_msg: str = None):
-    # state_data = await state.get_data()
-    # prev_start_msg = state_data.get('start_msg')
+    state_data = await state.get_data()
+    main_menu_msg: types.Message = state_data.get('main_menu_msg')
 
     # print(bool(prev_start_msg))
 
@@ -71,6 +71,12 @@ async def start(message: types.Message,
                                     parse_mode='html',
                                     reply_markup=start_kb.as_markup(resize_keyboard=True,
                                                                     is_persistent=True))
+    
+    if main_menu_msg:
+        try:
+            await main_menu_msg.delete()
+        except Exception:
+            pass
     # await state.update_data(start_msg=start_msg.message_id)
     # await state.update_data(username=message.from_user.username)
     # try:
@@ -112,11 +118,12 @@ async def back_to_main(callback: types.CallbackQuery,
     # if start_msg:
     #     await state.update_data(start_msg=start_msg)
     
-    await start(callback.message,
-                session,
-                state,
-                bot,
-                text_msg='Главное меню')
+    main_menu_msg = await start(callback.message,
+                                session,
+                                state,
+                                bot,
+                                text_msg='Главное меню')
+    await state.update_data(main_menu_msg=main_menu_msg)
 
 
 @main_router.callback_query(F.data == 'send_app')
