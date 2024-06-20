@@ -108,6 +108,7 @@ async def start_swift_sepa(message: types.Message,
                            state: FSMContext):
     data = await state.get_data()
     await state.set_state(SwiftSepaStates.request_type)
+    await state.update_data(order=dict())
 
     swift_start_kb = create_swift_start_kb()
     kb = add_cancel_btn_to_kb(swift_start_kb)
@@ -165,7 +166,12 @@ async def send_app(callback: types.CallbackQuery,
                    state: FSMContext,
                    bot: Bot,
                    api_client: Client):
+    
     data = await state.get_data()
+    order = data.get('order')
+    if order:
+        print('order', order)
+
     state_process = data.get('state_process')
     state_msg: types.Message = data.get('state_msg')
     username_from_state = data.get('username')
@@ -226,6 +232,10 @@ async def request_type_state(callback: types.CallbackQuery,
     request_type = 'Оплатить платеж' if callback.data == 'pay_payment' else 'Принять платеж'
     state_process = f'Тип заявки: {request_type}'
     #
+    order = data.get('order')
+    order['request_type'] = request_type
+    await state.update_data(order=order)
+    #
     username_from_state = data.get('username')
     print(username_from_state)
     #
@@ -257,6 +267,12 @@ async def country_state(message: types.Message,
     state_msg: types.Message = data.get('state_msg')
     await state.update_data(country=message.text)
 
+    #
+    order = data.get('order')
+    order['country'] = message.text
+    await state.update_data(order=order)
+    #
+
     state_process = data.get('state_process')
     state_process += f'\nСтрана: {message.text}'
     await state.update_data(state_process=state_process)
@@ -281,6 +297,12 @@ async def amount_state(message: types.Message,
     state_msg: types.Message = data.get('state_msg')
 
     await state.update_data(amount=message.text)
+
+    #
+    order = data.get('order')
+    order['amount'] = message.text
+    await state.update_data(order=order)
+    #
 
     state_process = data.get('state_process')
     state_process += f'\nСумма: {message.text}'
@@ -307,6 +329,12 @@ async def task_text_state(message: types.Message,
     state_msg: types.Message = data.get('state_msg')
 
     await state.update_data(task_text=message.text)
+
+    #
+    order = data.get('order')
+    order['comment'] = message.text
+    await state.update_data(order=order)
+    #
 
     state_process = data.get('state_process')
     state_process += f'\nКомментарий: {message.text}'
