@@ -93,11 +93,20 @@ async def start(message: types.Message,
 @main_router.message(F.text == 'Swift/Sepa')
 async def start_swift_sepa(message: types.Message,
                            state: FSMContext):
+    data = await state.get_data()
     await state.set_state(SwiftSepaStates.request_type)
 
     swift_start_kb = create_swift_start_kb()
     kb = add_cancel_btn_to_kb(swift_start_kb)
 
+    main_menu_msg: types.Message = data.get('main_menu_msg')
+
+    if main_menu_msg:
+        try:
+            await main_menu_msg.delete()
+        except Exception:
+            pass
+        
     state_msg = await message.answer('<b>Выберите тип заявки</b>',
                          reply_markup=kb.as_markup())
     
