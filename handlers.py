@@ -172,6 +172,7 @@ async def send_app(callback: types.CallbackQuery,
     await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link.invite_link}',
                                   reply_markup=kb.as_markup(resize_keyboard=True,
                                                             is_persistent=True))
+    await callback.answer()
 
 
 @main_router.callback_query(F.data.in_(('pay_payment', 'access_payment')))
