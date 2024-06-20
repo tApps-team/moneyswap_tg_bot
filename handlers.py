@@ -184,6 +184,11 @@ async def send_app(callback: types.CallbackQuery,
     print(callback.message.from_user.id)
     print(callback.from_user.id)
 
+    Order = Base.classes.general_models_customorder
+
+    session.execute(insert(Order).values(order))
+    session.commit()
+
     async with api_client as app:
         super_group = await app.create_supergroup(title=f'HelpChat|{callback.from_user.username}')
         chat_link = await app.create_chat_invite_link(super_group.id,
