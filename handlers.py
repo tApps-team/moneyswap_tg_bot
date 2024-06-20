@@ -32,9 +32,14 @@ async def start(message: types.Message,
                 state: FSMContext,
                 bot: Bot,
                 text_msg: str = None):
-    state_data = await state.get_data()
-    main_menu_msg: types.Message = state_data.get('main_menu_msg')
+    data = await state.get_data()
+    main_menu_msg: types.Message = data.get('main_menu_msg')
 
+    if main_menu_msg:
+        try:
+            await main_menu_msg.delete()
+        except Exception:
+            pass
     # print(bool(prev_start_msg))
 
     # if not prev_start_msg:
@@ -62,21 +67,29 @@ async def start(message: types.Message,
     print(message.from_user.username)
     print(message.from_user.id)
     start_kb = create_start_keyboard(message.from_user.id)
-    text = start_text if text_msg is None else text_msg
+    # text = start_text if text_msg is None else text_msg
     
     if isinstance(message, types.CallbackQuery):
         message = message.message
 
-    start_msg = await message.answer(text=text,
-                                    parse_mode='html',
-                                    reply_markup=start_kb.as_markup(resize_keyboard=True,
-                                                                    is_persistent=True))
+    # start_msg = await message.answer(text=text,
+    #                                 parse_mode='html',
+    #                                 reply_markup=start_kb.as_markup(resize_keyboard=True,
+    #                                                                 is_persistent=True))
+    if text_msg is None:
+        await message.answer(text=start_text)
+
+    main_menu_msg = await message.answer('Главное меню',
+                                         reply_markup=start_kb.as_markup(resize_keyboard=True,
+                                                                         is_persistent=True))
     
-    if main_menu_msg:
-        try:
-            await main_menu_msg.delete()
-        except Exception:
-            pass
+    await state.update_data(main_menu_msg=main_menu_msg)
+    
+    # if main_menu_msg:
+    #     try:
+    #         await main_menu_msg.delete()
+    #     except Exception:
+    #         pass
     # await state.update_data(start_msg=start_msg.message_id)
     # await state.update_data(username=message.from_user.username)
     # try:
@@ -99,15 +112,15 @@ async def start_swift_sepa(message: types.Message,
     swift_start_kb = create_swift_start_kb()
     kb = add_cancel_btn_to_kb(swift_start_kb)
 
-    main_menu_msg: types.Message = data.get('main_menu_msg')
+    # main_menu_msg: types.Message = data.get('main_menu_msg')
 
-    print('has_main_menu_msg?', bool(main_menu_msg))
+    # print('has_main_menu_msg?', bool(main_menu_msg))
 
-    if main_menu_msg:
-        try:
-            await main_menu_msg.delete()
-        except Exception:
-            pass
+    # if main_menu_msg:
+    #     try:
+    #         await main_menu_msg.delete()
+    #     except Exception:
+    #         pass
 
     state_msg = await message.answer('<b>Выберите тип заявки</b>',
                          reply_markup=kb.as_markup())
@@ -122,21 +135,28 @@ async def back_to_main(callback: types.CallbackQuery,
                        state: FSMContext,
                        session: Session,
                        bot: Bot):
-    # state_data = await state.get_data()
-    # start_msg = state_data.get('start_msg')
-    await state.clear()
-    
-    # if start_msg:
-    #     await state.update_data(start_msg=start_msg)
-    
-    main_menu_msg = await start(callback.message,
-                                session,
-                                state,
-                                bot,
-                                text_msg='Главное меню')
-    await state.update_data(main_menu_msg=main_menu_msg)
     data = await state.get_data()
-    print(data)
+    # start_msg = state_data.get('start_msg')
+    main_menu_msg: types.Message = data.get('main_menu_msg')
+    await state.clear()
+
+    if main_menu_msg:
+        await state.update_data(main_menu_msg=main_menu_msg)
+    
+    # if main_menu_msg:
+    #     try:
+    #         await main_menu_msg.delete()
+    #     except Exception:
+    #         pass
+
+    await start(callback.message,
+                session,
+                state,
+                bot,
+                text_msg='Главное меню')
+    # await state.update_data(main_menu_msg=main_menu_msg)
+    # data = await state.get_data()
+    # print(data)
 
 
 @main_router.callback_query(F.data == 'send_app')
