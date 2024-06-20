@@ -42,6 +42,8 @@ async def start(message: types.Message,
     state_data = await state.get_data()
     prev_start_msg = state_data.get('start_msg')
 
+    print(bool(prev_start_msg))
+
     if not prev_start_msg:
         # await bot.delete_message(message.chat.id,
         #                          start_msg)
