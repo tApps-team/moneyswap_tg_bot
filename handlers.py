@@ -71,6 +71,7 @@ async def start(message: types.Message,
                                     reply_markup=start_kb.as_markup(resize_keyboard=True,
                                                                     is_persistent=True))
     await state.update_data(start_msg=start_msg.message_id)
+    await state.update_data(username=message.from_user.username)
     try:
         await bot.delete_message(message.chat.id,
                                 prev_start_msg)
@@ -171,8 +172,11 @@ async def request_type_state(callback: types.CallbackQuery,
     request_type = 'Оплатить платеж' if callback.data == 'pay_payment' else 'Принять платеж'
     state_process = f'Тип заявки: {request_type}'
     #
+    username_from_state = data.get('username')
+    print(username_from_state)
+    #
     print(callback.message.from_user.username)
-    await state.update_data(username=callback.message.from_user.username)
+    # await state.update_data(username=callback.message.from_user.username)
     #
     await state.update_data(state_process=state_process)
     # print(state_msg)
