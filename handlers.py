@@ -26,19 +26,12 @@ start_text = '💱<b>Добро пожаловать в MoneySwap!</b>\n\nНаш
 
 
 
-# api_id = 25776470
-# api_hash = 'd60713b9c6b73973ad06827530d4ed8f'
-# api_client = Client('my_account',
-#                     api_id=api_id,
-#                     api_hash=api_hash)
-
-
-
 @main_router.message(Command('start'))
 async def start(message: types.Message,
                 session: Session,
                 state: FSMContext,
-                bot: Bot):
+                bot: Bot,
+                text_msg: str = None):
     state_data = await state.get_data()
     prev_start_msg = state_data.get('start_msg')
 
@@ -68,7 +61,8 @@ async def start(message: types.Message,
     print(message.from_user.username)
     print(message.from_user.id)
     start_kb = create_start_keyboard(message.from_user.id)
-    start_msg = await message.answer(start_text,
+    text = start_text if text_msg is None else text_msg
+    start_msg = await message.answer(text=text,
                                     parse_mode='html',
                                     reply_markup=start_kb.as_markup(resize_keyboard=True,
                                                                     is_persistent=True))
@@ -116,7 +110,8 @@ async def back_to_main(callback: types.CallbackQuery,
     await start(callback.message,
                 session,
                 state,
-                bot)
+                bot,
+                text_msg='Главное меню')
 
 
 @main_router.callback_query(F.data == 'send_app')
@@ -163,7 +158,8 @@ async def send_app(callback: types.CallbackQuery,
     await start(callback.message,
                 session,
                 state,
-                bot)
+                bot,
+                text_msg='Главное меню')
 
 
 @main_router.callback_query(F.data.in_(('pay_payment', 'access_payment')))
@@ -180,6 +176,7 @@ async def request_type_state(callback: types.CallbackQuery,
     print(username_from_state)
     #
     print(callback.message.from_user.username)
+    print(callback.from_user.username)
     # await state.update_data(username=callback.message.from_user.username)
     #
     await state.update_data(state_process=state_process)
