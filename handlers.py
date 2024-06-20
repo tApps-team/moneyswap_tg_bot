@@ -65,13 +65,15 @@ async def start(message: types.Message,
             }
             session.execute(insert(Guest).values(**value_dict))
             session.commit()
+    print(message.from_user.username)
+    print(message.from_user.id)
     start_kb = create_start_keyboard(message.from_user.id)
     start_msg = await message.answer(start_text,
                                     parse_mode='html',
                                     reply_markup=start_kb.as_markup(resize_keyboard=True,
                                                                     is_persistent=True))
     await state.update_data(start_msg=start_msg.message_id)
-    await state.update_data(username=message.from_user.username)
+    # await state.update_data(username=message.from_user.username)
     try:
         await bot.delete_message(message.chat.id,
                                 prev_start_msg)
@@ -95,6 +97,7 @@ async def start_swift_sepa(message: types.Message,
                          reply_markup=kb.as_markup())
     
     await state.update_data(state_msg=state_msg)
+    await state.update_data(username=message.from_user.username)
     await message.delete()
 
 
