@@ -123,9 +123,11 @@ async def send_app(callback: types.CallbackQuery,
     data = await state.get_data()
     state_process = data.get('state_process')
     username_from_state = data.get('username')
-    print(username_from_state)
+    print('username from state', username_from_state)
     username = callback.message.from_user.username
-    print(username)
+    print('username from callback__message', username)
+    username_from_callback = callback.from_user.username
+    print('username_from_callback', username_from_callback)
     print(callback.message.chat.id)
     print(callback.message.from_user.id)
     print(callback.from_user.id)
