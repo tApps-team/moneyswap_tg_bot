@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 from aiogram import Router, types, Bot, F
 from aiogram.types import BufferedInputFile, URLInputFile
@@ -169,7 +170,9 @@ async def send_app(callback: types.CallbackQuery,
     
     data = await state.get_data()
     order: dict = data.get('order')
-    order.update({'guest_id': callback.from_user.id})
+    time_create = datetime.now()
+    order.update({'guest_id': callback.from_user.id,
+                  'time_create': time_create})
     if order:
         print('order', order)
 
