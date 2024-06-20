@@ -32,47 +32,52 @@ async def start(message: types.Message,
                 state: FSMContext,
                 bot: Bot,
                 text_msg: str = None):
-    state_data = await state.get_data()
-    prev_start_msg = state_data.get('start_msg')
+    # state_data = await state.get_data()
+    # prev_start_msg = state_data.get('start_msg')
 
-    print(bool(prev_start_msg))
+    # print(bool(prev_start_msg))
 
-    if not prev_start_msg:
+    # if not prev_start_msg:
         # await bot.delete_message(message.chat.id,
         #                          start_msg)
         
-        Guest = Base.classes.general_models_guest
+    Guest = Base.classes.general_models_guest
 
-        tg_id = message.from_user.id
-        guest = session.query(Guest).where(Guest.tg_id == tg_id).first()
-        # print(guest)
-        if not guest:
-            value_dict = {
-                'username': message.from_user.username,
-                'tg_id': tg_id,
-                'first_name': message.from_user.first_name,
-                'last_name': message.from_user.last_name,
-                'language_code': message.from_user.language_code,
-                'is_premium': bool(message.from_user.is_premium),
-                'is_active': True,
-            }
-            session.execute(insert(Guest).values(**value_dict))
-            session.commit()
+    tg_id = message.from_user.id
+    guest = session.query(Guest).where(Guest.tg_id == tg_id).first()
+    # print(guest)
+    if not guest:
+        value_dict = {
+            'username': message.from_user.username,
+            'tg_id': tg_id,
+            'first_name': message.from_user.first_name,
+            'last_name': message.from_user.last_name,
+            'language_code': message.from_user.language_code,
+            'is_premium': bool(message.from_user.is_premium),
+            'is_active': True,
+        }
+        session.execute(insert(Guest).values(**value_dict))
+        session.commit()
+
     print(message.from_user.username)
     print(message.from_user.id)
     start_kb = create_start_keyboard(message.from_user.id)
     text = start_text if text_msg is None else text_msg
+    
+    if isinstance(message, types.CallbackQuery):
+        message = message.message
+
     start_msg = await message.answer(text=text,
                                     parse_mode='html',
                                     reply_markup=start_kb.as_markup(resize_keyboard=True,
                                                                     is_persistent=True))
-    await state.update_data(start_msg=start_msg.message_id)
+    # await state.update_data(start_msg=start_msg.message_id)
     # await state.update_data(username=message.from_user.username)
-    try:
-        await bot.delete_message(message.chat.id,
-                                prev_start_msg)
-    except Exception:
-        pass
+    # try:
+    #     await bot.delete_message(message.chat.id,
+    #                             prev_start_msg)
+    # except Exception:
+    #     pass
     try:
         await message.delete()
     except Exception:
@@ -91,7 +96,7 @@ async def start_swift_sepa(message: types.Message,
                          reply_markup=kb.as_markup())
     
     await state.update_data(state_msg=state_msg)
-    await state.update_data(username=message.from_user.username)
+    # await state.update_data(username=message.from_user.username)
     await message.delete()
 
 
@@ -100,12 +105,12 @@ async def back_to_main(callback: types.CallbackQuery,
                        state: FSMContext,
                        session: Session,
                        bot: Bot):
-    state_data = await state.get_data()
-    start_msg = state_data.get('start_msg')
+    # state_data = await state.get_data()
+    # start_msg = state_data.get('start_msg')
     await state.clear()
     
-    if start_msg:
-        await state.update_data(start_msg=start_msg)
+    # if start_msg:
+    #     await state.update_data(start_msg=start_msg)
     
     await start(callback.message,
                 session,
@@ -138,7 +143,7 @@ async def send_app(callback: types.CallbackQuery,
                                                       name=f'HelpChat|{username}')
         #
         is_add = await app.add_chat_members(chat_id=super_group.id,
-                                              user_ids=[username_from_state])
+                                              user_ids=[username_from_callback])
         print('add?', is_add)
         #
         print(super_group.members_count)
@@ -156,12 +161,13 @@ async def send_app(callback: types.CallbackQuery,
     await callback.answer(text='Ваша заявка успешно отправлена!',
                           show_alert=True)
     # await callback.message.answer(text= _chat.invite_link)
-    await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link.invite_link}')
     await start(callback.message,
                 session,
                 state,
                 bot,
                 text_msg='Главное меню')
+    
+    await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link.invite_link}')
 
 
 @main_router.callback_query(F.data.in_(('pay_payment', 'access_payment')))
