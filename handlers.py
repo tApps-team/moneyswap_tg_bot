@@ -138,7 +138,7 @@ async def send_app(callback: types.CallbackQuery,
     print(callback.from_user.id)
 
     async with api_client as app:
-        super_group = await app.create_supergroup(title=f'HelpChat|{username}')
+        super_group = await app.create_supergroup(title=f'HelpChat|{callback.from_user.username}')
         chat_link = await app.create_chat_invite_link(super_group.id,
                                                       name=f'HelpChat|{username}')
         #
