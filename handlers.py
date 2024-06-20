@@ -130,9 +130,9 @@ async def send_app(callback: types.CallbackQuery,
     username_from_state = data.get('username')
     print('username from state', username_from_state)
     username = callback.message.from_user.username
-    print('username from callback__message', username)
+    print('username from callback__message', username, callback.message.from_user.id)
     username_from_callback = callback.from_user.username
-    print('username_from_callback', username_from_callback)
+    print('username_from_callback', username_from_callback, callback.from_user.id)
     print(callback.message.chat.id)
     print(callback.message.from_user.id)
     print(callback.from_user.id)
@@ -166,6 +166,8 @@ async def send_app(callback: types.CallbackQuery,
                 state,
                 bot,
                 text_msg='Главное меню')
+    
+    kb = create_start_keyboard()
     
     await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link.invite_link}')
 
