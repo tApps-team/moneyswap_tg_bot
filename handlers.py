@@ -121,6 +121,8 @@ async def send_app(callback: types.CallbackQuery,
                    api_client: Client):
     data = await state.get_data()
     state_process = data.get('state_process')
+    username_from_state = data.get('username')
+    print(username_from_state)
     username = callback.message.from_user.username
     print(username)
     print(callback.message.chat.id)
@@ -133,7 +135,7 @@ async def send_app(callback: types.CallbackQuery,
                                                       name=f'HelpChat|{username}')
         #
         await app.add_chat_members(chat_id=super_group.id,
-                                   user_ids=callback.message.chat.id)
+                                   user_ids=[])
         #
         print(super_group.members_count)
         if state_process is not None:
@@ -166,6 +168,10 @@ async def request_type_state(callback: types.CallbackQuery,
     state_msg: types.Message = data.get('state_msg')
     request_type = 'Оплатить платеж' if callback.data == 'pay_payment' else 'Принять платеж'
     state_process = f'Тип заявки: {request_type}'
+    #
+    print(callback.message.from_user.username)
+    await state.update_data(username=callback.message.from_user.username)
+    #
     await state.update_data(state_process=state_process)
     # print(state_msg)
     await state.update_data(request_type=callback.data)
