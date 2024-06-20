@@ -135,6 +135,8 @@ async def back_to_main(callback: types.CallbackQuery,
                                 bot,
                                 text_msg='Главное меню')
     await state.update_data(main_menu_msg=main_menu_msg)
+    data = await state.get_data()
+    print(data)
 
 
 @main_router.callback_query(F.data == 'send_app')
