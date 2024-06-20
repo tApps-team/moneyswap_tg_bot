@@ -161,15 +161,17 @@ async def send_app(callback: types.CallbackQuery,
     await callback.answer(text='Ваша заявка успешно отправлена!',
                           show_alert=True)
     # await callback.message.answer(text= _chat.invite_link)
-    await start(callback.message,
-                session,
-                state,
-                bot,
-                text_msg='Главное меню')
+    # await start(callback.message,
+    #             session,
+    #             state,
+    #             bot,
+    #             text_msg='Главное меню')
     
-    kb = create_start_keyboard()
+    kb = create_start_keyboard(callback.from_user.id)
     
-    await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link.invite_link}')
+    await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link.invite_link}',
+                                  reply_markup=kb.as_markup(resize_keyboard=True,
+                                                            is_persistent=True))
 
 
 @main_router.callback_query(F.data.in_(('pay_payment', 'access_payment')))
