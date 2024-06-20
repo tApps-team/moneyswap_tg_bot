@@ -168,7 +168,8 @@ async def send_app(callback: types.CallbackQuery,
                    api_client: Client):
     
     data = await state.get_data()
-    order = data.get('order')
+    order: dict = data.get('order')
+    order.update({'guest_id': callback.from_user.id})
     if order:
         print('order', order)
 
