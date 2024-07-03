@@ -24,8 +24,17 @@ DB_PORT = os.environ.get('DB_PORT')
 DB_NAME = os.environ.get('DB_NAME')
 
 
-db_url = URL.create(
+sync_db_url = URL.create(
     'postgresql+psycopg2',
+    username=DB_USER,
+    password=DB_PASS,
+    host=DB_HOST,
+    port=DB_PORT,
+    database=DB_NAME,
+)
+
+db_url = URL.create(
+    'postgresql+asyncpg',
     username=DB_USER,
     password=DB_PASS,
     host=DB_HOST,
