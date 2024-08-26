@@ -241,11 +241,14 @@ async def send_app(callback: types.CallbackQuery,
                 response_message = response_json.get('message')
 
                 if response_message == 'Свободные чаты закончились.':
+                    await callback.answer(text='К сожалению, свободные чаты закончились. Попробуйте позже.',
+                                        show_alert=True)
+                    
                     await start(callback.message,
                                 session,
                                 state,
                                 bot,
-                                text_msg='К сожалению, свободные чаты закончились. Попробуйте позже.')
+                                text_msg='Главное меню')
                     # await callback.message.answer('К сожалению, свободные чаты закончились. Попробуйте позже.',
                     #                               reply_markup=kb.as_markup(resize_keyboard=True))
                     try:
