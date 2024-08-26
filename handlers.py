@@ -86,7 +86,7 @@ async def start(message: types.Message,
     if text_msg is None:
         await message.answer(text=start_text)
 
-    main_menu_msg = await message.answer('Главное меню',
+    main_menu_msg = await message.answer(text_msg,
                                          reply_markup=start_kb.as_markup(resize_keyboard=True,
                                                                          is_persistent=True))
     
@@ -250,7 +250,7 @@ async def send_app(callback: types.CallbackQuery,
                         await bot.delete_message(callback.from_user.id, state_msg.message_id)
                     except Exception:
                         pass
-                    
+
                     return
             # chat_link = json.dumps(response_json).get('chat').get('url')
             # print('ответ на запрос', chat_link)
