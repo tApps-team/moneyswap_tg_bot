@@ -120,15 +120,15 @@ async def start_swift_sepa(message: types.Message,
     swift_start_kb = create_swift_start_kb()
     kb = add_cancel_btn_to_kb(swift_start_kb)
 
-    # main_menu_msg: types.Message = data.get('main_menu_msg')
+    main_menu_msg: types.Message = data.get('main_menu_msg')
 
     # print('has_main_menu_msg?', bool(main_menu_msg))
 
-    # if main_menu_msg:
-    #     try:
-    #         await main_menu_msg.delete()
-    #     except Exception:
-    #         pass
+    if main_menu_msg:
+        try:
+            await main_menu_msg.delete()
+        except Exception:
+            pass
 
     state_msg = await message.answer('<b>Выберите тип заявки</b>',
                          reply_markup=kb.as_markup())
@@ -209,16 +209,6 @@ async def send_app(callback: types.CallbackQuery,
     if chat_link is None:
         print('делаю пост запрос')
 
-        
-        # body = '{"tg_id": {}, "request_type": "{}", "country": "{}", "amount": "{}", "comment": "{}", "time_create": {}}'.format(
-        #     order['guest_id'],
-        #     order['request_type'],
-        #     order['country'],
-        #     order['amount'],
-        #     order['comment'],
-        #     order['time_create'].timestamp(),
-        # )
-
         body = f'''"tg_id": {order['guest_id']}, "request_type": "{order['request_type']}", "country": "{order['country']}", "amount": {order['amount']}, "comment": "{order['comment']}", "time_create": {order['time_create'].timestamp()}'''
 
         json_order = {
@@ -249,8 +239,13 @@ async def send_app(callback: types.CallbackQuery,
                 response_message = response_json.get('message')
 
                 if response_message == 'Свободные чаты закончились.':
-                    await callback.message.answer('К сожалению, свободные чаты закончились. Попробуйте позже.',
-                                                  reply_markup=kb.as_markup(resize_keyboard=True))
+                    await start(callback.message,
+                                session,
+                                state,
+                                bot,
+                                text_msg='К сожалению, свободные чаты закончились. Попробуйте позже.')
+                    # await callback.message.answer('К сожалению, свободные чаты закончились. Попробуйте позже.',
+                    #                               reply_markup=kb.as_markup(resize_keyboard=True))
                     
                     await bot.delete_message(callback.from_user.id, state_msg.message_id)
                     return
