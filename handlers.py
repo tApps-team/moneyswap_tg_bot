@@ -214,7 +214,7 @@ async def send_app(callback: types.CallbackQuery,
         '''
 
         json_order = {
-            "order": json_body
+            "order": f"\"{json_body}\""
         }
 
         json_order = json.dumps(json_order,
