@@ -231,7 +231,8 @@ async def send_app(callback: types.CallbackQuery,
                                           data=json_order,
                                           headers={'Authorization': f'Bearer {BEARER_TOKEN}',
                                                    'CONTENT-TYPE': 'application/json'})
-            chat_link = await response.json()
+            response_json = await response.json()
+            chat_link = response_json.get('chat').get('url')
             print('ответ на запрос', chat_link)
     else:
         print('ссылка из базы', guest.chat_link)
