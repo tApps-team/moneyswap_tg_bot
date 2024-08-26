@@ -1,6 +1,8 @@
 import os
 from datetime import datetime
 
+import aiohttp
+
 from aiogram import Router, types, Bot, F
 from aiogram.types import BufferedInputFile, URLInputFile
 from aiogram.utils.media_group import MediaGroupBuilder
@@ -11,6 +13,8 @@ from pyrogram import Client
 
 from sqlalchemy.orm import Session, joinedload, sessionmaker
 from sqlalchemy import insert, select, update
+
+from config import BEARER_TOKEN
 
 from keyboards import create_start_keyboard, create_swift_start_kb, add_cancel_btn_to_kb, create_kb_to_main
 
@@ -175,61 +179,70 @@ async def send_app(callback: types.CallbackQuery,
     time_create = datetime.now()
     order.update({'guest_id': callback.from_user.id,
                   'time_create': time_create})
-    if order:
-        print('order', order)
+    # if order:
+    print('order', order)
 
     state_process = data.get('state_process')
     state_msg: types.Message = data.get('state_msg')
-    username_from_state = data.get('username')
-    # print('username from state', username_from_state)
+
     username = callback.message.from_user.username
-    # print('username from callback__message', username, callback.message.from_user.id)
     username_from_callback = callback.from_user.username
-    # print('username_from_callback', username_from_callback, callback.from_user.id)
-    # print(callback.message.chat.id)
-    # print(callback.message.from_user.id)
-    # print(callback.from_user.id)
 
     Order = Base.classes.general_models_customorder
 
     session.execute(insert(Order).values(order))
     session.commit()
 
-    async with api_client as app:
-        super_group = await app.create_supergroup(title=f'HelpChat|{callback.from_user.username}')
-        chat_link = await app.create_chat_invite_link(super_group.id,
-                                                      name=f'HelpChat|{username}')
-        #
-        is_add = await app.add_chat_members(chat_id=super_group.id,
-                                              user_ids=[username_from_callback])
-        # print('add?', is_add)
-        #
-        # print(super_group.members_count)
-        if state_process is not None:
-            await app.send_message(super_group.id,
-                                   state_process)
+    Guest = Base.classes.general_models_guest
 
-    # print(super_group)
-    # print(super_group.__dict__)
-    # print(chat_link.invite_link)
-    # _chat = await callback.message.chat.create_invite_link(name='22qwerty')
-    # _chat.invite_link
-    # chat_link = await bot.create_chat_invite_link(chat_id=callback.message.chat.id,
-    #                                               name=f'Чат по заявке 22| {username}')
+    guest = session.query(Guest)\
+                    .where(Guest.tg_id == callback.from_user.id)\
+                    .first()
+    
+    if guest.chat_link is None:
+        print('делаю пост запрос')
+        json_order = {
+            "order": {
+                "tg_id": order['guest_id'],
+                "request_type": order['request_type'],
+                "country": order['country'],
+                "amount": order['amount'],
+                'comment': order['comment'],
+                "time_create": order['time_create'],
+            }
+        }
+
+        #
+        async with aiohttp.ClientSession() as session:
+            response = await session.post(url='https://api.moneyport.pro/api/partners/create-order',
+                                          data=json_order,
+                                          headers={'Baerer': BEARER_TOKEN})
+            chat_link = await response.json()
+            print('ответ на запрос', chat_link)
+    else:
+        print('ссылка из базы', guest.chat_link)
+        #
+
+    # async with api_client as app:
+    #     super_group = await app.create_supergroup(title=f'HelpChat|{callback.from_user.username}')
+    #     chat_link = await app.create_chat_invite_link(super_group.id,
+    #                                                   name=f'HelpChat|{username}')
+    #     #
+    #     is_add = await app.add_chat_members(chat_id=super_group.id,
+    #                                           user_ids=[username_from_callback])
+
+    #     if state_process is not None:
+    #         await app.send_message(super_group.id,
+    #                                state_process)
+
     await callback.answer(text='Ваша заявка успешно отправлена!',
                           show_alert=True)
-    # await callback.message.answer(text= _chat.invite_link)
-    # await start(callback.message,
-    #             session,
-    #             state,
-    #             bot,
-    #             text_msg='Главное меню')
     
     kb = create_start_keyboard(callback.from_user.id)
     
-    await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link.invite_link}',
-                                  reply_markup=kb.as_markup(resize_keyboard=True,
-                                                            is_persistent=True))
+    # await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link.invite_link}',
+    #                               reply_markup=kb.as_markup(resize_keyboard=True,
+    #                                                         is_persistent=True))
     await bot.delete_message(callback.from_user.id, state_msg.message_id)
 
 

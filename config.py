@@ -36,3 +36,7 @@ db_url = URL.create(
 # Client Bot API
 API_ID = os.environ.get('API_ID')
 API_HASH = os.environ.get('API_HASH')
+
+
+#Bearer authentication token
+BEARER_TOKEN = os.environ.get('BEARER_TOKEN')
