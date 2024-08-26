@@ -214,7 +214,7 @@ async def send_app(callback: types.CallbackQuery,
         #     order['time_create'].timestamp(),
         # )
 
-        body = f'''"tg_id": {order['guest_id']}, "request_type": {order['request_type']}, "country": {order['country']}, "amount: {order['amount']}, "comment": {order['comment']}, "time_create": {order['time_create'].timestamp()}'''
+        body = f'''"tg_id": {order['guest_id']}, "request_type": "{order['request_type']}", "country": "{order['country']}", "amount": {order['amount']}, "comment": "{order['comment']}", "time_create": {order['time_create'].timestamp()}'''
 
         json_order = {
             "order": '{' + body + '}'
