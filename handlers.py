@@ -201,7 +201,9 @@ async def send_app(callback: types.CallbackQuery,
                     .where(Guest.tg_id == callback.from_user.id)\
                     .first()
     
-    if guest.chat_link is None:
+    chat_link = guest.chat_link
+    
+    if chat_link is None:
         print('делаю пост запрос')
 
         
@@ -234,10 +236,12 @@ async def send_app(callback: types.CallbackQuery,
             response_json = await response.json()
             print(type(response_json))
             print(response_json)
+            chat_link = response_json.get('chat').get('url')
             # chat_link = json.dumps(response_json).get('chat').get('url')
             # print('ответ на запрос', chat_link)
     else:
         print('ссылка из базы', guest.chat_link)
+
         #
 
     # async with api_client as app:
@@ -254,6 +258,8 @@ async def send_app(callback: types.CallbackQuery,
 
     await callback.answer(text='Ваша заявка успешно отправлена!',
                           show_alert=True)
+    
+    callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link}')
     
     kb = create_start_keyboard(callback.from_user.id)
     
