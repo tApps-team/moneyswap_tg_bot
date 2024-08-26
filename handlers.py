@@ -204,21 +204,14 @@ async def send_app(callback: types.CallbackQuery,
     if guest.chat_link is None:
         print('делаю пост запрос')
         
-        body = f'''
-        \"tg_id\": {order['guest_id']},
-        \"request_type\": \"{order['request_type']}\",
-        \"country\": \"{order['country']}\",
-        \"amount\": \"{order['amount']}\",
-        \"comment\": \"{order['comment']}\",
-        \"time_create\": {order['time_create'].timestamp()}
-        '''
-        json_body = json.dumps(body,
-                                ensure_ascii=False)
+        body = f'\"tg_id\": {order['guest_id']}, \"request_type\": \"{order['request_type']}\", \"country\": \"{order['country']}\", \"amount\": \"{order['amount']}\", \"comment\": \"{order['comment']}\", \"time_create\": {order['time_create'].timestamp()}'
 
         json_order = {
-            "order": json_body
+            "order": body
         }
 
+        json_order = json.dumps(json_order,
+                                ensure_ascii=False)
 
         print('json', json_order)
 
