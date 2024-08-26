@@ -214,10 +214,14 @@ async def send_app(callback: types.CallbackQuery,
             }
         }
 
+        json_order = json.dump(json_order)
+
+        print('json', json_order)
+
         #
         async with aiohttp.ClientSession() as session:
             response = await session.post(url='https://api.moneyport.pro/api/partners/create-order',
-                                          data=json.dump(json_order),
+                                          data=json_order,
                                           headers={'Authorization': f'Bearer {BEARER_TOKEN}'})
             chat_link = await response.json()
             print('ответ на запрос', chat_link)
