@@ -210,7 +210,7 @@ async def send_app(callback: types.CallbackQuery,
                 "country": order['country'],
                 "amount": order['amount'],
                 'comment': order['comment'],
-                "time_create": order['time_create'],
+                "time_create": order['time_create'].timestamp(),
             }
         }
 
