@@ -65,8 +65,8 @@ async def start(message: types.Message,
         session.execute(insert(Guest).values(**value_dict))
         session.commit()
 
-    print(message.from_user.username)
-    print(message.from_user.id)
+    # print(message.from_user.username)
+    # print(message.from_user.id)
     start_kb = create_start_keyboard(message.from_user.id)
     # text = start_text if text_msg is None else text_msg
     
@@ -156,6 +156,8 @@ async def back_to_main(callback: types.CallbackQuery,
                 state,
                 bot,
                 text_msg='Главное меню')
+    
+    await callback.answer()
     # await state.update_data(main_menu_msg=main_menu_msg)
     # data = await state.get_data()
     # print(data)
@@ -179,14 +181,14 @@ async def send_app(callback: types.CallbackQuery,
     state_process = data.get('state_process')
     state_msg: types.Message = data.get('state_msg')
     username_from_state = data.get('username')
-    print('username from state', username_from_state)
+    # print('username from state', username_from_state)
     username = callback.message.from_user.username
-    print('username from callback__message', username, callback.message.from_user.id)
+    # print('username from callback__message', username, callback.message.from_user.id)
     username_from_callback = callback.from_user.username
-    print('username_from_callback', username_from_callback, callback.from_user.id)
-    print(callback.message.chat.id)
-    print(callback.message.from_user.id)
-    print(callback.from_user.id)
+    # print('username_from_callback', username_from_callback, callback.from_user.id)
+    # print(callback.message.chat.id)
+    # print(callback.message.from_user.id)
+    # print(callback.from_user.id)
 
     Order = Base.classes.general_models_customorder
 
@@ -200,16 +202,16 @@ async def send_app(callback: types.CallbackQuery,
         #
         is_add = await app.add_chat_members(chat_id=super_group.id,
                                               user_ids=[username_from_callback])
-        print('add?', is_add)
+        # print('add?', is_add)
         #
-        print(super_group.members_count)
+        # print(super_group.members_count)
         if state_process is not None:
             await app.send_message(super_group.id,
                                    state_process)
 
-    print(super_group)
-    print(super_group.__dict__)
-    print(chat_link.invite_link)
+    # print(super_group)
+    # print(super_group.__dict__)
+    # print(chat_link.invite_link)
     # _chat = await callback.message.chat.create_invite_link(name='22qwerty')
     # _chat.invite_link
     # chat_link = await bot.create_chat_invite_link(chat_id=callback.message.chat.id,
@@ -245,11 +247,11 @@ async def request_type_state(callback: types.CallbackQuery,
     order['request_type'] = request_type
     await state.update_data(order=order)
     #
-    username_from_state = data.get('username')
-    print(username_from_state)
-    #
-    print(callback.message.from_user.username)
-    print(callback.from_user.username)
+    # username_from_state = data.get('username')
+    # print(username_from_state)
+    # #
+    # print(callback.message.from_user.username)
+    # print(callback.from_user.username)
     # await state.update_data(username=callback.message.from_user.username)
     #
     await state.update_data(state_process=state_process)
