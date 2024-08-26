@@ -86,6 +86,8 @@ async def start(message: types.Message,
     if text_msg is None:
         await message.answer(text=start_text)
 
+    text_msg = text_msg | 'Главное меню'
+
     main_menu_msg = await message.answer(text_msg,
                                          reply_markup=start_kb.as_markup(resize_keyboard=True,
                                                                          is_persistent=True))
