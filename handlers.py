@@ -246,8 +246,11 @@ async def send_app(callback: types.CallbackQuery,
                                 text_msg='К сожалению, свободные чаты закончились. Попробуйте позже.')
                     # await callback.message.answer('К сожалению, свободные чаты закончились. Попробуйте позже.',
                     #                               reply_markup=kb.as_markup(resize_keyboard=True))
+                    try:
+                        await bot.delete_message(callback.from_user.id, state_msg.message_id)
+                    except Exception:
+                        pass
                     
-                    await bot.delete_message(callback.from_user.id, state_msg.message_id)
                     return
             # chat_link = json.dumps(response_json).get('chat').get('url')
             # print('ответ на запрос', chat_link)
