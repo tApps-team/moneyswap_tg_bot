@@ -190,6 +190,8 @@ async def send_app(callback: types.CallbackQuery,
     username = callback.message.from_user.username
     username_from_callback = callback.from_user.username
 
+    kb = create_start_keyboard(callback.from_user.id)
+
     Order = Base.classes.general_models_customorder
 
     session.execute(insert(Order).values(order))
@@ -202,6 +204,7 @@ async def send_app(callback: types.CallbackQuery,
                     .first()
     
     chat_link = guest.chat_link
+    
     
     if chat_link is None:
         print('делаю пост запрос')
@@ -236,7 +239,19 @@ async def send_app(callback: types.CallbackQuery,
             response_json = await response.json()
             print(type(response_json))
             print(response_json)
-            chat_link = response_json.get('chat').get('url')
+            
+            chat_link = response_json.get('chat')
+
+            if chat_link is not None:
+                chat_link = chat_link.get('url')
+
+            else:
+                response_message = response_json.get('message')
+
+                if response_message == 'Свободные чаты закончились.':
+                    await callback.message.answer('Свободные чаты закончились. Попробуйте позже.',
+                                                  reply_markup=kb.as_markup(resize_keyboard=True))
+                    return
             # chat_link = json.dumps(response_json).get('chat').get('url')
             # print('ответ на запрос', chat_link)
     else:
@@ -259,9 +274,10 @@ async def send_app(callback: types.CallbackQuery,
     await callback.answer(text='Ваша заявка успешно отправлена!',
                           show_alert=True)
     
-    callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link}')
+
+    await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link}',
+                                  reply_markup=kb.as_markup(resize_keyboard=True))
     
-    kb = create_start_keyboard(callback.from_user.id)
     
     # await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link.invite_link}',
     #                               reply_markup=kb.as_markup(resize_keyboard=True,
