@@ -274,7 +274,7 @@ async def send_app(callback: types.CallbackQuery,
 
         #
 
-    # async with api_client as app:
+    async with api_client as app:
     #     super_group = await app.create_supergroup(title=f'HelpChat|{callback.from_user.username}')
     #     chat_link = await app.create_chat_invite_link(super_group.id,
     #                                                   name=f'HelpChat|{username}')
@@ -282,12 +282,12 @@ async def send_app(callback: types.CallbackQuery,
     #     is_add = await app.add_chat_members(chat_id=super_group.id,
     #                                           user_ids=[username_from_callback])
 
-    #     if state_process is not None:
-    #         await app.send_message(super_group.id,
-    #                                state_process)
+        if state_process is not None:
+            await app.send_message(chat_link,
+                                   state_process)
 
-    await bot.send_message(chat_link,
-                           state_process)
+    # await bot.send_message(chat_link,
+    #                        state_process)
 
     await callback.answer(text='Ваша заявка успешно отправлена!',
                           show_alert=True)
