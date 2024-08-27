@@ -211,7 +211,7 @@ async def send_app(callback: types.CallbackQuery,
     if chat_link is None:
         print('делаю пост запрос')
 
-        body = f'''"tg_id": {order['guest_id']}, "request_type": "{order['request_type']}", "country": "{order['country']}", "amount": "{order['amount']}", "comment": "{order['comment']}", "time_create": {order['time_create'].timestamp()}'''
+        body = f'''"tg_id": {order['guest_id']}, "type": "{order['request_type']}", "country": "{order['country']}", "sum": "{order['amount']}", "comment": "{order['comment']}", "time_create": {order['time_create'].timestamp()}'''
 
         json_order = {
             "order": '{' + body + '}'
@@ -237,26 +237,36 @@ async def send_app(callback: types.CallbackQuery,
             if chat_link is not None:
                 chat_link = chat_link.get('url')
 
+                session.execute(update(Guest)\
+                                .where(Guest.tg_id == callback.from_user.id)\
+                                .values(chat_link=chat_link))
+                # guest.chat_link = chat_link
+                session.commit()
             else:
                 response_message = response_json.get('message')
 
                 if response_message == 'Свободные чаты закончились.':
-                    await callback.answer(text='К сожалению, свободные чаты закончились. Попробуйте позже.',
-                                        show_alert=True)
+                    error_text = 'К сожалению, свободные чаты закончились. Попробуйте позже.'
+                
+                elif response_message == 'Для выполнения данной операции требуется войти в аккаунт.':
+                    error_text = 'Сервис времмено не работает. Мы его уже чиним. Попробуйте позже.'
                     
-                    await start(callback.message,
-                                session,
-                                state,
-                                bot,
-                                text_msg='Главное меню')
-                    # await callback.message.answer('К сожалению, свободные чаты закончились. Попробуйте позже.',
-                    #                               reply_markup=kb.as_markup(resize_keyboard=True))
-                    try:
-                        await bot.delete_message(callback.from_user.id, state_msg.message_id)
-                    except Exception:
-                        pass
+                await callback.answer(text=error_text,
+                                      show_alert=True)
+                
+                await start(callback.message,
+                            session,
+                            state,
+                            bot,
+                            text_msg='Главное меню')
+                # await callback.message.answer('К сожалению, свободные чаты закончились. Попробуйте позже.',
+                #                               reply_markup=kb.as_markup(resize_keyboard=True))
+                try:
+                    await bot.delete_message(callback.from_user.id, state_msg.message_id)
+                except Exception:
+                    pass
 
-                    return
+                return
             # chat_link = json.dumps(response_json).get('chat').get('url')
             # print('ответ на запрос', chat_link)
     else:
@@ -276,12 +286,16 @@ async def send_app(callback: types.CallbackQuery,
     #         await app.send_message(super_group.id,
     #                                state_process)
 
+    await bot.send_message(chat_link,
+                           state_process)
+
     await callback.answer(text='Ваша заявка успешно отправлена!',
                           show_alert=True)
     
 
     await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link}',
-                                  reply_markup=kb.as_markup(resize_keyboard=True))
+                                  reply_markup=kb.as_markup(resize_keyboard=True,
+                                                            is_persistent=True))
     
     
     # await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link.invite_link}',
