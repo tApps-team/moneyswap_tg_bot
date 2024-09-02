@@ -294,8 +294,11 @@ async def send_app(callback: types.CallbackQuery,
     
     if prev_chat_link_msg := data.get('chat_link_msg'):
         try:
-            bot.delete_message(callback.from_user.id,
-                               prev_chat_link_msg.message_id)
+            print('prev_chat_link_msg')
+            # bot.delete_message(callback.from_user.id,
+            #                    prev_chat_link_msg.message_id)
+            prev_chat_link_msg: types.Message
+            prev_chat_link_msg.delete()
         except Exception:
             pass
 
