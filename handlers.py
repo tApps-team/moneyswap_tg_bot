@@ -148,16 +148,15 @@ async def back_to_main(callback: types.CallbackQuery,
     data = await state.get_data()
     # start_msg = state_data.get('start_msg')
     main_menu_msg: types.Message = data.get('main_menu_msg')
+    chat_link_msg: types.Message = data.get('chat_link_msg')
+
     await state.clear()
 
     if main_menu_msg:
         await state.update_data(main_menu_msg=main_menu_msg)
-    
-    # if main_menu_msg:
-    #     try:
-    #         await main_menu_msg.delete()
-    #     except Exception:
-    #         pass
+
+    if chat_link_msg:
+        await state.update_data(chat_link_msg=chat_link_msg)
 
     await start(callback.message,
                 session,
@@ -168,9 +167,6 @@ async def back_to_main(callback: types.CallbackQuery,
         await callback.answer()
     except Exception:
         pass
-    # await state.update_data(main_menu_msg=main_menu_msg)
-    # data = await state.get_data()
-    # print(data)
 
 
 @main_router.callback_query(F.data == 'send_app')
