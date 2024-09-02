@@ -21,6 +21,10 @@ services:
     command: sh -c 'python main.py'
     networks:
       - bot_network
+    logging:
+      driver: "json-file"
+      options:
+          max-size: "20m"
 
 networks:
   bot_network:
