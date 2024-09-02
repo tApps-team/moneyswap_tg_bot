@@ -301,7 +301,8 @@ async def send_app(callback: types.CallbackQuery,
             #                    prev_chat_link_msg.message_id)
             prev_chat_link_msg: types.Message
             prev_chat_link_msg.delete()
-        except Exception:
+        except Exception as ex:
+            print(ex)
             pass
 
     chat_link_msg = await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link}',
