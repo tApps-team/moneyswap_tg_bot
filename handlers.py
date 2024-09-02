@@ -164,8 +164,10 @@ async def back_to_main(callback: types.CallbackQuery,
                 state,
                 bot,
                 text_msg='Главное меню')
-    
-    await callback.answer()
+    try:
+        await callback.answer()
+    except Exception:
+        pass
     # await state.update_data(main_menu_msg=main_menu_msg)
     # data = await state.get_data()
     # print(data)
@@ -349,7 +351,10 @@ async def request_type_state(callback: types.CallbackQuery,
 
     await state_msg.edit_text(f'{state_process}\n<b>Введите страну...</b>',
                               reply_markup=kb.as_markup())
-    await callback.answer()
+    try:
+        await callback.answer()
+    except Exception:
+        pass
     # await callback.message.answer('Введите страну...')
 
     # await callback.message.delete()
