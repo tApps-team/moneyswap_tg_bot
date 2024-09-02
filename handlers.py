@@ -292,16 +292,27 @@ async def send_app(callback: types.CallbackQuery,
     await callback.answer(text='Ваша заявка успешно отправлена!',
                           show_alert=True)
     
+    if prev_chat_link_msg := data.get('chat_link_msg'):
+        try:
+            bot.delete_message(callback.from_user.id,
+                               prev_chat_link_msg.message_id)
+        except Exception:
+            pass
 
-    await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link}',
-                                  reply_markup=kb.as_markup(resize_keyboard=True,
-                                                            is_persistent=True))
+    chat_link_msg = await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link}',
+                                                  reply_markup=kb.as_markup(resize_keyboard=True,
+                                                                            is_persistent=True))
+    
+    await state.update_data(chat_link_msg=chat_link_msg)
     
     
     # await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link.invite_link}',
     #                               reply_markup=kb.as_markup(resize_keyboard=True,
     #                                                         is_persistent=True))
-    await bot.delete_message(callback.from_user.id, state_msg.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, state_msg.message_id)
+    except Exception:
+        pass
 
 
 @main_router.callback_query(F.data.in_(('pay_payment', 'access_payment')))
@@ -335,6 +346,7 @@ async def request_type_state(callback: types.CallbackQuery,
 
     await state_msg.edit_text(f'{state_process}\n<b>Введите страну...</b>',
                               reply_markup=kb.as_markup())
+    await callback.answer()
     # await callback.message.answer('Введите страну...')
 
     # await callback.message.delete()
