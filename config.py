@@ -38,5 +38,10 @@ API_ID = os.environ.get('API_ID')
 API_HASH = os.environ.get('API_HASH')
 
 
+#Redis
+REDIS_HOST = os.environ.get('REDIS_HOST')
+REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD')
+
+
 #Bearer authentication token
 BEARER_TOKEN = os.environ.get('BEARER_TOKEN')

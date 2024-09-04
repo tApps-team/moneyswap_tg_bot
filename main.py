@@ -1,6 +1,9 @@
 import asyncio
 
-import uvicorn
+import redis
+
+import redis.asyncio
+import redis.asyncio.client
 from uvicorn import Config, Server
 
 from pyrogram import Client
@@ -11,6 +14,7 @@ from fastapi import FastAPI, APIRouter
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.fsm.storage.redis import RedisStorage
 
 from sqlalchemy.engine import create_engine
 from sqlalchemy.orm import sessionmaker, Session
@@ -19,7 +23,13 @@ from db.base import engine, session, Base
 
 from middlewares.db import DbSessionMiddleware
 
-from config import TOKEN, db_url, PUBLIC_URL, API_ID, API_HASH
+from config import (TOKEN,
+                    db_url,
+                    PUBLIC_URL,
+                    API_ID,
+                    API_HASH,
+                    REDIS_HOST,
+                    REDIS_PASSWORD)
 from handlers import main_router, send_mass_message
 
 
@@ -33,6 +43,11 @@ from handlers import main_router, send_mass_message
 
 # session = sessionmaker(engine, expire_on_commit=False)
 
+#Initialize Redis storage
+redis_client = redis.asyncio.client.Redis(host=REDIS_HOST,
+                                          password=REDIS_PASSWORD)
+storage = RedisStorage(redis=redis_client)
+
 
 #TG BOT
 bot = Bot(TOKEN, parse_mode="HTML")
@@ -43,7 +58,7 @@ api_client = Client('my_account',
                     api_hash=API_HASH)
 #####
 
-dp = Dispatcher(storage=MemoryStorage())
+dp = Dispatcher(storage=storage)
 dp.include_router(main_router)
 
 #Add session and database connection in handlers 
