@@ -145,7 +145,7 @@ async def start_swift_sepa(message: types.Message,
     state_msg = await message.answer('<b>Выберите тип заявки</b>',
                          reply_markup=kb.as_markup())
     
-    state_data_message = (state_msg.from_user.id, state_msg.message_id)
+    state_data_message = (state_msg.chat.id, state_msg.message_id)
     
     await state.update_data(state_msg=state_data_message)
     # await state.update_data(username=message.from_user.username)
