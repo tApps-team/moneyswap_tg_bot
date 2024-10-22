@@ -91,7 +91,8 @@ async def start(message: types.Message | types.CallbackQuery,
     #                                 reply_markup=start_kb.as_markup(resize_keyboard=True,
     #                                                                 is_persistent=True))
     if text_msg is None:
-        await message.answer(text=start_text)
+        await message.answer(text=start_text,
+                             disable_web_page_preview=True)
 
     text_msg = text_msg if text_msg else 'Главное меню'
 
