@@ -53,6 +53,16 @@ async def start(message: types.Message | types.CallbackQuery,
     # if not prev_start_msg:
         # await bot.delete_message(message.chat.id,
         #                          start_msg)
+
+    if isinstance(message, types.Message):
+        query_param = message.text.split()
+
+        if len(query_param) > 1:
+            utm_source = query_param[-1]
+            print('UTM SOURCE')
+            print(utm_source)
+            print(len(utm_source))
+            print('*' * 10)
         
     Guest = Base.classes.general_models_guest
 
