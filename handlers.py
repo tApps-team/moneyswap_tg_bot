@@ -53,16 +53,17 @@ async def start(message: types.Message | types.CallbackQuery,
     # if not prev_start_msg:
         # await bot.delete_message(message.chat.id,
         #                          start_msg)
+    utm_source = None
 
     if isinstance(message, types.Message):
         query_param = message.text.split()
 
         if len(query_param) > 1:
             utm_source = query_param[-1]
-            print('UTM SOURCE')
-            print(utm_source)
-            print(len(utm_source))
-            print('*' * 10)
+            # print('UTM SOURCE')
+            # print(utm_source)
+            # print(len(utm_source))
+            # print('*' * 10)
         
     Guest = Base.classes.general_models_guest
 
@@ -85,6 +86,13 @@ async def start(message: types.Message | types.CallbackQuery,
             'is_premium': bool(message.from_user.is_premium),
             'is_active': True,
         }
+
+        if utm_source:
+            value_dict.update(
+                {
+                    'utm_source': utm_source,
+                }
+            )
         session.execute(insert(Guest).values(**value_dict))
         session.commit()
 
