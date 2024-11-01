@@ -17,6 +17,23 @@ def create_start_keyboard(user_id: int):
     return start_kb
 
 
+def create_start_inline_keyboard(user_id: int):
+    start_kb = InlineKeyboardBuilder()
+
+    start_kb.row(types.InlineKeyboardButton(text='Безналичные',
+                                            web_app=WebAppInfo(url=f'https://www.bestexchanges.world/?direction=noncash&user_id={user_id}')))
+    start_kb.row(types.InlineKeyboardButton(text='Наличные',
+                                            web_app=WebAppInfo(url=f'https://www.bestexchanges.world/?direction=cash&user_id={user_id}')))
+    start_kb.add(types.InlineKeyboardButton(text='Инвойсы Swift/Sepa',
+                                            callback_data='invoice_swift/sepa'))
+    start_kb.add(types.InlineKeyboardButton(text='О MoneySwap',
+                                            callback_data='about'))
+    start_kb.add(types.InlineKeyboardButton(text='Поддержка',
+                                            callback_data='support'))
+    
+    return start_kb
+
+
 def create_swift_start_kb():
     kb = InlineKeyboardBuilder()
     kb.add(types.InlineKeyboardButton(text='Оплатить платеж',

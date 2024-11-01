@@ -18,7 +18,11 @@ from sqlalchemy import insert, select, update
 
 from config import BEARER_TOKEN
 
-from keyboards import create_start_keyboard, create_swift_start_kb, add_cancel_btn_to_kb, create_kb_to_main
+from keyboards import (create_start_keyboard,
+                       create_start_inline_keyboard,
+                       create_swift_start_kb,
+                       add_cancel_btn_to_kb,
+                       create_kb_to_main)
 
 from states import SwiftSepaStates
 
@@ -98,7 +102,9 @@ async def start(message: types.Message | types.CallbackQuery,
 
     # print(message.from_user.username)
     # print(message.from_user.id)
-    start_kb = create_start_keyboard(tg_id)
+    # start_kb = create_start_keyboard(tg_id)
+
+    start_kb = create_start_inline_keyboard(tg_id)
     # text = start_text if text_msg is None else text_msg
     
     # if isinstance(message, types.CallbackQuery):
@@ -115,8 +121,7 @@ async def start(message: types.Message | types.CallbackQuery,
     text_msg = text_msg if text_msg else 'Главное меню'
 
     main_menu_msg: types.Message = await message.answer(text_msg,
-                                                        reply_markup=start_kb.as_markup(resize_keyboard=True,
-                                                                                        is_persistent=True))
+                                                        reply_markup=start_kb.as_markup())
     msg_data_for_delete = (tg_id, main_menu_msg.message_id)
 
     await state.update_data(main_menu_msg=msg_data_for_delete)
