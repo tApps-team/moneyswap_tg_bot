@@ -126,13 +126,15 @@ async def start(message: types.Message | types.CallbackQuery,
     # text_msg = text_msg if text_msg else 'Главное меню'
     if not main_menu_msg:
         main_menu_msg: types.Message = await message.answer(start_text,
-                                                            reply_markup=start_kb.as_markup())
+                                                            reply_markup=start_kb.as_markup(),
+                                                            disable_web_page_preview=True)
     else:
         chat_id, message_id = main_menu_msg
-        
+
         main_menu_msg: types.Message = await bot.edit_message_text(text=start_text,
                                                                     chat_id=chat_id,
-                                                                    message_id=message_id)
+                                                                    message_id=message_id,
+                                                                    disable_web_page_preview=True)
 
         await bot.edit_message_reply_markup(chat_id=chat_id,
                                             message_id=message_id,
