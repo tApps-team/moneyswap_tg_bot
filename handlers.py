@@ -707,17 +707,17 @@ async def send_mass_message(bot: Bot,
 
             try:
                 if image_video_group is not None:
-                    mb1 = await bot.send_media_group('686339126', media=image_video_group.build())
+                    mb1 = await bot.send_media_group('350016695', media=image_video_group.build())
                     print('MB1', mb1)
                 if file_group is not None:
-                    mb2 = await bot.send_media_group('686339126', media=file_group.build())    
+                    mb2 = await bot.send_media_group('350016695', media=file_group.build())    
                     print('MB2', mb2)
-                guest = session.query(Guest).where(Guest.tg_id == '686339126').first()
+                guest = session.query(Guest).where(Guest.tg_id == '350016695').first()
                 if not guest.is_active:
-                   session.execute(update(Guest).where(Guest.tg_id == '686339126').values(is_active=True))
+                   session.execute(update(Guest).where(Guest.tg_id == '350016695').values(is_active=True))
                    session.commit()
             except Exception:
-                session.execute(update(Guest).where(Guest.tg_id == '686339126').values(is_active=False))
+                session.execute(update(Guest).where(Guest.tg_id == '350016695').values(is_active=False))
                 session.commit()
             
             session.close()
