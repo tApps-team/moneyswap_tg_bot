@@ -334,7 +334,7 @@ async def feedback_form_send(callback: types.CallbackQuery,
                     text_msg='Главное меню')
 
     
-@main_router.callback_query(F.data.startswith_(FEEDBACK_REASON_PREFIX))
+@main_router.callback_query(F.data.startswith(FEEDBACK_REASON_PREFIX))
 async def request_type_state(callback: types.CallbackQuery,
                              session: Session,
                              state: FSMContext,
