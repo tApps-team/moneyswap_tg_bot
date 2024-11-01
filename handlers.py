@@ -666,17 +666,23 @@ async def send(message: types.Message,
 
 
 async def send_mass_message(bot: Bot,
-                            session: Session):
+                            session: Session,
+                            name_send: str):
         with session as session:
             Guest = Base.classes.general_models_guest
             # session: Session
 
             # get MassSendMessage model from DB
             MassSendMessage = Base.classes.general_models_masssendmessage
+            # mass_message = session.query(MassSendMessage)\
+            #                         .options(joinedload(MassSendMessage.general_models_masssendimage_collection),
+            #                                  joinedload(MassSendMessage.general_models_masssendvideo_collection))\
+            #                         .first()
             mass_message = session.query(MassSendMessage)\
                                     .options(joinedload(MassSendMessage.general_models_masssendimage_collection),
                                              joinedload(MassSendMessage.general_models_masssendvideo_collection))\
-                                    .first()
+                                    .where(MassSendMessage.name == name_send)
+
             # try add file_id for each related file passed object
             await try_add_file_ids(bot, session, mass_message)
             # refresh all DB records
@@ -707,17 +713,17 @@ async def send_mass_message(bot: Bot,
 
             try:
                 if image_video_group is not None:
-                    mb1 = await bot.send_media_group('350016695', media=image_video_group.build())
+                    mb1 = await bot.send_media_group('686339126', media=image_video_group.build())
                     print('MB1', mb1)
                 if file_group is not None:
-                    mb2 = await bot.send_media_group('350016695', media=file_group.build())    
+                    mb2 = await bot.send_media_group('686339126', media=file_group.build())    
                     print('MB2', mb2)
-                guest = session.query(Guest).where(Guest.tg_id == '350016695').first()
+                guest = session.query(Guest).where(Guest.tg_id == '686339126').first()
                 if not guest.is_active:
-                   session.execute(update(Guest).where(Guest.tg_id == '350016695').values(is_active=True))
+                   session.execute(update(Guest).where(Guest.tg_id == '686339126').values(is_active=True))
                    session.commit()
             except Exception:
-                session.execute(update(Guest).where(Guest.tg_id == '350016695').values(is_active=False))
+                session.execute(update(Guest).where(Guest.tg_id == '686339126').values(is_active=False))
                 session.commit()
             
             session.close()
