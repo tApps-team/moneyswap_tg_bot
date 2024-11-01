@@ -355,11 +355,12 @@ async def request_type_state(callback: types.CallbackQuery,
 
     await state.set_state(FeedbackFormStates.description)
 
-    kb = add_cancel_btn_to_kb()
 
     await bot.edit_message_text(text='Опишите проблему, если это нужно\nЕсли нет напишите "Нет"',
                                 chat_id=chat_id,
                                 message_id=message_id)
+    
+    kb = add_cancel_btn_to_kb()
 
     await bot.edit_message_reply_markup(chat_id=chat_id,
                                         message_id=message_id,
@@ -394,6 +395,14 @@ async def request_type_state(message: types.Message,
                                 chat_id=chat_id,
                                 message_id=message_id)
     
+    kb = add_cancel_btn_to_kb()
+
+    await bot.edit_message_reply_markup(chat_id=chat_id,
+                                        message_id=message_id,
+                                        reply_markup=kb.as_markup())
+    
+    await message.delete()
+    
 
 @main_router.message(FeedbackFormStates.contact)
 async def country_state(message: types.Message,
@@ -419,6 +428,14 @@ async def country_state(message: types.Message,
     await bot.edit_message_text(text='Укажите имя, чтобы мы знали как к Вам обращаться',
                                 chat_id=chat_id,
                                 message_id=message_id)
+    
+    kb = add_cancel_btn_to_kb()
+
+    await bot.edit_message_reply_markup(chat_id=chat_id,
+                                        message_id=message_id,
+                                        reply_markup=kb.as_markup())
+
+    await message.delete()
     
 
 
@@ -452,6 +469,8 @@ async def country_state(message: types.Message,
     await bot.edit_message_reply_markup(chat_id=chat_id,
                                         message_id=message_id,
                                         reply_markup=feedback_confirm_kb.as_markup())
+
+    await message.delete()
 
     # feedback_values = {
     #     'reasons': reason_dict.get(feedback_form['reason']),
