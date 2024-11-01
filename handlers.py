@@ -50,7 +50,6 @@ async def start(message: types.Message | types.CallbackQuery,
                 text_msg: str = None):
     data = await state.get_data()
     main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
-    chat_id, message_id = main_menu_msg
 
     # if main_menu_msg:
     #     try:
@@ -129,6 +128,8 @@ async def start(message: types.Message | types.CallbackQuery,
         main_menu_msg: types.Message = await message.answer(start_text,
                                                             reply_markup=start_kb.as_markup())
     else:
+        chat_id, message_id = main_menu_msg
+        
         main_menu_msg: types.Message = await bot.edit_message_text(text=start_text,
                                                                     chat_id=chat_id,
                                                                     message_id=message_id)
