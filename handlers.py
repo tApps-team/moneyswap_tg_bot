@@ -720,6 +720,9 @@ async def send_mass_message(bot: Bot,
                 if image_video_group is not None:
                     mb1 = await bot.send_media_group('350016695', media=image_video_group.build())
                     print('MB1', mb1)
+                else:
+                    await bot.send_message('350016695',
+                                           text=mass_message_text)
                 if file_group is not None:
                     mb2 = await bot.send_media_group('350016695', media=file_group.build())    
                     print('MB2', mb2)
