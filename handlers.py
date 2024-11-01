@@ -686,7 +686,7 @@ async def send_mass_message(bot: Bot,
             mass_message = session.query(MassSendMessage)\
                                     .options(joinedload(MassSendMessage.general_models_masssendimage_collection),
                                              joinedload(MassSendMessage.general_models_masssendvideo_collection))\
-                                    .where(MassSendMessage.name == name_send)
+                                    .where(MassSendMessage.name == name_send).first()
 
             # try add file_id for each related file passed object
             await try_add_file_ids(bot, session, mass_message)
