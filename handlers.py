@@ -50,13 +50,14 @@ async def start(message: types.Message | types.CallbackQuery,
                 text_msg: str = None):
     data = await state.get_data()
     main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+    chat_id, message_id = main_menu_msg
 
-    if main_menu_msg:
-        try:
-            await bot.delete_message(*main_menu_msg)
-            # await main_menu_msg.delete()
-        except Exception:
-            pass
+    # if main_menu_msg:
+    #     try:
+    #         await bot.delete_message(*main_menu_msg)
+    #         # await main_menu_msg.delete()
+    #     except Exception:
+    #         pass
     # print(bool(prev_start_msg))
 
     # if not prev_start_msg:
@@ -119,17 +120,26 @@ async def start(message: types.Message | types.CallbackQuery,
     #                                 parse_mode='html',
     #                                 reply_markup=start_kb.as_markup(resize_keyboard=True,
     #                                                                 is_persistent=True))
-    if text_msg is None:
-        await message.answer(text=start_text,
-                             disable_web_page_preview=True)
+    # if text_msg is None:
+    #     await message.answer(text=start_text,
+    #                          disable_web_page_preview=True)
 
-    text_msg = text_msg if text_msg else 'Главное меню'
+    # text_msg = text_msg if text_msg else 'Главное меню'
+    if not main_menu_msg:
+        main_menu_msg: types.Message = await message.answer(start_text,
+                                                            reply_markup=start_kb.as_markup())
+    else:
+        main_menu_msg: types.Message = await bot.edit_message_text(text=start_text,
+                                                                    chat_id=chat_id,
+                                                                    message_id=message_id)
 
-    main_menu_msg: types.Message = await message.answer(text_msg,
-                                                        reply_markup=start_kb.as_markup())
-    msg_data_for_delete = (tg_id, main_menu_msg.message_id)
+        await bot.edit_message_reply_markup(chat_id=chat_id,
+                                            message_id=message_id,
+                                            reply_markup=start_kb.as_markup())
 
-    await state.update_data(main_menu_msg=msg_data_for_delete)
+    msg_data = (tg_id, main_menu_msg.message_id)
+
+    await state.update_data(main_menu_msg=msg_data)
     
     # if main_menu_msg:
     #     try:
