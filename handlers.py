@@ -353,7 +353,7 @@ async def request_type_state(callback: types.CallbackQuery,
 
     await state.update_data(feedback_form=feedback_form)
 
-    await state.set_data(FeedbackFormStates.description)
+    await state.set_state(FeedbackFormStates.description)
 
     kb = add_cancel_btn_to_kb()
 
@@ -388,7 +388,7 @@ async def request_type_state(message: types.Message,
 
     await state.update_data(feedback_form=feedback_form)
 
-    await state.set_data(FeedbackFormStates.contact)
+    await state.set_state(FeedbackFormStates.contact)
 
     await bot.edit_message_text(text='Укажите контактные данные, по которым мы сможем с Вами связаться\n(E-mail, ссылка на Телеграм или что то другое)',
                                 chat_id=chat_id,
