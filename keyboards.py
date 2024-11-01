@@ -34,6 +34,24 @@ def create_start_inline_keyboard(user_id: int):
     return start_kb
 
 
+def create_swift_sepa_kb():
+    swift_sepa_kb = InlineKeyboardBuilder()
+    swift_sepa_kb.add(types.InlineKeyboardButton(text='Оплатить инвойс',
+                                                 callback_data='start_swift_sepa'))
+    swift_sepa_kb.row(types.InlineKeyboardButton(text='Условия - Телеграф',
+                                                 callback_data='qwerty'))     ###   !!!!
+
+    return swift_sepa_kb
+
+
+def create_support_kb():
+    support_kb = InlineKeyboardBuilder()
+    support_kb.add(types.InlineKeyboardButton(text='Заполнить форму',
+                                              callback_data='feedback_form'))
+
+    return support_kb
+
+
 def create_swift_start_kb():
     kb = InlineKeyboardBuilder()
     kb.add(types.InlineKeyboardButton(text='Оплатить платеж',

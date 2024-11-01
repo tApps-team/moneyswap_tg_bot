@@ -22,7 +22,9 @@ from keyboards import (create_start_keyboard,
                        create_start_inline_keyboard,
                        create_swift_start_kb,
                        add_cancel_btn_to_kb,
-                       create_kb_to_main)
+                       create_kb_to_main,
+                       create_swift_sepa_kb,
+                       create_support_kb)
 
 from states import SwiftSepaStates
 
@@ -203,6 +205,55 @@ async def back_to_main(callback: types.CallbackQuery,
         await callback.answer()
     except Exception:
         pass
+
+
+@main_router.callback_query(F.data == 'invoice_swift/sepa')
+async def invoice_swift_sepa(callback: types.CallbackQuery,
+                            session: Session,
+                            state: FSMContext,
+                            bot: Bot,
+                            api_client: Client):
+    data = await state.get_data()
+
+    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+
+    chat_id, message_id = main_menu_msg
+
+    swift_sepa_kb = create_swift_sepa_kb()
+    swift_sepa_kb = add_cancel_btn_to_kb(swift_sepa_kb)
+
+    await bot.edit_message_text(text='Выберите действие',
+                                chat_id=chat_id,
+                                message_id=message_id)
+    
+    await bot.edit_message_reply_markup(chat_id=chat_id,
+                                        message_id=message_id,
+                                        reply_markup=swift_sepa_kb.as_markup())
+    
+
+@main_router.callback_query(F.data == 'support')
+async def start_support(callback: types.CallbackQuery,
+                        session: Session,
+                        state: FSMContext,
+                        bot: Bot,
+                        api_client: Client):
+    data = await state.get_data()
+
+    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+
+    chat_id, message_id = main_menu_msg
+
+    support_kb = create_support_kb()
+    support_kb = add_cancel_btn_to_kb(support_kb)
+
+    await bot.edit_message_text(text='Выберите действие',
+                                chat_id=chat_id,
+                                message_id=message_id)
+    
+    await bot.edit_message_reply_markup(chat_id=chat_id,
+                                        message_id=message_id,
+                                        reply_markup=support_kb.as_markup())
+
 
 
 @main_router.callback_query(F.data == 'send_app')
