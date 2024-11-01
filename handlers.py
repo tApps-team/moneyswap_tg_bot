@@ -140,7 +140,7 @@ async def start(message: types.Message | types.CallbackQuery,
                                             message_id=message_id,
                                             reply_markup=start_kb.as_markup())
 
-    msg_data = (tg_id, main_menu_msg.message_id)
+    msg_data = (main_menu_msg.chat.id, main_menu_msg.message_id)
 
     await state.update_data(main_menu_msg=msg_data)
     
