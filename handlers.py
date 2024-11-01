@@ -48,6 +48,8 @@ async def start(message: types.Message | types.CallbackQuery,
                 state: FSMContext,
                 bot: Bot,
                 text_msg: str = None):
+    is_callback = isinstance(message, types.CallbackQuery)
+
     data = await state.get_data()
     main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
 
@@ -157,7 +159,8 @@ async def start(message: types.Message | types.CallbackQuery,
     # except Exception:
     #     pass
     try:
-        await message.delete()
+        if not is_callback:
+            await message.delete()
     except Exception:
         pass
 
