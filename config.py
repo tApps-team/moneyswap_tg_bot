@@ -45,3 +45,6 @@ REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD')
 
 #Bearer authentication token
 BEARER_TOKEN = os.environ.get('BEARER_TOKEN')
+
+
+FEEDBACK_REASON_PREFIX = 'feedback_reason'

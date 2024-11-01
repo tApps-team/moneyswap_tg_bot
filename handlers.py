@@ -16,7 +16,7 @@ from pyrogram import Client
 from sqlalchemy.orm import Session, joinedload, sessionmaker
 from sqlalchemy import insert, select, update
 
-from config import BEARER_TOKEN
+from config import BEARER_TOKEN, FEEDBACK_REASON_PREFIX
 
 from keyboards import (create_start_keyboard,
                        create_start_inline_keyboard,
@@ -24,9 +24,12 @@ from keyboards import (create_start_keyboard,
                        add_cancel_btn_to_kb,
                        create_kb_to_main,
                        create_swift_sepa_kb,
-                       create_support_kb)
+                       create_support_kb,
+                       create_feedback_form_reasons_kb,
+                       reason_dict,
+                       create_feedback_confirm_kb)
 
-from states import SwiftSepaStates
+from states import SwiftSepaStates, FeedbackFormStates
 
 from utils.handlers import try_add_file_ids_to_db, try_add_file_ids, swift_sepa_data
 
@@ -253,6 +256,268 @@ async def start_support(callback: types.CallbackQuery,
     await bot.edit_message_reply_markup(chat_id=chat_id,
                                         message_id=message_id,
                                         reply_markup=support_kb.as_markup())
+    
+
+@main_router.callback_query(F.data == 'feedback_form')
+async def start_support(callback: types.CallbackQuery,
+                        session: Session,
+                        state: FSMContext,
+                        bot: Bot,
+                        api_client: Client):
+    data = await state.get_data()
+
+    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+
+    chat_id, message_id = main_menu_msg
+
+    await state.set_state(FeedbackFormStates.reason)
+
+    await state.update_data(feedback_form=dict())
+
+    reason_kb = create_feedback_form_reasons_kb()
+
+    reason_kb = add_cancel_btn_to_kb(reason_kb)
+
+    await bot.edit_message_text(text='Выберите причину обращения',
+                                chat_id=chat_id,
+                                message_id=message_id)
+
+    await bot.edit_message_reply_markup(reply_markup=reason_kb.as_markup(),
+                                        chat_id=chat_id,
+                                        message_id=message_id)
+    
+    await callback.answer()
+
+
+@main_router.callback_query(F.data == 'feedback_form_send')
+async def feedback_form_send(callback: types.CallbackQuery,
+                            session: Session,
+                            state: FSMContext,
+                            bot: Bot,
+                            api_client: Client):
+    data = await state.get_data()
+
+    # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+
+    # chat_id, message_id = main_menu_msg
+
+    feedback_form = data.get('feedback_form')
+
+    feedback_values = {
+        'reasons': reason_dict.get(feedback_form['reason']),
+        'username': feedback_form['username'],
+        'email': feedback_form['contact'],
+        'description': feedback_form['description'],
+        'time_create': datetime.now(),
+    }
+
+    FeedbackForm = Base.classes.general_models_feedbackform
+
+    session.execute(insert(FeedbackForm).values(feedback_values))
+    try:
+        session.commit()
+
+        _text = 'Обращение успешно отправлено!'
+    except Exception as ex:
+        print(ex)
+        session.rollback()
+        _text = 'Что то пошло не так, попробуйте повторить позже'
+    
+    finally:
+        await callback.answer(text=_text,
+                              show_alert=True)
+        
+        await start(callback,
+                    session,
+                    state,
+                    bot,
+                    text_msg='Главное меню')
+
+    
+@main_router.callback_query(F.data.startswith_(FEEDBACK_REASON_PREFIX))
+async def request_type_state(callback: types.CallbackQuery,
+                             session: Session,
+                             state: FSMContext,
+                             bot: Bot):
+    reason = callback.data.split('__')[-1]
+
+    data = await state.get_data()
+
+    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+
+    chat_id, message_id = main_menu_msg
+
+    feedback_form = data.get('feedback_form')
+
+    feedback_form['reason'] = reason
+
+    await state.update_data(feedback_form=feedback_form)
+
+    await state.set_data(FeedbackFormStates.description)
+
+    kb = add_cancel_btn_to_kb()
+
+    await bot.edit_message_text(text='Опишите проблему, если это нужно\nЕсли нет напишите "Нет"',
+                                chat_id=chat_id,
+                                message_id=message_id)
+
+    await bot.edit_message_reply_markup(chat_id=chat_id,
+                                        message_id=message_id,
+                                        reply_markup=kb.as_markup())
+    
+    await callback.answer()
+
+
+@main_router.message(FeedbackFormStates.description)
+async def request_type_state(message: types.Message,
+                             session: Session,
+                             state: FSMContext,
+                             bot: Bot):
+    # reason = callback.data.split('__')[-1]
+    description = message.text
+
+    data = await state.get_data()
+
+    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+
+    chat_id, message_id = main_menu_msg
+
+    feedback_form = data.get('feedback_form')
+
+    feedback_form['description'] = description
+
+    await state.update_data(feedback_form=feedback_form)
+
+    await state.set_data(FeedbackFormStates.contact)
+
+    await bot.edit_message_text(text='Укажите контактные данные, по которым мы сможем с Вами связаться\n(E-mail, ссылка на Телеграм или что то другое)',
+                                chat_id=chat_id,
+                                message_id=message_id)
+    
+
+@main_router.message(FeedbackFormStates.contact)
+async def country_state(message: types.Message,
+                        session: Session,
+                        state: FSMContext,
+                        bot: Bot):
+    contact = message.text
+
+    data = await state.get_data()
+
+    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+
+    chat_id, message_id = main_menu_msg
+
+    feedback_form = data.get('feedback_form')
+
+    feedback_form['contact'] = contact
+
+    await state.update_data(feedback_form=feedback_form)
+
+    await state.set_state(FeedbackFormStates.username)
+
+    await bot.edit_message_text(text='Укажите имя, чтобы мы знали как к Вам обращаться',
+                                chat_id=chat_id,
+                                message_id=message_id)
+    
+
+
+@main_router.message(FeedbackFormStates.username)
+async def country_state(message: types.Message,
+                        session: Session,
+                        state: FSMContext,
+                        bot: Bot):
+    username = message.text
+
+    data = await state.get_data()
+
+    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+
+    chat_id, message_id = main_menu_msg
+
+    feedback_form = data.get('feedback_form')
+
+    feedback_form['username'] = username
+
+    await state.update_data(feedback_form=feedback_form)
+
+    feedback_confirm_kb = create_feedback_confirm_kb()
+
+    feedback_confirm_kb = add_cancel_btn_to_kb(feedback_confirm_kb)
+
+    await bot.edit_message_text(text='Заполнение завершено\nВыберите действие',
+                                chat_id=chat_id,
+                                message_id=message_id)
+
+    await bot.edit_message_reply_markup(chat_id=chat_id,
+                                        message_id=message_id,
+                                        reply_markup=feedback_confirm_kb.as_markup())
+
+    # feedback_values = {
+    #     'reasons': reason_dict.get(feedback_form['reason']),
+    #     'username': username,
+    #     'email': feedback_form['contact'],
+    #     'description': feedback_form['description'],
+    #     'time_create': datetime.now(),
+    # }
+
+    # FeedbackForm = Base.classes.general_models_feedbackform
+
+    # session.execute(insert(FeedbackForm).values(feedback_values))
+    # try:
+    #     session.commit()
+
+    #     tx = ''
+    # except Exception as ex:
+    #     print(ex)
+
+
+# @main_router.message(FeedbackFormStates.username)
+# async def country_state(message: types.Message,
+#                         session: Session,
+#                         state: FSMContext,
+#                         bot: Bot):
+#     username = message.text
+
+#     data = await state.get_data()
+
+#     main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+
+#     chat_id, message_id = main_menu_msg
+
+#     feedback_form = data.get('feedback_form')
+
+#     feedback_form['username'] = username
+
+#     feedback_values = {
+#         'reasons': reason_dict.get(feedback_form['reason']),
+#         'username': username,
+#         'email': feedback_form['contact'],
+#         'description': feedback_form['description'],
+#         'time_create': datetime.now(),
+#     }
+
+#     FeedbackForm = Base.classes.general_models_feedbackform
+
+#     session.execute(insert(FeedbackForm).values(feedback_values))
+#     try:
+#         session.commit()
+
+#         tx = ''
+#     except Exception as ex:
+#         print(ex)
+
+
+    # await state.update_data(feedback_form=feedback_form)
+
+    # await state.set_state(FeedbackFormStates.username)
+
+    # await bot.edit_message_text(text='Укажите имя, чтобы мы знали как к Вам обращаться',
+    #                             chat_id=chat_id,
+    #                             message_id=message_id)
+
+
+
 
 
 
