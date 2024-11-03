@@ -251,6 +251,8 @@ async def invoice_swift_sepa(callback: types.CallbackQuery,
                                         message_id=message_id,
                                         reply_markup=swift_sepa_kb.as_markup())
     
+    await callback.answer()
+    
 
 @main_router.callback_query(F.data == 'start_swift_sepa')
 async def start_swift_sepa(callback: types.CallbackQuery,
@@ -305,6 +307,8 @@ async def start_support(callback: types.CallbackQuery,
     await bot.edit_message_reply_markup(chat_id=chat_id,
                                         message_id=message_id,
                                         reply_markup=support_kb.as_markup())
+    
+    await callback.answer()
     
 
 @main_router.callback_query(F.data == 'feedback_form')
