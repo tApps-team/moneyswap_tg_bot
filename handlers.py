@@ -1123,3 +1123,11 @@ async def send_mass_message(bot: Bot,
                 session.commit()
             
             session.close()
+
+
+@main_router.message()
+async def ignore_any_message(message: types.Message):
+    try:
+        await message.delete()
+    except Exception as ex:
+        print(ex)
