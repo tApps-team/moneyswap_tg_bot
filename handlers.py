@@ -129,7 +129,8 @@ async def start(message: types.Message | types.CallbackQuery,
     if not main_menu_msg:
         main_menu_msg: types.Message = await message.answer(start_text,
                                                             reply_markup=start_kb.as_markup(),
-                                                            disable_web_page_preview=True)
+                                                            disable_web_page_preview=True,
+                                                            disable_notification=True)
     else:
         chat_id, message_id = main_menu_msg
 
