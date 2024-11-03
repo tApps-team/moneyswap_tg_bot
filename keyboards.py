@@ -55,7 +55,7 @@ def create_swift_sepa_kb():
     swift_sepa_kb.add(types.InlineKeyboardButton(text='Оплатить инвойс',
                                                  callback_data='start_swift_sepa'))
     swift_sepa_kb.row(types.InlineKeyboardButton(text='Условия - Телеграф',
-                                                 callback_data='qwerty'))     ###   !!!!
+                                                 callback_data='conditions'))     ###   !!!!
 
     return swift_sepa_kb
 

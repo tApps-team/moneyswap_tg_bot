@@ -204,13 +204,13 @@ async def back_to_main(callback: types.CallbackQuery,
                        bot: Bot):
     data = await state.get_data()
     # start_msg = state_data.get('start_msg')
-    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+    # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
     chat_link_msg: tuple[str,str] = data.get('chat_link_msg')
 
     await state.clear()
 
-    if main_menu_msg:
-        await state.update_data(main_menu_msg=main_menu_msg)
+    # if main_menu_msg:
+    #     await state.update_data(main_menu_msg=main_menu_msg)
 
     if chat_link_msg:
         await state.update_data(chat_link_msg=chat_link_msg)
@@ -222,6 +222,7 @@ async def back_to_main(callback: types.CallbackQuery,
                 text_msg='Главное меню')
     try:
         await callback.answer()
+        await callback.message.delete()
     except Exception:
         pass
 
@@ -249,6 +250,37 @@ async def invoice_swift_sepa(callback: types.CallbackQuery,
                                         message_id=message_id,
                                         reply_markup=swift_sepa_kb.as_markup())
     
+
+@main_router.callback_query(F.data == 'start_swift_sepa')
+async def start_swift_sepa(callback: types.CallbackQuery,
+                            session: Session,
+                            state: FSMContext,
+                            bot: Bot,
+                            api_client: Client):
+    await callback.answer(text='Находится в разработке',
+                          show_alert=True)
+
+
+@main_router.callback_query(F.data == 'conditions')
+async def get_conditions(callback: types.CallbackQuery,
+                        session: Session,
+                        state: FSMContext,
+                        bot: Bot,
+                        api_client: Client):
+    await callback.answer(text='Находится в разработке',
+                          show_alert=True)
+    
+
+@main_router.callback_query(F.data == 'about')
+async def get_about(callback: types.CallbackQuery,
+                    session: Session,
+                    state: FSMContext,
+                    bot: Bot,
+                    api_client: Client):
+    await callback.answer(text='Находится в разработке',
+                          show_alert=True)
+
+
 
 @main_router.callback_query(F.data == 'support')
 async def start_support(callback: types.CallbackQuery,
