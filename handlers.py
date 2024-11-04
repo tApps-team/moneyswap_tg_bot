@@ -126,7 +126,7 @@ async def start(message: types.Message | types.CallbackQuery,
     #                          disable_web_page_preview=True)
 
     # text_msg = text_msg if text_msg else 'Главное меню'
-    if not main_menu_msg:
+    if not main_menu_msg or is_callback:
         main_menu_msg: types.Message = await message.answer(start_text,
                                                             reply_markup=start_kb.as_markup(),
                                                             disable_web_page_preview=True,
