@@ -785,6 +785,12 @@ async def send_app(callback: types.CallbackQuery,
     except Exception:
         pass
 
+    await start(callback,
+                session,
+                state,
+                bot,
+                text_msg='Главное меню')
+
 
 # @main_router.callback_query(F.data == 'start_swift_sepa')
 # async def start_swift_sepa(callback: types.CallbackQuery,
