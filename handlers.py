@@ -652,6 +652,8 @@ async def send_app(callback: types.CallbackQuery,
     main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
     chat_id, message_id = main_menu_msg
 
+    await state.update_data(main_menu_msg=None)
+
     username = callback.message.from_user.username
     username_from_callback = callback.from_user.username
 
