@@ -650,94 +650,94 @@ async def send_app(callback: types.CallbackQuery,
     # state_msg: tuple[str, str] = data.get('state_msg')
     # state_msg: types.Message = data.get('state_msg')
     main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
-    chat_id, message_id = main_menu_msg
+    # chat_id, message_id = main_menu_msg
 
     await state.update_data(main_menu_msg=None)
 
-    username = callback.message.from_user.username
-    username_from_callback = callback.from_user.username
+    # username = callback.message.from_user.username
+    # username_from_callback = callback.from_user.username
 
-    kb = create_start_keyboard(callback.from_user.id)
+    # kb = create_start_keyboard(callback.from_user.id)
 
     Order = Base.classes.general_models_customorder
 
     session.execute(insert(Order).values(order))
     session.commit()
 
-    Guest = Base.classes.general_models_guest
+    # Guest = Base.classes.general_models_guest
 
-    guest = session.query(Guest)\
-                    .where(Guest.tg_id == callback.from_user.id)\
-                    .first()
+    # guest = session.query(Guest)\
+    #                 .where(Guest.tg_id == callback.from_user.id)\
+    #                 .first()
     
-    chat_link = guest.chat_link
+    # chat_link = guest.chat_link
     
     
-    if chat_link is None:
-        print('делаю пост запрос')
+    # if chat_link is None:
+    #     print('делаю пост запрос')
 
-        body = f'''"tg_id": {order['guest_id']}, "type": "{order['request_type']}", "country": "{order['country']}", "sum": "{order['amount']}", "comment": "{order['comment']}", "time_create": {order['time_create'].timestamp()}'''
+    #     body = f'''"tg_id": {order['guest_id']}, "type": "{order['request_type']}", "country": "{order['country']}", "sum": "{order['amount']}", "comment": "{order['comment']}", "time_create": {order['time_create'].timestamp()}'''
 
-        json_order = {
-            "order": '{' + body + '}'
-        }
+    #     json_order = {
+    #         "order": '{' + body + '}'
+    #     }
 
-        json_order = json.dumps(json_order,
-                                ensure_ascii=False)
+    #     json_order = json.dumps(json_order,
+    #                             ensure_ascii=False)
 
-        print('json', json_order)
+    #     print('json', json_order)
 
-        #
-        async with aiohttp.ClientSession() as aiosession:
-            response = await aiosession.post(url='https://api.moneyport.pro/api/partners/create-order',
-                                          data=json_order,
-                                          headers={'Authorization': f'Bearer {BEARER_TOKEN}',
-                                                   'CONTENT-TYPE': 'application/json'})
-            response_json = await response.json()
-            print(type(response_json))
-            print(response_json)
+    #     #
+    #     async with aiohttp.ClientSession() as aiosession:
+    #         response = await aiosession.post(url='https://api.moneyport.pro/api/partners/create-order',
+    #                                       data=json_order,
+    #                                       headers={'Authorization': f'Bearer {BEARER_TOKEN}',
+    #                                                'CONTENT-TYPE': 'application/json'})
+    #         response_json = await response.json()
+    #         print(type(response_json))
+    #         print(response_json)
             
-            chat_link = response_json.get('chat')
+    #         chat_link = response_json.get('chat')
 
-            if chat_link is not None:
-                chat_link = chat_link.get('url')
+    #         if chat_link is not None:
+    #             chat_link = chat_link.get('url')
 
-                session.execute(update(Guest)\
-                                .where(Guest.tg_id == callback.from_user.id)\
-                                .values(chat_link=chat_link))
-                # guest.chat_link = chat_link
-                session.commit()
-            else:
-                response_message = response_json.get('message')
+    #             session.execute(update(Guest)\
+    #                             .where(Guest.tg_id == callback.from_user.id)\
+    #                             .values(chat_link=chat_link))
+    #             # guest.chat_link = chat_link
+    #             session.commit()
+    #         else:
+    #             response_message = response_json.get('message')
 
-                if response_message == 'Свободные чаты закончились.':
-                    error_text = 'К сожалению, свободные чаты закончились. Попробуйте позже.'
+    #             if response_message == 'Свободные чаты закончились.':
+    #                 error_text = 'К сожалению, свободные чаты закончились. Попробуйте позже.'
                 
-                elif response_message == 'Для выполнения данной операции требуется войти в аккаунт.':
-                    error_text = 'Сервис времмено не работает. Мы его уже чиним. Попробуйте позже.'
+    #             elif response_message == 'Для выполнения данной операции требуется войти в аккаунт.':
+    #                 error_text = 'Сервис времмено не работает. Мы его уже чиним. Попробуйте позже.'
                     
-                await callback.answer(text=error_text,
-                                      show_alert=True)
+    #             await callback.answer(text=error_text,
+    #                                   show_alert=True)
                 
-                await start(callback,
-                            session,
-                            state,
-                            bot,
-                            text_msg='Главное меню')
-                # await callback.message.answer('К сожалению, свободные чаты закончились. Попробуйте позже.',
-                #                               reply_markup=kb.as_markup(resize_keyboard=True))
-                try:
-                    # await bot.delete_message(*state_msg)
-                    await callback.message.delete()
-                    # await bot.delete_message(callback.from_user.id, state_msg.message_id)
-                except Exception:
-                    pass
+    #             await start(callback,
+    #                         session,
+    #                         state,
+    #                         bot,
+    #                         text_msg='Главное меню')
+    #             # await callback.message.answer('К сожалению, свободные чаты закончились. Попробуйте позже.',
+    #             #                               reply_markup=kb.as_markup(resize_keyboard=True))
+    #             try:
+    #                 # await bot.delete_message(*state_msg)
+    #                 await callback.message.delete()
+    #                 # await bot.delete_message(callback.from_user.id, state_msg.message_id)
+    #             except Exception:
+    #                 pass
 
-                return
-            # chat_link = json.dumps(response_json).get('chat').get('url')
-            # print('ответ на запрос', chat_link)
-    else:
-        print('ссылка из базы', guest.chat_link)
+    #             return
+    #         # chat_link = json.dumps(response_json).get('chat').get('url')
+    #         # print('ответ на запрос', chat_link)
+    # else:
+    #     print('ссылка из базы', guest.chat_link)
 
         #
 
@@ -759,23 +759,23 @@ async def send_app(callback: types.CallbackQuery,
     await callback.answer(text='Ваша заявка успешно отправлена!',
                           show_alert=True)
     
-    if prev_chat_link_msg := data.get('chat_link_msg'):
-        prev_chat_link_msg: tuple[str, str]
-        try:
-            await bot.delete_message(*prev_chat_link_msg)
-            # await bot.delete_message(callback.from_user.id,
-            #                          prev_chat_link_msg.message_id)
-        except Exception:
-            pass
+    # if prev_chat_link_msg := data.get('chat_link_msg'):
+    #     prev_chat_link_msg: tuple[str, str]
+    #     try:
+    #         await bot.delete_message(*prev_chat_link_msg)
+    #         # await bot.delete_message(callback.from_user.id,
+    #         #                          prev_chat_link_msg.message_id)
+    #     except Exception:
+    #         pass
 
     # chat_link_msg = await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link}',
     #                                               reply_markup=kb.as_markup(resize_keyboard=True,
     #                                                                         is_persistent=True))
-    chat_link_msg = await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link}')
+    # chat_link_msg = await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link}')
 
-    message_data_for_delete = (callback.from_user.id, chat_link_msg.message_id)
+    # message_data_for_delete = (callback.from_user.id, chat_link_msg.message_id)
     
-    await state.update_data(chat_link_msg=message_data_for_delete)
+    # await state.update_data(chat_link_msg=message_data_for_delete)
     
     
     # await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link.invite_link}',
@@ -1219,6 +1219,98 @@ async def send_mass_message(bot: Bot,
                 session.commit()
             
             session.close()
+
+
+async def try_send_order(bot: Bot,
+                         session: Session,
+                         data: dict):
+    order_id = data.get('order_id')
+    user_id = data.get('user_id')
+
+    CustomOrder = Base.classes.general_models_customorder
+    Guest = Base.classes.general_models_guest
+
+    query = (
+        select(
+            CustomOrder,
+            Guest,
+        )\
+        .where(
+            CustomOrder.guest_id == user_id,
+            CustomOrder.id == order_id,
+        )
+    )
+
+    res = session.execute(query)
+
+    order = res.fetchall()
+    print(order)
+
+    if order:
+        order, guest = order[0]
+        chat_link = guest.chat_link
+        
+        if chat_link is None:
+            print('делаю пост запрос')
+
+            body = f'''"tg_id": {order['guest_id']}, "type": "{order['request_type']}", "country": "{order['country']}", "sum": "{order['amount']}", "comment": "{order['comment']}", "time_create": {order['time_create'].timestamp()}'''
+
+            json_order = {
+                "order": '{' + body + '}'
+            }
+
+            json_order = json.dumps(json_order,
+                                    ensure_ascii=False)
+
+            print('json', json_order)
+
+            #
+            async with aiohttp.ClientSession() as aiosession:
+                response = await aiosession.post(url='https://api.moneyport.pro/api/partners/create-order',
+                                            data=json_order,
+                                            headers={'Authorization': f'Bearer {BEARER_TOKEN}',
+                                                    'CONTENT-TYPE': 'application/json'})
+                response_json = await response.json()
+                print(type(response_json))
+                print(response_json)
+                
+                chat_link = response_json.get('chat')
+
+                if chat_link is not None:
+                    chat_link = chat_link.get('url')
+
+                    session.execute(update(Guest)\
+                                    .where(Guest.tg_id == user_id)\
+                                    .values(chat_link=chat_link))
+                    # guest.chat_link = chat_link
+                    session.commit()
+                else:
+                    print('не получилось')
+        else:
+            print('ссылка из базы', guest.chat_link)
+
+            chat_link_text = f'Ссылка на чат по Вашему обращению -> {chat_link}'
+
+            await bot.send_message(chat_id=user_id,
+                                   text=chat_link_text)
+            
+            query = (
+                update(
+                    CustomOrder,
+                )\
+                .where(CustomOrder.id == order_id,
+                       CustomOrder.guset_id == user_id)\
+                .values(status='Завершен')
+            )
+
+            session.execute(query)
+            try:
+                session.commit()
+            except Exception as ex:
+                print(ex)
+                session.rollback()
+
+
 
 
 @main_router.message()

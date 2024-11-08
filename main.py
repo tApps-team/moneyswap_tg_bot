@@ -30,7 +30,7 @@ from config import (TOKEN,
                     API_HASH,
                     REDIS_HOST,
                     REDIS_PASSWORD)
-from handlers import main_router, send_mass_message
+from handlers import main_router, send_mass_message, try_send_order
 
 
 ###DEV###
@@ -117,6 +117,13 @@ async def send_mass_message_for_all_users(name_send: str):
     await send_mass_message(bot=bot,
                             session=session(),
                             name_send=name_send)
+    
+
+@app.post('/test_swift_sepa')
+async def test_swift_sepa(data: dict):
+    await try_send_order(bot=bot,
+                         session=session,
+                         data=data)
     
 
 # app.include_router(fast_api_router)
