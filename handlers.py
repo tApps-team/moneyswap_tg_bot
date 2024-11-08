@@ -646,9 +646,11 @@ async def send_app(callback: types.CallbackQuery,
     # if order:
     print('order', order)
 
-    state_process = data.get('state_process')
-    state_msg: tuple[str, str] = data.get('state_msg')
+    # state_process = data.get('state_process')
+    # state_msg: tuple[str, str] = data.get('state_msg')
     # state_msg: types.Message = data.get('state_msg')
+    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+    chat_id, message_id = main_menu_msg
 
     username = callback.message.from_user.username
     username_from_callback = callback.from_user.username
@@ -764,9 +766,11 @@ async def send_app(callback: types.CallbackQuery,
         except Exception:
             pass
 
-    chat_link_msg = await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link}',
-                                                  reply_markup=kb.as_markup(resize_keyboard=True,
-                                                                            is_persistent=True))
+    # chat_link_msg = await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link}',
+    #                                               reply_markup=kb.as_markup(resize_keyboard=True,
+    #                                                                         is_persistent=True))
+    chat_link_msg = await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link}')
+
     message_data_for_delete = (callback.from_user.id, chat_link_msg.message_id)
     
     await state.update_data(chat_link_msg=message_data_for_delete)
@@ -776,7 +780,7 @@ async def send_app(callback: types.CallbackQuery,
     #                               reply_markup=kb.as_markup(resize_keyboard=True,
     #                                                         is_persistent=True))
     try:
-        await bot.delete_message(*state_msg)
+        await bot.delete_message(*main_menu_msg)
         # await bot.delete_message(callback.from_user.id, state_msg.message_id)
     except Exception:
         pass
