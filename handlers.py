@@ -271,7 +271,8 @@ async def start_swift_sepa(callback: types.CallbackQuery,
 
     main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
 
-    chat_id, message_id = callback.message.chat.id, callback.message.message_id
+    chat_id, message_id = main_menu_msg
+
 
     # print('has_main_menu_msg?', bool(main_menu_msg))
 
@@ -288,6 +289,11 @@ async def start_swift_sepa(callback: types.CallbackQuery,
                                 chat_id=chat_id,
                                 message_id=message_id,
                                 reply_markup=kb.as_markup())
+    
+    try:
+        await callback.answer()
+    except Exception:
+        pass
     
     # state_data_message = (state_msg.chat.id, state_msg.message_id)
     
@@ -817,9 +823,12 @@ async def request_type_state(callback: types.CallbackQuery,
                              state: FSMContext,
                              bot: Bot):
     data = await state.get_data()
-    state_msg: tuple[str, str] = data.get('state_msg')
-    chat_id, message_id = state_msg
+    # state_msg: tuple[str, str] = data.get('state_msg')
+    # chat_id, message_id = state_msg
     # state_msg: types.Message = data.get('state_msg')
+    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+    chat_id, message_id = main_menu_msg
+
     request_type = 'Оплатить платеж' if callback.data == 'pay_payment' else 'Принять платеж'
     state_process = f'Тип заявки: {request_type}'
     #
@@ -866,8 +875,11 @@ async def country_state(message: types.Message,
                         state: FSMContext,
                         bot: Bot):
     data = await state.get_data()
-    state_msg: tuple[str, str] = data.get('state_msg')
-    chat_id, message_id = state_msg
+    # state_msg: tuple[str, str] = data.get('state_msg')
+    # chat_id, message_id = state_msg
+    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+    chat_id, message_id = main_menu_msg
+
     # state_msg: types.Message = data.get('state_msg')
     await state.update_data(country=message.text)
 
@@ -906,8 +918,10 @@ async def amount_state(message: types.Message,
                        bot: Bot):
     data = await state.get_data()
     # state_msg: types.Message = data.get('state_msg')
-    state_msg: tuple[str, str] = data.get('state_msg')
-    chat_id, message_id = state_msg
+    # state_msg: tuple[str, str] = data.get('state_msg')
+    # chat_id, message_id = state_msg
+    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+    chat_id, message_id = main_menu_msg
 
     await state.update_data(amount=message.text)
 
@@ -947,8 +961,10 @@ async def task_text_state(message: types.Message,
                           api_client: Client):
     data = await state.get_data()
     # state_msg: types.Message = data.get('state_msg')
-    state_msg: tuple[str, str] = data.get('state_msg')
-    chat_id, message_id = state_msg
+    # state_msg: tuple[str, str] = data.get('state_msg')
+    # chat_id, message_id = state_msg
+    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+    chat_id, message_id = main_menu_msg
 
     await state.update_data(task_text=message.text)
 
