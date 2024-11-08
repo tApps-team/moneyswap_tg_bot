@@ -140,7 +140,7 @@ async def start(message: types.Message | types.CallbackQuery,
                                                 reply_markup=start_kb.as_markup())
         except Exception as ex:
             print(ex)
-            main_menu_msg: types.Message = await bot.send_message(chat_id=message.message.chat.id,
+            main_menu_msg: types.Message = await bot.send_message(chat_id=message.chat.id,
                                                                   text=start_text,
                                                                   reply_markup=start_kb.as_markup(),
                                                                   disable_web_page_preview=True,
