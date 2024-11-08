@@ -127,16 +127,26 @@ async def start(message: types.Message | types.CallbackQuery,
                                                             disable_web_page_preview=True,
                                                             disable_notification=True)
     else:
-        chat_id, message_id = main_menu_msg
+        try:
+            chat_id, message_id = main_menu_msg
 
-        main_menu_msg: types.Message = await bot.edit_message_text(text=start_text,
-                                                                    chat_id=chat_id,
-                                                                    message_id=message_id,
-                                                                    disable_web_page_preview=True)
+            main_menu_msg: types.Message = await bot.edit_message_text(text=start_text,
+                                                                        chat_id=chat_id,
+                                                                        message_id=message_id,
+                                                                        disable_web_page_preview=True)
 
-        await bot.edit_message_reply_markup(chat_id=chat_id,
-                                            message_id=message_id,
-                                            reply_markup=start_kb.as_markup())
+            await bot.edit_message_reply_markup(chat_id=chat_id,
+                                                message_id=message_id,
+                                                reply_markup=start_kb.as_markup())
+        except Exception as ex:
+            print(ex)
+            main_menu_msg: types.Message = await bot.send_message(chat_id=message.message.chat.id,
+                                                                  text=start_text,
+                                                                  reply_markup=start_kb.as_markup(),
+                                                                  disable_web_page_preview=True,
+                                                                  disable_notification=True)
+
+
     if not is_callback:
         try:
             await bot.delete_message(*main_menu_msg)
