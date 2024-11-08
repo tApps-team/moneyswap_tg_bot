@@ -1237,6 +1237,8 @@ async def try_send_order(bot: Bot,
                 CustomOrder,
                 Guest,
             )\
+            .join(Guest,
+                  CustomOrder.guest_id == Guest.tg_id)\
             .where(
                 CustomOrder.guest_id == user_id,
                 CustomOrder.id == order_id,
