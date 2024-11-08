@@ -685,7 +685,8 @@ async def send_app(callback: types.CallbackQuery,
                 # await callback.message.answer('К сожалению, свободные чаты закончились. Попробуйте позже.',
                 #                               reply_markup=kb.as_markup(resize_keyboard=True))
                 try:
-                    await bot.delete_message(*state_msg)
+                    # await bot.delete_message(*state_msg)
+                    await callback.message.delete()
                     # await bot.delete_message(callback.from_user.id, state_msg.message_id)
                 except Exception:
                     pass
@@ -741,6 +742,41 @@ async def send_app(callback: types.CallbackQuery,
         # await bot.delete_message(callback.from_user.id, state_msg.message_id)
     except Exception:
         pass
+
+
+@main_router.callback_query(F.data == 'start_swift_sepa')
+async def start_swift_sepa(callback: types.CallbackQuery,
+                           state: FSMContext,
+                           bot: Bot):
+    data = await state.get_data()
+    await state.set_state(SwiftSepaStates.request_type)
+    await state.update_data(order=dict())
+
+    swift_start_kb = create_swift_start_kb()
+    kb = add_cancel_btn_to_kb(swift_start_kb)
+
+    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+
+    # print('has_main_menu_msg?', bool(main_menu_msg))
+
+    # if main_menu_msg:
+    #     try:
+    #         await bot.delete_message(*main_menu_msg)
+    #         # await main_menu_msg.delete()
+    #     except Exception:
+    #         pass
+
+    # state_msg = await message.answer('<b>Выберите тип заявки</b>',
+    #                      reply_markup=kb.as_markup())
+    await bot.edit_message_text(text='<b>Выберите тип заявки</b>',
+                                reply_markup=kb.as_markup())
+    
+    # state_data_message = (state_msg.chat.id, state_msg.message_id)
+    
+    # await state.update_data(state_msg=state_data_message)
+    # # await state.update_data(username=message.from_user.username)
+    # await message.delete()
+
 
 
 @main_router.callback_query(F.data.in_(('pay_payment', 'access_payment')))
