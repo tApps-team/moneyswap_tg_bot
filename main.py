@@ -119,11 +119,13 @@ async def send_mass_message_for_all_users(name_send: str):
                             name_send=name_send)
     
 
-@app.post('/test_swift_sepa')
-async def test_swift_sepa(data: dict):
+@app.get('/test_swift_sepa')
+async def test_swift_sepa(user_id: int,
+                          order_id: int):
     await try_send_order(bot=bot,
                          session=session,
-                         data=data)
+                         user_id=user_id,
+                         order_id=order_id)
     
 
 # app.include_router(fast_api_router)

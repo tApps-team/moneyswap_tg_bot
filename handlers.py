@@ -1223,9 +1223,10 @@ async def send_mass_message(bot: Bot,
 
 async def try_send_order(bot: Bot,
                          session: Session,
-                         data: dict):
-    order_id = data.get('order_id')
-    user_id = data.get('user_id')
+                         user_id: int,
+                         order_id: int):
+    # order_id = data.get('order_id')
+    # user_id = data.get('user_id')
 
     CustomOrder = Base.classes.general_models_customorder
     Guest = Base.classes.general_models_guest
