@@ -805,6 +805,8 @@ async def send_app(callback: types.CallbackQuery,
                 state,
                 bot,
                 text_msg='Главное меню')
+    
+    await callback.message.delete()
 
 
 # @main_router.callback_query(F.data == 'start_swift_sepa')
