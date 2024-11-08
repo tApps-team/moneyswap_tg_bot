@@ -715,7 +715,7 @@ async def send_app(callback: types.CallbackQuery,
                 await callback.answer(text=error_text,
                                       show_alert=True)
                 
-                await start(callback.message,
+                await start(callback,
                             session,
                             state,
                             bot,
