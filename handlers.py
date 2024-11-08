@@ -1227,89 +1227,90 @@ async def try_send_order(bot: Bot,
                          order_id: int):
     # order_id = data.get('order_id')
     # user_id = data.get('user_id')
+    with session as session:
 
-    CustomOrder = Base.classes.general_models_customorder
-    Guest = Base.classes.general_models_guest
+        CustomOrder = Base.classes.general_models_customorder
+        Guest = Base.classes.general_models_guest
 
-    query = (
-        select(
-            CustomOrder,
-            Guest,
-        )\
-        .where(
-            CustomOrder.guest_id == user_id,
-            CustomOrder.id == order_id,
-        )
-    )
-
-    res = session.execute(query)
-
-    order = res.fetchall()
-    print(order)
-
-    if order:
-        order, guest = order[0]
-        chat_link = guest.chat_link
-        
-        if chat_link is None:
-            print('делаю пост запрос')
-
-            body = f'''"tg_id": {order['guest_id']}, "type": "{order['request_type']}", "country": "{order['country']}", "sum": "{order['amount']}", "comment": "{order['comment']}", "time_create": {order['time_create'].timestamp()}'''
-
-            json_order = {
-                "order": '{' + body + '}'
-            }
-
-            json_order = json.dumps(json_order,
-                                    ensure_ascii=False)
-
-            print('json', json_order)
-
-            #
-            async with aiohttp.ClientSession() as aiosession:
-                response = await aiosession.post(url='https://api.moneyport.pro/api/partners/create-order',
-                                            data=json_order,
-                                            headers={'Authorization': f'Bearer {BEARER_TOKEN}',
-                                                    'CONTENT-TYPE': 'application/json'})
-                response_json = await response.json()
-                print(type(response_json))
-                print(response_json)
-                
-                chat_link = response_json.get('chat')
-
-                if chat_link is not None:
-                    chat_link = chat_link.get('url')
-
-                    session.execute(update(Guest)\
-                                    .where(Guest.tg_id == user_id)\
-                                    .values(chat_link=chat_link))
-                    # guest.chat_link = chat_link
-                    session.commit()
-                else:
-                    print('не получилось')
-        else:
-            print('ссылка из базы', guest.chat_link)
-
-            chat_link_text = f'Ссылка на чат по Вашему обращению -> {chat_link}'
-
-            await bot.send_message(chat_id=user_id,
-                                   text=chat_link_text)
-            
-            query = (
-                update(
-                    CustomOrder,
-                )\
-                .where(CustomOrder.id == order_id,
-                       CustomOrder.guset_id == user_id)\
-                .values(status='Завершен')
+        query = (
+            select(
+                CustomOrder,
+                Guest,
+            )\
+            .where(
+                CustomOrder.guest_id == user_id,
+                CustomOrder.id == order_id,
             )
+        )
 
-            session.execute(query)
-            try:
-                session.commit()
-            except Exception as ex:
-                print(ex)
-                session.rollback()
+        res = session.execute(query)
+
+        order = res.fetchall()
+        print(order)
+
+        if order:
+            order, guest = order[0]
+            chat_link = guest.chat_link
+            
+            if chat_link is None:
+                print('делаю пост запрос')
+
+                body = f'''"tg_id": {order['guest_id']}, "type": "{order['request_type']}", "country": "{order['country']}", "sum": "{order['amount']}", "comment": "{order['comment']}", "time_create": {order['time_create'].timestamp()}'''
+
+                json_order = {
+                    "order": '{' + body + '}'
+                }
+
+                json_order = json.dumps(json_order,
+                                        ensure_ascii=False)
+
+                print('json', json_order)
+
+                #
+                async with aiohttp.ClientSession() as aiosession:
+                    response = await aiosession.post(url='https://api.moneyport.pro/api/partners/create-order',
+                                                data=json_order,
+                                                headers={'Authorization': f'Bearer {BEARER_TOKEN}',
+                                                        'CONTENT-TYPE': 'application/json'})
+                    response_json = await response.json()
+                    print(type(response_json))
+                    print(response_json)
+                    
+                    chat_link = response_json.get('chat')
+
+                    if chat_link is not None:
+                        chat_link = chat_link.get('url')
+
+                        session.execute(update(Guest)\
+                                        .where(Guest.tg_id == user_id)\
+                                        .values(chat_link=chat_link))
+                        # guest.chat_link = chat_link
+                        session.commit()
+                    else:
+                        print('не получилось')
+            else:
+                print('ссылка из базы', guest.chat_link)
+
+                chat_link_text = f'Ссылка на чат по Вашему обращению -> {chat_link}'
+
+                await bot.send_message(chat_id=user_id,
+                                    text=chat_link_text)
+                
+                query = (
+                    update(
+                        CustomOrder,
+                    )\
+                    .where(CustomOrder.id == order_id,
+                        CustomOrder.guset_id == user_id)\
+                    .values(status='Завершен')
+                )
+
+                session.execute(query)
+                try:
+                    session.commit()
+                except Exception as ex:
+                    print(ex)
+                    session.rollback()
 
 
 
