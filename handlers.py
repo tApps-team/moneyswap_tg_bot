@@ -642,7 +642,9 @@ async def send_app(callback: types.CallbackQuery,
     order: dict = data.get('order')
     time_create = datetime.now()
     order.update({'guest_id': callback.from_user.id,
-                  'time_create': time_create})
+                  'time_create': time_create,
+                  'moderation': False,
+                  'status': 'Модерация'})
     # if order:
     print('order', order)
 
