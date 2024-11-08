@@ -53,12 +53,7 @@ async def start(message: types.Message | types.CallbackQuery,
     data = await state.get_data()
     main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
 
-    # if main_menu_msg:
-    #     try:
-    #         await bot.delete_message(*main_menu_msg)
-    #         # await main_menu_msg.delete()
-    #     except Exception:
-    #         pass
+
     # print(bool(prev_start_msg))
 
     # if not prev_start_msg:
@@ -126,7 +121,7 @@ async def start(message: types.Message | types.CallbackQuery,
     #                          disable_web_page_preview=True)
 
     # text_msg = text_msg if text_msg else 'Главное меню'
-    if not main_menu_msg or not is_callback:
+    if not is_callback:
         main_menu_msg: types.Message = await message.answer(start_text,
                                                             reply_markup=start_kb.as_markup(),
                                                             disable_web_page_preview=True,
@@ -142,6 +137,12 @@ async def start(message: types.Message | types.CallbackQuery,
         await bot.edit_message_reply_markup(chat_id=chat_id,
                                             message_id=message_id,
                                             reply_markup=start_kb.as_markup())
+    if not is_callback:
+        try:
+            await bot.delete_message(*main_menu_msg)
+            # await main_menu_msg.delete()
+        except Exception:
+            pass
 
     msg_data = (main_menu_msg.chat.id, main_menu_msg.message_id)
 
@@ -783,11 +784,11 @@ async def send_app(callback: types.CallbackQuery,
     # await callback.message.answer(f'Ссылка на чат по Вашему обращению -> {chat_link.invite_link}',
     #                               reply_markup=kb.as_markup(resize_keyboard=True,
     #                                                         is_persistent=True))
-    try:
-        await bot.delete_message(*main_menu_msg)
-        # await bot.delete_message(callback.from_user.id, state_msg.message_id)
-    except Exception:
-        pass
+    # try:
+    #     await bot.delete_message(*main_menu_msg)
+    #     # await bot.delete_message(callback.from_user.id, state_msg.message_id)
+    # except Exception:
+    #     pass
 
     await start(callback,
                 session,
