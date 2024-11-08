@@ -271,6 +271,8 @@ async def start_swift_sepa(callback: types.CallbackQuery,
 
     main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
 
+    chat_id, message_id = callback.message.chat.id, callback.message.message_id
+
     # print('has_main_menu_msg?', bool(main_menu_msg))
 
     # if main_menu_msg:
@@ -283,6 +285,8 @@ async def start_swift_sepa(callback: types.CallbackQuery,
     # state_msg = await message.answer('<b>Выберите тип заявки</b>',
     #                      reply_markup=kb.as_markup())
     await bot.edit_message_text(text='<b>Выберите тип заявки</b>',
+                                chat_id=chat_id,
+                                message_id=message_id,
                                 reply_markup=kb.as_markup())
     
     # state_data_message = (state_msg.chat.id, state_msg.message_id)
