@@ -123,7 +123,7 @@ async def send_mass_message_for_all_users(name_send: str):
 async def test_swift_sepa(user_id: int,
                           order_id: int):
     await try_send_order(bot=bot,
-                         session=session,
+                         session=session(),
                          user_id=user_id,
                          order_id=order_id)
     
