@@ -55,6 +55,7 @@ async def start(message: types.Message | types.CallbackQuery,
 
 
     # print(bool(prev_start_msg))
+    _start_text = start_text
 
     # if not prev_start_msg:
         # await bot.delete_message(message.chat.id,
@@ -114,7 +115,7 @@ async def start(message: types.Message | types.CallbackQuery,
 
     if chat_link:
         chat_link_text = f'Cсылка на чата по Вашим обращениям -> {chat_link}'
-        start_text += f'\n{chat_link_text}'
+        _start_text += f'\n{chat_link_text}'
     # text = start_text if text_msg is None else text_msg
     
     # if isinstance(message, types.CallbackQuery):
@@ -130,7 +131,7 @@ async def start(message: types.Message | types.CallbackQuery,
 
     # text_msg = text_msg if text_msg else 'Главное меню'
     if not is_callback:
-        main_menu_msg: types.Message = await message.answer(start_text,
+        main_menu_msg: types.Message = await message.answer(_start_text,
                                                             reply_markup=start_kb.as_markup(),
                                                             disable_web_page_preview=True,
                                                             disable_notification=True)
@@ -138,7 +139,7 @@ async def start(message: types.Message | types.CallbackQuery,
         try:
             chat_id, message_id = main_menu_msg
 
-            main_menu_msg: types.Message = await bot.edit_message_text(text=start_text,
+            main_menu_msg: types.Message = await bot.edit_message_text(text=_start_text,
                                                                         chat_id=chat_id,
                                                                         message_id=message_id,
                                                                         disable_web_page_preview=True)
@@ -149,7 +150,6 @@ async def start(message: types.Message | types.CallbackQuery,
         except Exception as ex:
             print(ex)
             main_menu_msg: types.Message = await bot.send_message(chat_id=message.chat.id,
-                                                                  text=start_text,
                                                                   reply_markup=start_kb.as_markup(),
                                                                   disable_web_page_preview=True,
                                                                   disable_notification=True)
