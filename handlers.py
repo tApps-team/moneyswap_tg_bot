@@ -115,7 +115,7 @@ async def start(message: types.Message | types.CallbackQuery,
 
     if chat_link:
         chat_link_text = f'Cсылка на чата по Вашим обращениям -> {chat_link}'
-        _start_text += f'\n{chat_link_text}'
+        _start_text += f'\n\n{chat_link_text}'
     # text = start_text if text_msg is None else text_msg
     
     # if isinstance(message, types.CallbackQuery):
@@ -1316,26 +1316,26 @@ async def try_send_order(bot: Bot,
             else:
                 print('ссылка из базы', guest.chat_link)
 
-                chat_link_text = f'Ссылка на чат по Вашему обращению -> {chat_link}'
+                chat_link_text = f'Ссылка на чат по Вашему обращению -> {chat_link}\n\n<i>*Можете удалить это сообщение, чтобы не потрить вид чата, мы будем дублировать ссылку на чат в главном сообщении.</i>'
 
                 await bot.send_message(chat_id=user_id,
                                     text=chat_link_text)
                 
-                query = (
-                    update(
-                        CustomOrder,
-                    )\
-                    .where(CustomOrder.id == order_id,
-                        CustomOrder.guset_id == user_id)\
-                    .values(status='Завершен')
-                )
+                # query = (
+                #     update(
+                #         CustomOrder,
+                #     )\
+                #     .where(CustomOrder.id == order_id,
+                #         CustomOrder.guset_id == user_id)\
+                #     .values(status='Завершен')
+                # )
 
-                session.execute(query)
-                try:
-                    session.commit()
-                except Exception as ex:
-                    print(ex)
-                    session.rollback()
+                # session.execute(query)
+                # try:
+                #     session.commit()
+                # except Exception as ex:
+                #     print(ex)
+                #     session.rollback()
 
 
 
