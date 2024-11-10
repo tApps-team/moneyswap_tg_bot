@@ -82,6 +82,8 @@ async def start(message: types.Message | types.CallbackQuery,
         message = message.message
 
     # print(guest)
+    chat_link = None
+
     if not guest:
         value_dict = {
             'username': message.from_user.username,
@@ -101,12 +103,18 @@ async def start(message: types.Message | types.CallbackQuery,
             )
         session.execute(insert(Guest).values(**value_dict))
         session.commit()
+    else:
+        chat_link  = guest.chat_link
 
     # print(message.from_user.username)
     # print(message.from_user.id)
     # start_kb = create_start_keyboard(tg_id)
 
     start_kb = create_start_inline_keyboard(tg_id)
+
+    if chat_link:
+        chat_link_text = f'Cсылка на чата по Вашим обращениям -> {chat_link}'
+        start_text += f'\n{chat_link_text}'
     # text = start_text if text_msg is None else text_msg
     
     # if isinstance(message, types.CallbackQuery):
