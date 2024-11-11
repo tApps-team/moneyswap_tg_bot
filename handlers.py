@@ -52,14 +52,9 @@ async def start(message: types.Message | types.CallbackQuery,
 
     data = await state.get_data()
     main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+    chat_id, message_id = main_menu_msg
 
-
-    # print(bool(prev_start_msg))
     _start_text = start_text
-
-    # if not prev_start_msg:
-        # await bot.delete_message(message.chat.id,
-        #                          start_msg)
     utm_source = None
 
     if isinstance(message, types.Message):
@@ -67,10 +62,6 @@ async def start(message: types.Message | types.CallbackQuery,
 
         if len(query_param) > 1:
             utm_source = query_param[-1]
-            # print('UTM SOURCE')
-            # print(utm_source)
-            # print(len(utm_source))
-            # print('*' * 10)
         
     Guest = Base.classes.general_models_guest
 
@@ -82,7 +73,6 @@ async def start(message: types.Message | types.CallbackQuery,
     if isinstance(message, types.CallbackQuery):
         message = message.message
 
-    # print(guest)
     chat_link = None
 
     if not guest:
@@ -107,61 +97,52 @@ async def start(message: types.Message | types.CallbackQuery,
     else:
         chat_link  = guest.chat_link
 
-    # print(message.from_user.username)
-    # print(message.from_user.id)
-    # start_kb = create_start_keyboard(tg_id)
-
     start_kb = create_start_inline_keyboard(tg_id)
 
     if chat_link:
         chat_link_text = f'Cсылка на чата по Вашим обращениям -> {chat_link}'
         _start_text += f'\n\n{chat_link_text}'
-    # text = start_text if text_msg is None else text_msg
-    
-    # if isinstance(message, types.CallbackQuery):
-    #     message = message.message
 
-    # start_msg = await message.answer(text=text,
-    #                                 parse_mode='html',
-    #                                 reply_markup=start_kb.as_markup(resize_keyboard=True,
-    #                                                                 is_persistent=True))
-    # if text_msg is None:
-    #     await message.answer(text=start_text,
-    #                          disable_web_page_preview=True)
-
-    # text_msg = text_msg if text_msg else 'Главное меню'
     if not is_callback:
-        main_menu_msg: types.Message = await message.answer(_start_text,
+        # chat_id, message_id = main_menu_msg
+
+        main_menu_msg: types.Message = await message.answer(text=_start_text,
                                                             reply_markup=start_kb.as_markup(),
                                                             disable_web_page_preview=True,
                                                             disable_notification=True)
+        try:
+            await bot.delete_message(chat_id=chat_id,
+                                     message_id=message_id)
+        except Exception:
+            pass
     else:
         try:
-            chat_id, message_id = main_menu_msg
+            # chat_id, message_id = main_menu_msg
 
             main_menu_msg: types.Message = await bot.edit_message_text(text=_start_text,
                                                                         chat_id=chat_id,
                                                                         message_id=message_id,
+                                                                        reply_markup=start_kb.as_markup(),
                                                                         disable_web_page_preview=True)
 
-            await bot.edit_message_reply_markup(chat_id=chat_id,
-                                                message_id=message_id,
-                                                reply_markup=start_kb.as_markup())
+            # await bot.edit_message_reply_markup(chat_id=chat_id,
+            #                                     message_id=message_id,
+            #                                     reply_markup=start_kb.as_markup())
         except Exception as ex:
             print(ex)
-            main_menu_msg: types.Message = await bot.send_message(chat_id=message.chat.id,
+            main_menu_msg: types.Message = await bot.send_message(chat_id=chat_id,
                                                                   text=_start_text,
                                                                   reply_markup=start_kb.as_markup(),
                                                                   disable_web_page_preview=True,
                                                                   disable_notification=True)
 
 
-    if not is_callback:
-        try:
-            await bot.delete_message(*main_menu_msg)
-            # await main_menu_msg.delete()
-        except Exception:
-            pass
+    # if not is_callback:
+    #     try:
+    #         await bot.delete_message(chat_id=chat_id,
+    #                                  message_id=message_id)
+    #     except Exception:
+    #         pass
 
     msg_data = (main_menu_msg.chat.id, main_menu_msg.message_id)
 
@@ -265,11 +246,12 @@ async def invoice_swift_sepa(callback: types.CallbackQuery,
 
     await bot.edit_message_text(text='Выберите действие',
                                 chat_id=chat_id,
-                                message_id=message_id)
+                                message_id=message_id,
+                                reply_markup=swift_sepa_kb.as_markup())
     
-    await bot.edit_message_reply_markup(chat_id=chat_id,
-                                        message_id=message_id,
-                                        reply_markup=swift_sepa_kb.as_markup())
+    # await bot.edit_message_reply_markup(chat_id=chat_id,
+    #                                     message_id=message_id,
+    #                                     reply_markup=swift_sepa_kb.as_markup())
     
     await callback.answer()
     
@@ -360,11 +342,12 @@ async def start_support(callback: types.CallbackQuery,
 
     await bot.edit_message_text(text='Выберите действие',
                                 chat_id=chat_id,
-                                message_id=message_id)
+                                message_id=message_id,
+                                reply_markup=support_kb.as_markup())
     
-    await bot.edit_message_reply_markup(chat_id=chat_id,
-                                        message_id=message_id,
-                                        reply_markup=support_kb.as_markup())
+    # await bot.edit_message_reply_markup(chat_id=chat_id,
+    #                                     message_id=message_id,
+    #                                     reply_markup=support_kb.as_markup())
     
     await callback.answer()
     
@@ -466,16 +449,17 @@ async def request_type_state(callback: types.CallbackQuery,
 
     await state.set_state(FeedbackFormStates.description)
 
+    kb = add_cancel_btn_to_kb()
 
     await bot.edit_message_text(text='Опишите проблему, если это нужно\nЕсли нет напишите "Нет"',
                                 chat_id=chat_id,
-                                message_id=message_id)
+                                message_id=message_id,
+                                reply_markup=kb.as_markup())
     
-    kb = add_cancel_btn_to_kb()
 
-    await bot.edit_message_reply_markup(chat_id=chat_id,
-                                        message_id=message_id,
-                                        reply_markup=kb.as_markup())
+    # await bot.edit_message_reply_markup(chat_id=chat_id,
+    #                                     message_id=message_id,
+    #                                     reply_markup=kb.as_markup())
     
     await callback.answer()
 
@@ -501,16 +485,18 @@ async def request_type_state(message: types.Message,
     await state.update_data(feedback_form=feedback_form)
 
     await state.set_state(FeedbackFormStates.contact)
-
-    await bot.edit_message_text(text='Укажите контактные данные, по которым мы сможем с Вами связаться\n(E-mail, ссылка на Телеграм или что то другое)',
-                                chat_id=chat_id,
-                                message_id=message_id)
     
     kb = add_cancel_btn_to_kb()
 
-    await bot.edit_message_reply_markup(chat_id=chat_id,
-                                        message_id=message_id,
-                                        reply_markup=kb.as_markup())
+    await bot.edit_message_text(text='Укажите контактные данные, по которым мы сможем с Вами связаться\n(E-mail, ссылка на Телеграм или что то другое)',
+                                chat_id=chat_id,
+                                message_id=message_id,
+                                reply_markup=kb.as_markup())
+    
+
+    # await bot.edit_message_reply_markup(chat_id=chat_id,
+    #                                     message_id=message_id,
+    #                                     reply_markup=kb.as_markup())
     
     await message.delete()
     
@@ -536,15 +522,17 @@ async def country_state(message: types.Message,
 
     await state.set_state(FeedbackFormStates.username)
 
-    await bot.edit_message_text(text='Укажите имя, чтобы мы знали как к Вам обращаться',
-                                chat_id=chat_id,
-                                message_id=message_id)
-    
     kb = add_cancel_btn_to_kb()
 
-    await bot.edit_message_reply_markup(chat_id=chat_id,
-                                        message_id=message_id,
-                                        reply_markup=kb.as_markup())
+    await bot.edit_message_text(text='Укажите имя, чтобы мы знали как к Вам обращаться',
+                                chat_id=chat_id,
+                                message_id=message_id,
+                                reply_markup=kb.as_markup())
+    
+
+    # await bot.edit_message_reply_markup(chat_id=chat_id,
+    #                                     message_id=message_id,
+    #                                     reply_markup=kb.as_markup())
 
     await message.delete()
     
@@ -575,11 +563,12 @@ async def country_state(message: types.Message,
 
     await bot.edit_message_text(text='Заполнение завершено\nВыберите действие',
                                 chat_id=chat_id,
-                                message_id=message_id)
+                                message_id=message_id,
+                                reply_markup=feedback_confirm_kb.as_markup())
 
-    await bot.edit_message_reply_markup(chat_id=chat_id,
-                                        message_id=message_id,
-                                        reply_markup=feedback_confirm_kb.as_markup())
+    # await bot.edit_message_reply_markup(chat_id=chat_id,
+    #                                     message_id=message_id,
+    #                                     reply_markup=feedback_confirm_kb.as_markup())
 
     await message.delete()
 
@@ -1249,10 +1238,7 @@ async def try_send_order(bot: Bot,
                          session: Session,
                          user_id: int,
                          order_id: int):
-    # order_id = data.get('order_id')
-    # user_id = data.get('user_id')
     with session as session:
-
         CustomOrder = Base.classes.general_models_customorder
         Guest = Base.classes.general_models_guest
 
@@ -1277,6 +1263,8 @@ async def try_send_order(bot: Bot,
         if order:
             order, guest = order[0]
             chat_link = guest.chat_link
+
+            print(order.__dict__)
             
             if chat_link is None:
                 print('делаю пост запрос')
