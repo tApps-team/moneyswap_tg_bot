@@ -1264,31 +1264,31 @@ async def try_send_order(bot: Bot,
             print(order.__dict__)
             
             # if chat_link is None:
-            print('делаю пост запрос')
-
-            # body = f'''"tg_id": {order['guest_id']}, "type": "{order['request_type']}", "country": "{order['country']}", "sum": "{order['amount']}", "comment": "{order['comment']}", "time_create": {order['time_create'].timestamp()}'''
-
-            body = f'''"tg_id": {order.guest_id}, "type": "{order.request_type}", "country": "{order.country}", "sum": "{order.amount}", "comment": "{order.comment}", "time_create": {order.time_create.timestamp()}'''
-            json_order = {
-                "order": '{' + body + '}'
-            }
-
-            json_order = json.dumps(json_order,
-                                    ensure_ascii=False)
-
-            print('json', json_order)
-        
             if chat_link is None:
+                print('делаю пост запрос')
 
-            #
+                # body = f'''"tg_id": {order['guest_id']}, "type": "{order['request_type']}", "country": "{order['country']}", "sum": "{order['amount']}", "comment": "{order['comment']}", "time_create": {order['time_create'].timestamp()}'''
+
+                body = f'''"tg_id": {order.guest_id}, "type": "{order.request_type}", "country": "{order.country}", "sum": "{order.amount}", "comment": "{order.comment}", "time_create": {order.time_create.timestamp()}'''
+                json_order = {
+                    "order": '{' + body + '}'
+                }
+
+                json_order = json.dumps(json_order,
+                                        ensure_ascii=False)
+
+                print('json', json_order)
+            
+
+                #
                 async with aiohttp.ClientSession() as aiosession:
                     response = await aiosession.post(url='https://api.moneyport.pro/api/partners/create-order',
                                                 data=json_order,
                                                 headers={'Authorization': f'Bearer {BEARER_TOKEN}',
                                                         'CONTENT-TYPE': 'application/json'})
                     response_json = await response.json()
-                    print(type(response_json))
-                    print(response_json)
+                    # print(type(response_json))
+                    # print(response_json)
                     
                     chat_link = response_json.get('chat')
 
