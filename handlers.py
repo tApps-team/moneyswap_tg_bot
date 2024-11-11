@@ -52,7 +52,9 @@ async def start(message: types.Message | types.CallbackQuery,
 
     data = await state.get_data()
     main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
-    chat_id, message_id = main_menu_msg
+
+    # if main_menu_msg:
+    #     chat_id, message_id = main_menu_msg
 
     _start_text = start_text
     utm_source = None
@@ -104,33 +106,28 @@ async def start(message: types.Message | types.CallbackQuery,
         _start_text += f'\n\n{chat_link_text}'
 
     if not is_callback:
-        # chat_id, message_id = main_menu_msg
-
         main_menu_msg: types.Message = await message.answer(text=_start_text,
                                                             reply_markup=start_kb.as_markup(),
                                                             disable_web_page_preview=True,
                                                             disable_notification=True)
         try:
+            chat_id, message_id = main_menu_msg
             await bot.delete_message(chat_id=chat_id,
                                      message_id=message_id)
         except Exception:
             pass
     else:
         try:
-            # chat_id, message_id = main_menu_msg
+            chat_id, message_id = main_menu_msg
 
             main_menu_msg: types.Message = await bot.edit_message_text(text=_start_text,
                                                                         chat_id=chat_id,
                                                                         message_id=message_id,
                                                                         reply_markup=start_kb.as_markup(),
                                                                         disable_web_page_preview=True)
-
-            # await bot.edit_message_reply_markup(chat_id=chat_id,
-            #                                     message_id=message_id,
-            #                                     reply_markup=start_kb.as_markup())
         except Exception as ex:
             print(ex)
-            main_menu_msg: types.Message = await bot.send_message(chat_id=chat_id,
+            main_menu_msg: types.Message = await bot.send_message(chat_id=message.chat.id,
                                                                   text=_start_text,
                                                                   reply_markup=start_kb.as_markup(),
                                                                   disable_web_page_preview=True,
