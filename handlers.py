@@ -669,8 +669,16 @@ async def send_app(callback: types.CallbackQuery,
 
     Order = Base.classes.general_models_customorder
 
-    session.execute(insert(Order).values(order))
+    # session.execute(insert(Order).values(order))
+    # session.commit()
+
+    new_order = Order(**order)  # предполагая, что order — это словарь
+    session.add(new_order)
     session.commit()
+
+    session.refresh(new_order)
+
+    print(new_order.__dict__)
 
     # Guest = Base.classes.general_models_guest
 
@@ -802,6 +810,8 @@ async def send_app(callback: types.CallbackQuery,
                 text_msg='Главное меню')
     
     await callback.message.delete()
+
+
 
 
 # @main_router.callback_query(F.data == 'start_swift_sepa')
