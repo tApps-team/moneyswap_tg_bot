@@ -680,6 +680,17 @@ async def send_app(callback: types.CallbackQuery,
 
     print(new_order.__dict__)
 
+    user_id = new_order.guest_id
+    order_id = new_order.id
+    marker = 'swift/sepa'
+
+    # _url = f'https://api.moneyswap.online/test_swift_sepa?user_id={user_id}&order_id={order_id}&marker={marker}'
+    # timeout = aiohttp.ClientTimeout(total=5)
+    # async with aiohttp.ClientSession() as session:
+    #     async with session.get(_url,
+    #                            timeout=timeout) as response:
+    #         pass
+
     # Guest = Base.classes.general_models_guest
 
     # guest = session.query(Guest)\
@@ -810,6 +821,13 @@ async def send_app(callback: types.CallbackQuery,
                 text_msg='Главное меню')
     
     await callback.message.delete()
+
+    _url = f'https://api.moneyswap.online/test_swift_sepa?user_id={user_id}&order_id={order_id}&marker={marker}'
+    timeout = aiohttp.ClientTimeout(total=5)
+    async with aiohttp.ClientSession() as session:
+        async with session.get(_url,
+                               timeout=timeout) as response:
+            pass
 
 
 
