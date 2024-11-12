@@ -822,7 +822,7 @@ async def send_app(callback: types.CallbackQuery,
     
     await callback.message.delete()
 
-    _url = f'https://api.moneyswap.online/test_swift_sepa?user_id={user_id}&order_id={order_id}&marker={marker}'
+    _url = f'https://api.moneyswap.online/send_to_tg_group?user_id={user_id}&order_id={order_id}&marker={marker}'
     timeout = aiohttp.ClientTimeout(total=5)
     async with aiohttp.ClientSession() as session:
         async with session.get(_url,
