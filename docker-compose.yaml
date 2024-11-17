@@ -22,8 +22,7 @@ services:
     networks:
       - bot_network
       # - redis_network
-    cpu:
-     - '0.5'
+    cpus: '0.5'
     logging:
       driver: "json-file"
       options:
