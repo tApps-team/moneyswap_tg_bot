@@ -298,11 +298,11 @@ async def back_to_main(callback: types.CallbackQuery,
                 state,
                 bot,
                 text_msg='Главное меню')
-    # try:
-    #     await callback.answer()
-    #     await callback.message.delete()
-    # except Exception:
-    #     pass
+    try:
+        await callback.answer()
+        # await callback.message.delete()
+    except Exception:
+        pass
 
 
 @main_router.callback_query(F.data == 'invoice_swift/sepa')
