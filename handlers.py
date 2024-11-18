@@ -1001,7 +1001,7 @@ async def send_app(callback: types.CallbackQuery,
                 bot,
                 text_msg='Главное меню')
     
-    await callback.message.delete()
+    # await callback.message.delete()
 
     _url = f'https://api.moneyswap.online/send_to_tg_group?user_id={user_id}&order_id={order_id}&marker={marker}'
     timeout = aiohttp.ClientTimeout(total=5)
