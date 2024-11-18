@@ -44,9 +44,9 @@ from handlers import main_router, send_mass_message, try_send_order
 # session = sessionmaker(engine, expire_on_commit=False)
 
 #Initialize Redis storage
-# redis_client = redis.asyncio.client.Redis(host=REDIS_HOST,
-#                                           password=REDIS_PASSWORD)
-# storage = RedisStorage(redis=redis_client)
+redis_client = redis.asyncio.client.Redis(host=REDIS_HOST,
+                                          password=REDIS_PASSWORD)
+storage = RedisStorage(redis=redis_client)
 
 
 #TG BOT
@@ -58,8 +58,8 @@ api_client = Client('my_account',
                     api_hash=API_HASH)
 #####
 
-# dp = Dispatcher(storage=storage)
-dp = Dispatcher()
+dp = Dispatcher(storage=storage)
+# dp = Dispatcher()
 dp.include_router(main_router)
 
 #Add session and database connection in handlers 

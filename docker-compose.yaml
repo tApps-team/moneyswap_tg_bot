@@ -21,30 +21,31 @@ services:
     command: sh -c 'python main.py'
     networks:
       - bot_network
-      # - redis_network
+      - redis_network
     cpus: '0.5'
     logging:
       driver: "json-file"
       options:
           max-size: "20m"
 
-  # redis_tg_bot_db:
-  #   image: redis:alpine
-  #   restart: on-failure
-  #   networks:
-  #     - redis_network
-  #   # ports:
-  #   #   - 6379:6379
-  #   env_file:
-  #     - ./.env
-  #   command: redis-server --requirepass ${REDIS_PASSWORD} --save "10" "1" --appendonly no
-  #   # sh -c "echo 1 > /proc/sys/vm/overcommit_memory && redis-server --save 900 1 --loglevel warning"
-  #   volumes:
-  #     - redis_tg_bot_data:/data
-  #   logging:
-  #     driver: "json-file"
-  #     options:
-  #         max-size: "20m"
+  redis_tg_bot_db:
+    image: redis:alpine
+    restart: on-failure
+    networks:
+      - redis_network
+    cpus: '0.5'
+    # ports:
+    #   - 6379:6379
+    env_file:
+      - ./.env
+    command: redis-server --requirepass ${REDIS_PASSWORD} --save "10" "1" --appendonly no
+    # sh -c "echo 1 > /proc/sys/vm/overcommit_memory && redis-server --save 900 1 --loglevel warning"
+    volumes:
+      - redis_tg_bot_data:/data
+    logging:
+      driver: "json-file"
+      options:
+          max-size: "20m"
 
 networks:
   bot_network:
@@ -52,5 +53,5 @@ networks:
     external: true
   redis_network:
 
-# volumes:
-#   redis_tg_bot_data:
+volumes:
+  redis_tg_bot_data:

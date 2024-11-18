@@ -42,128 +42,6 @@ start_text = '💱<b>Добро пожаловать в MoneySwap!</b>\n\nНаш
 
 
 
-@main_router.message(Command('start'))
-async def start(message: types.Message | types.CallbackQuery,
-                session: Session,
-                state: FSMContext,
-                bot: Bot,
-                text_msg: str = None):
-    is_callback = isinstance(message, types.CallbackQuery)
-
-    data = await state.get_data()
-    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
-
-    # if main_menu_msg:
-    #     chat_id, message_id = main_menu_msg
-
-    _start_text = start_text
-    utm_source = None
-
-    if isinstance(message, types.Message):
-        query_param = message.text.split()
-
-        if len(query_param) > 1:
-            utm_source = query_param[-1]
-
-    with session as session:
-        Guest = Base.classes.general_models_guest
-
-        tg_id = message.from_user.id
-        guest = session.query(Guest)\
-                        .where(Guest.tg_id == tg_id)\
-                        .first()
-    
-        if isinstance(message, types.CallbackQuery):
-            message = message.message
-
-        chat_link = None
-
-        if not guest:
-            value_dict = {
-                'username': message.from_user.username,
-                'tg_id': tg_id,
-                'first_name': message.from_user.first_name,
-                'last_name': message.from_user.last_name,
-                'language_code': message.from_user.language_code,
-                'is_premium': bool(message.from_user.is_premium),
-                'is_active': True,
-            }
-
-            if utm_source:
-                value_dict.update(
-                    {
-                        'utm_source': utm_source,
-                    }
-                )
-            session.execute(insert(Guest).values(**value_dict))
-            session.commit()
-        else:
-            chat_link  = guest.chat_link
-
-    start_kb = create_start_inline_keyboard(tg_id)
-
-    if chat_link:
-        chat_link_text = f'Cсылка на чата по Вашим обращениям -> {chat_link}'
-        _start_text += f'\n\n{chat_link_text}'
-
-    if not is_callback:
-        main_menu_msg: types.Message = await message.answer(text=_start_text,
-                                                            reply_markup=start_kb.as_markup(),
-                                                            disable_web_page_preview=True,
-                                                            disable_notification=True)
-        try:
-            chat_id, message_id = main_menu_msg
-            await bot.delete_message(chat_id=chat_id,
-                                     message_id=message_id)
-        except Exception:
-            pass
-    else:
-        try:
-            chat_id, message_id = main_menu_msg
-
-            main_menu_msg: types.Message = await bot.edit_message_text(text=_start_text,
-                                                                        chat_id=chat_id,
-                                                                        message_id=message_id,
-                                                                        reply_markup=start_kb.as_markup(),
-                                                                        disable_web_page_preview=True)
-        except Exception as ex:
-            print(ex)
-            main_menu_msg: types.Message = await bot.send_message(chat_id=message.chat.id,
-                                                                  text=_start_text,
-                                                                  reply_markup=start_kb.as_markup(),
-                                                                  disable_web_page_preview=True,
-                                                                  disable_notification=True)
-
-
-    # if not is_callback:
-    #     try:
-    #         await bot.delete_message(chat_id=chat_id,
-    #                                  message_id=message_id)
-    #     except Exception:
-    #         pass
-
-    msg_data = (main_menu_msg.chat.id, main_menu_msg.message_id)
-
-    await state.update_data(main_menu_msg=msg_data)
-    
-    # if main_menu_msg:
-    #     try:
-    #         await main_menu_msg.delete()
-    #     except Exception:
-    #         pass
-    # await state.update_data(start_msg=start_msg.message_id)
-    # await state.update_data(username=message.from_user.username)
-    # try:
-    #     await bot.delete_message(message.chat.id,
-    #                             prev_start_msg)
-    # except Exception:
-    #     pass
-    try:
-        await message.delete()
-    except Exception:
-        pass
-
-
 # @main_router.message(Command('start'))
 # async def start(message: types.Message | types.CallbackQuery,
 #                 session: Session,
@@ -171,6 +49,12 @@ async def start(message: types.Message | types.CallbackQuery,
 #                 bot: Bot,
 #                 text_msg: str = None):
 #     is_callback = isinstance(message, types.CallbackQuery)
+
+#     data = await state.get_data()
+#     main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+
+#     # if main_menu_msg:
+#     #     chat_id, message_id = main_menu_msg
 
 #     _start_text = start_text
 #     utm_source = None
@@ -180,7 +64,7 @@ async def start(message: types.Message | types.CallbackQuery,
 
 #         if len(query_param) > 1:
 #             utm_source = query_param[-1]
-            
+
 #     with session as session:
 #         Guest = Base.classes.general_models_guest
 
@@ -223,24 +107,140 @@ async def start(message: types.Message | types.CallbackQuery,
 #         _start_text += f'\n\n{chat_link_text}'
 
 #     if not is_callback:
-#         await message.answer(text=_start_text,
-#                              reply_markup=start_kb.as_markup(),
-#                              disable_web_page_preview=True,
-#                              disable_notification=True)
+#         main_menu_msg: types.Message = await message.answer(text=_start_text,
+#                                                             reply_markup=start_kb.as_markup(),
+#                                                             disable_web_page_preview=True,
+#                                                             disable_notification=True)
 #         try:
-#             await message.delete()
+#             chat_id, message_id = main_menu_msg
+#             await bot.delete_message(chat_id=chat_id,
+#                                      message_id=message_id)
 #         except Exception:
 #             pass
 #     else:
-#         await bot.send_message(chat_id=message.chat.id,
-#                                text=_start_text,
-#                                reply_markup=start_kb.as_markup(),
-#                                disable_web_page_preview=True,
-#                                disable_notification=True)
 #         try:
-#             await message.delete()
-#         except Exception:
-#             pass
+#             chat_id, message_id = main_menu_msg
+
+#             main_menu_msg: types.Message = await bot.edit_message_text(text=_start_text,
+#                                                                         chat_id=chat_id,
+#                                                                         message_id=message_id,
+#                                                                         reply_markup=start_kb.as_markup(),
+#                                                                         disable_web_page_preview=True)
+#         except Exception as ex:
+#             print(ex)
+#             main_menu_msg: types.Message = await bot.send_message(chat_id=message.chat.id,
+#                                                                   text=_start_text,
+#                                                                   reply_markup=start_kb.as_markup(),
+#                                                                   disable_web_page_preview=True,
+#                                                                   disable_notification=True)
+
+
+#     # if not is_callback:
+#     #     try:
+#     #         await bot.delete_message(chat_id=chat_id,
+#     #                                  message_id=message_id)
+#     #     except Exception:
+#     #         pass
+
+#     msg_data = (main_menu_msg.chat.id, main_menu_msg.message_id)
+
+#     await state.update_data(main_menu_msg=msg_data)
+    
+#     # if main_menu_msg:
+#     #     try:
+#     #         await main_menu_msg.delete()
+#     #     except Exception:
+#     #         pass
+#     # await state.update_data(start_msg=start_msg.message_id)
+#     # await state.update_data(username=message.from_user.username)
+#     # try:
+#     #     await bot.delete_message(message.chat.id,
+#     #                             prev_start_msg)
+#     # except Exception:
+#     #     pass
+#     try:
+#         await message.delete()
+#     except Exception:
+#         pass
+
+
+@main_router.message(Command('start'))
+async def start(message: types.Message | types.CallbackQuery,
+                session: Session,
+                state: FSMContext,
+                bot: Bot,
+                text_msg: str = None):
+    is_callback = isinstance(message, types.CallbackQuery)
+
+    _start_text = start_text
+    utm_source = None
+
+    if isinstance(message, types.Message):
+        query_param = message.text.split()
+
+        if len(query_param) > 1:
+            utm_source = query_param[-1]
+            
+    with session as session:
+        Guest = Base.classes.general_models_guest
+
+        tg_id = message.from_user.id
+        guest = session.query(Guest)\
+                        .where(Guest.tg_id == tg_id)\
+                        .first()
+    
+        if isinstance(message, types.CallbackQuery):
+            message = message.message
+
+        chat_link = None
+
+        if not guest:
+            value_dict = {
+                'username': message.from_user.username,
+                'tg_id': tg_id,
+                'first_name': message.from_user.first_name,
+                'last_name': message.from_user.last_name,
+                'language_code': message.from_user.language_code,
+                'is_premium': bool(message.from_user.is_premium),
+                'is_active': True,
+            }
+
+            if utm_source:
+                value_dict.update(
+                    {
+                        'utm_source': utm_source,
+                    }
+                )
+            session.execute(insert(Guest).values(**value_dict))
+            session.commit()
+        else:
+            chat_link  = guest.chat_link
+
+    start_kb = create_start_inline_keyboard(tg_id)
+
+    if chat_link:
+        chat_link_text = f'Cсылка на чата по Вашим обращениям -> {chat_link}'
+        _start_text += f'\n\n{chat_link_text}'
+
+    if not is_callback:
+        await message.answer(text=_start_text,
+                             reply_markup=start_kb.as_markup(),
+                             disable_web_page_preview=True,
+                             disable_notification=True)
+        try:
+            await message.delete()
+        except Exception:
+            pass
+    else:
+        await bot.send_message(chat_id=message.chat.id,
+                               text=_start_text,
+                               reply_markup=start_kb.as_markup(),
+                               disable_web_page_preview=True,
+                               disable_notification=True)
+        try:
+            await message.delete()
+        except Exception:
+            pass
 
 
 # @main_router.message(F.text == 'Swift/Sepa')
@@ -305,19 +305,49 @@ async def back_to_main(callback: types.CallbackQuery,
         pass
 
 
+# @main_router.callback_query(F.data == 'invoice_swift/sepa')
+# async def invoice_swift_sepa(callback: types.CallbackQuery,
+#                             session: Session,
+#                             state: FSMContext,
+#                             bot: Bot,
+#                             api_client: Client):
+#     data = await state.get_data()
+
+#     main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+
+#     chat_id, message_id = main_menu_msg
+#     # chat_id = callback.message.chat.id
+#     # message_id = callback.message.message_id
+
+#     swift_sepa_kb = create_swift_sepa_kb()
+#     swift_sepa_kb = add_cancel_btn_to_kb(swift_sepa_kb)
+
+#     # await state.update_data(action='swift/sepa')
+
+#     await bot.edit_message_text(text='Выберите действие',
+#                                 chat_id=chat_id,
+#                                 message_id=message_id,
+#                                 reply_markup=swift_sepa_kb.as_markup())
+    
+#     # await bot.edit_message_reply_markup(chat_id=chat_id,
+#     #                                     message_id=message_id,
+#     #                                     reply_markup=swift_sepa_kb.as_markup())
+    
+#     await callback.answer()
+
 @main_router.callback_query(F.data == 'invoice_swift/sepa')
 async def invoice_swift_sepa(callback: types.CallbackQuery,
                             session: Session,
                             state: FSMContext,
                             bot: Bot,
                             api_client: Client):
-    data = await state.get_data()
+    # data = await state.get_data()
 
-    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+    # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
 
-    chat_id, message_id = main_menu_msg
-    # chat_id = callback.message.chat.id
-    # message_id = callback.message.message_id
+    # chat_id, message_id = main_menu_msg
+    chat_id = callback.message.chat.id
+    message_id = callback.message.message_id
 
     swift_sepa_kb = create_swift_sepa_kb()
     swift_sepa_kb = add_cancel_btn_to_kb(swift_sepa_kb)
@@ -334,7 +364,69 @@ async def invoice_swift_sepa(callback: types.CallbackQuery,
     #                                     reply_markup=swift_sepa_kb.as_markup())
     
     await callback.answer()
+
     
+
+# @main_router.callback_query(F.data == 'start_swift_sepa')
+# async def start_swift_sepa(callback: types.CallbackQuery,
+#                             session: Session,
+#                             state: FSMContext,
+#                             bot: Bot,
+#                             api_client: Client):
+#     # await callback.answer(text='Находится в разработке',
+#     #                       show_alert=True)
+#     data = await state.get_data()
+
+#     # if not data.get('action'):
+#     #     await callback.answer(text='Что то пошло не так, попробуйте еще раз.')
+#     #     await state.clear()
+
+#     #     await start(callback,
+#     #                 session,
+#     #                 state,
+#     #                 bot,
+#     #                 text_msg='Главное меню')
+#     #     return
+    
+#     await state.set_state(SwiftSepaStates.request_type)
+#     await state.update_data(order=dict())
+
+#     swift_start_kb = create_swift_start_kb()
+#     kb = add_cancel_btn_to_kb(swift_start_kb)
+
+#     main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+
+#     chat_id, message_id = main_menu_msg
+#     # chat_id = callback.message.chat.id
+#     # message_id = callback.message.message_id
+
+
+#     # print('has_main_menu_msg?', bool(main_menu_msg))
+
+#     # if main_menu_msg:
+#     #     try:
+#     #         await bot.delete_message(*main_menu_msg)
+#     #         # await main_menu_msg.delete()
+#     #     except Exception:
+#     #         pass
+
+#     # state_msg = await message.answer('<b>Выберите тип заявки</b>',
+#     #                      reply_markup=kb.as_markup())
+#     await bot.edit_message_text(text='<b>Выберите тип заявки</b>',
+#                                 chat_id=chat_id,
+#                                 message_id=message_id,
+#                                 reply_markup=kb.as_markup())
+    
+#     try:
+#         await callback.answer()
+#     except Exception:
+#         pass
+    
+#     # state_data_message = (state_msg.chat.id, state_msg.message_id)
+    
+#     # await state.update_data(state_msg=state_data_message)
+#     # # await state.update_data(username=message.from_user.username)
+#     # await message.delete()
 
 @main_router.callback_query(F.data == 'start_swift_sepa')
 async def start_swift_sepa(callback: types.CallbackQuery,
@@ -342,9 +434,7 @@ async def start_swift_sepa(callback: types.CallbackQuery,
                             state: FSMContext,
                             bot: Bot,
                             api_client: Client):
-    # await callback.answer(text='Находится в разработке',
-    #                       show_alert=True)
-    data = await state.get_data()
+    # data = await state.get_data()
 
     # if not data.get('action'):
     #     await callback.answer(text='Что то пошло не так, попробуйте еще раз.')
@@ -363,24 +453,12 @@ async def start_swift_sepa(callback: types.CallbackQuery,
     swift_start_kb = create_swift_start_kb()
     kb = add_cancel_btn_to_kb(swift_start_kb)
 
-    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+    # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
 
-    chat_id, message_id = main_menu_msg
-    # chat_id = callback.message.chat.id
-    # message_id = callback.message.message_id
+    # chat_id, message_id = main_menu_msg
+    chat_id = callback.message.chat.id
+    message_id = callback.message.message_id
 
-
-    # print('has_main_menu_msg?', bool(main_menu_msg))
-
-    # if main_menu_msg:
-    #     try:
-    #         await bot.delete_message(*main_menu_msg)
-    #         # await main_menu_msg.delete()
-    #     except Exception:
-    #         pass
-
-    # state_msg = await message.answer('<b>Выберите тип заявки</b>',
-    #                      reply_markup=kb.as_markup())
     await bot.edit_message_text(text='<b>Выберите тип заявки</b>',
                                 chat_id=chat_id,
                                 message_id=message_id,
@@ -390,12 +468,6 @@ async def start_swift_sepa(callback: types.CallbackQuery,
         await callback.answer()
     except Exception:
         pass
-    
-    # state_data_message = (state_msg.chat.id, state_msg.message_id)
-    
-    # await state.update_data(state_msg=state_data_message)
-    # # await state.update_data(username=message.from_user.username)
-    # await message.delete()
 
 
 @main_router.callback_query(F.data == 'conditions')
@@ -425,11 +497,13 @@ async def start_support(callback: types.CallbackQuery,
                         state: FSMContext,
                         bot: Bot,
                         api_client: Client):
-    data = await state.get_data()
+    # data = await state.get_data()
 
-    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+    # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
 
-    chat_id, message_id = main_menu_msg
+    # chat_id, message_id = main_menu_msg
+    chat_id = callback.message.chat.id
+    message_id = callback.message.message_id
 
     support_kb = create_support_kb()
     support_kb = add_cancel_btn_to_kb(support_kb)
@@ -452,11 +526,13 @@ async def start_support(callback: types.CallbackQuery,
                         state: FSMContext,
                         bot: Bot,
                         api_client: Client):
-    data = await state.get_data()
+    # data = await state.get_data()
 
-    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+    # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
 
-    chat_id, message_id = main_menu_msg
+    # chat_id, message_id = main_menu_msg
+    chat_id = callback.message.chat.id
+    message_id = callback.message.message_id
 
     await state.set_state(FeedbackFormStates.reason)
 
@@ -468,11 +544,12 @@ async def start_support(callback: types.CallbackQuery,
 
     await bot.edit_message_text(text='Выберите причину обращения',
                                 chat_id=chat_id,
-                                message_id=message_id)
+                                message_id=message_id,
+                                reply_markup=reason_kb.as_markup())
 
-    await bot.edit_message_reply_markup(reply_markup=reason_kb.as_markup(),
-                                        chat_id=chat_id,
-                                        message_id=message_id)
+    # await bot.edit_message_reply_markup(reply_markup=reason_kb.as_markup(),
+    #                                     chat_id=chat_id,
+    #                                     message_id=message_id)
     
     await callback.answer()
 
@@ -533,15 +610,18 @@ async def request_type_state(callback: types.CallbackQuery,
 
     data = await state.get_data()
 
-    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+    # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
 
-    chat_id, message_id = main_menu_msg
+    # chat_id, message_id = main_menu_msg
+    chat_id = callback.message.chat.id
+    message_id = callback.message.message_id
 
     feedback_form = data.get('feedback_form')
 
     feedback_form['reason'] = reason
 
     await state.update_data(feedback_form=feedback_form)
+    await state.update_data(state_msg=(chat_id, message_id))
 
     await state.set_state(FeedbackFormStates.description)
 
@@ -570,9 +650,9 @@ async def request_type_state(message: types.Message,
 
     data = await state.get_data()
 
-    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+    state_msg: tuple[str,str] = data.get('state_msg')
 
-    chat_id, message_id = main_menu_msg
+    chat_id, message_id = state_msg
 
     feedback_form = data.get('feedback_form')
 
@@ -606,9 +686,9 @@ async def country_state(message: types.Message,
 
     data = await state.get_data()
 
-    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+    state_msg: tuple[str,str] = data.get('state_msg')
 
-    chat_id, message_id = main_menu_msg
+    chat_id, message_id = state_msg
 
     feedback_form = data.get('feedback_form')
 
@@ -643,9 +723,9 @@ async def country_state(message: types.Message,
 
     data = await state.get_data()
 
-    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+    state_msg: tuple[str,str] = data.get('state_msg')
 
-    chat_id, message_id = main_menu_msg
+    chat_id, message_id = state_msg
 
     feedback_form = data.get('feedback_form')
 
@@ -759,7 +839,7 @@ async def send_app(callback: types.CallbackQuery,
     main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
     # chat_id, message_id = main_menu_msg
 
-    await state.update_data(main_menu_msg=None)
+    await state.update_data(state_msg=None)
 
     # username = callback.message.from_user.username
     # username_from_callback = callback.from_user.username
@@ -989,11 +1069,10 @@ async def request_type_state(callback: types.CallbackQuery,
     # state_msg: tuple[str, str] = data.get('state_msg')
     # chat_id, message_id = state_msg
     # state_msg: types.Message = data.get('state_msg')
-    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
-    chat_id, message_id = main_menu_msg
-
-    # chat_id = callback.message.chat.id
-    # message_id = callback.message.message_id
+    # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+    # chat_id, message_id = main_menu_msg
+    chat_id = callback.message.chat.id
+    message_id = callback.message.message_id
 
     request_type = 'Оплатить платеж' if callback.data == 'pay_payment' else 'Принять платеж'
     state_process = f'Тип заявки: {request_type}'
@@ -1001,6 +1080,7 @@ async def request_type_state(callback: types.CallbackQuery,
     order = data.get('order')
     order['request_type'] = request_type
     await state.update_data(order=order)
+    await state.update_data(state_msg=(chat_id, message_id))
     #
     # username_from_state = data.get('username')
     # print(username_from_state)
@@ -1056,8 +1136,8 @@ async def country_state(message: types.Message,
     #     return
     # state_msg: tuple[str, str] = data.get('state_msg')
     # chat_id, message_id = state_msg
-    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
-    chat_id, message_id = main_menu_msg
+    state_msg: tuple[str,str] = data.get('state_msg')
+    chat_id, message_id = state_msg
 
     # state_msg: types.Message = data.get('state_msg')
     await state.update_data(country=message.text)
@@ -1099,8 +1179,8 @@ async def amount_state(message: types.Message,
     # state_msg: types.Message = data.get('state_msg')
     # state_msg: tuple[str, str] = data.get('state_msg')
     # chat_id, message_id = state_msg
-    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
-    chat_id, message_id = main_menu_msg
+    state_msg: tuple[str,str] = data.get('state_msg')
+    chat_id, message_id = state_msg
 
     await state.update_data(amount=message.text)
 
@@ -1142,8 +1222,8 @@ async def task_text_state(message: types.Message,
     # state_msg: types.Message = data.get('state_msg')
     # state_msg: tuple[str, str] = data.get('state_msg')
     # chat_id, message_id = state_msg
-    main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
-    chat_id, message_id = main_menu_msg
+    state_msg: tuple[str,str] = data.get('state_msg')
+    chat_id, message_id = state_msg
 
     await state.update_data(task_text=message.text)
 
