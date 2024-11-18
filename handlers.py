@@ -64,40 +64,41 @@ async def start(message: types.Message | types.CallbackQuery,
 
         if len(query_param) > 1:
             utm_source = query_param[-1]
-        
-    Guest = Base.classes.general_models_guest
 
-    tg_id = message.from_user.id
-    guest = session.query(Guest)\
-                    .where(Guest.tg_id == tg_id)\
-                    .first()
+    with session as session:
+        Guest = Base.classes.general_models_guest
+
+        tg_id = message.from_user.id
+        guest = session.query(Guest)\
+                        .where(Guest.tg_id == tg_id)\
+                        .first()
     
-    if isinstance(message, types.CallbackQuery):
-        message = message.message
+        if isinstance(message, types.CallbackQuery):
+            message = message.message
 
-    chat_link = None
+        chat_link = None
 
-    if not guest:
-        value_dict = {
-            'username': message.from_user.username,
-            'tg_id': tg_id,
-            'first_name': message.from_user.first_name,
-            'last_name': message.from_user.last_name,
-            'language_code': message.from_user.language_code,
-            'is_premium': bool(message.from_user.is_premium),
-            'is_active': True,
-        }
+        if not guest:
+            value_dict = {
+                'username': message.from_user.username,
+                'tg_id': tg_id,
+                'first_name': message.from_user.first_name,
+                'last_name': message.from_user.last_name,
+                'language_code': message.from_user.language_code,
+                'is_premium': bool(message.from_user.is_premium),
+                'is_active': True,
+            }
 
-        if utm_source:
-            value_dict.update(
-                {
-                    'utm_source': utm_source,
-                }
-            )
-        session.execute(insert(Guest).values(**value_dict))
-        session.commit()
-    else:
-        chat_link  = guest.chat_link
+            if utm_source:
+                value_dict.update(
+                    {
+                        'utm_source': utm_source,
+                    }
+                )
+            session.execute(insert(Guest).values(**value_dict))
+            session.commit()
+        else:
+            chat_link  = guest.chat_link
 
     start_kb = create_start_inline_keyboard(tg_id)
 
@@ -164,6 +165,85 @@ async def start(message: types.Message | types.CallbackQuery,
         pass
 
 
+# @main_router.message(Command('start'))
+# async def start(message: types.Message | types.CallbackQuery,
+#                 session: Session,
+#                 state: FSMContext,
+#                 bot: Bot,
+#                 text_msg: str = None):
+#     is_callback = isinstance(message, types.CallbackQuery)
+
+#     _start_text = start_text
+#     utm_source = None
+
+#     if isinstance(message, types.Message):
+#         query_param = message.text.split()
+
+#         if len(query_param) > 1:
+#             utm_source = query_param[-1]
+            
+#     with session as session:
+#         Guest = Base.classes.general_models_guest
+
+#         tg_id = message.from_user.id
+#         guest = session.query(Guest)\
+#                         .where(Guest.tg_id == tg_id)\
+#                         .first()
+    
+#         if isinstance(message, types.CallbackQuery):
+#             message = message.message
+
+#         chat_link = None
+
+#         if not guest:
+#             value_dict = {
+#                 'username': message.from_user.username,
+#                 'tg_id': tg_id,
+#                 'first_name': message.from_user.first_name,
+#                 'last_name': message.from_user.last_name,
+#                 'language_code': message.from_user.language_code,
+#                 'is_premium': bool(message.from_user.is_premium),
+#                 'is_active': True,
+#             }
+
+#             if utm_source:
+#                 value_dict.update(
+#                     {
+#                         'utm_source': utm_source,
+#                     }
+#                 )
+#             session.execute(insert(Guest).values(**value_dict))
+#             session.commit()
+#         else:
+#             chat_link  = guest.chat_link
+
+#     start_kb = create_start_inline_keyboard(tg_id)
+
+#     if chat_link:
+#         chat_link_text = f'Cсылка на чата по Вашим обращениям -> {chat_link}'
+#         _start_text += f'\n\n{chat_link_text}'
+
+#     if not is_callback:
+#         await message.answer(text=_start_text,
+#                              reply_markup=start_kb.as_markup(),
+#                              disable_web_page_preview=True,
+#                              disable_notification=True)
+#         try:
+#             await message.delete()
+#         except Exception:
+#             pass
+#     else:
+#         await bot.send_message(chat_id=message.chat.id,
+#                                text=_start_text,
+#                                reply_markup=start_kb.as_markup(),
+#                                disable_web_page_preview=True,
+#                                disable_notification=True)
+#         try:
+#             await message.delete()
+#         except Exception:
+#             pass
+
+
 # @main_router.message(F.text == 'Swift/Sepa')
 # async def start_swift_sepa(message: types.Message,
 #                            state: FSMContext,
@@ -201,29 +281,29 @@ async def back_to_main(callback: types.CallbackQuery,
                        state: FSMContext,
                        session: Session,
                        bot: Bot):
-    data = await state.get_data()
+    # data = await state.get_data()
     # start_msg = state_data.get('start_msg')
     # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
-    chat_link_msg: tuple[str,str] = data.get('chat_link_msg')
+    # chat_link_msg: tuple[str,str] = data.get('chat_link_msg')
 
     await state.clear()
 
     # if main_menu_msg:
     #     await state.update_data(main_menu_msg=main_menu_msg)
 
-    if chat_link_msg:
-        await state.update_data(chat_link_msg=chat_link_msg)
+    # if chat_link_msg:
+    #     await state.update_data(chat_link_msg=chat_link_msg)
 
     await start(callback,
                 session,
                 state,
                 bot,
                 text_msg='Главное меню')
-    try:
-        await callback.answer()
-        await callback.message.delete()
-    except Exception:
-        pass
+    # try:
+    #     await callback.answer()
+    #     await callback.message.delete()
+    # except Exception:
+    #     pass
 
 
 @main_router.callback_query(F.data == 'invoice_swift/sepa')
@@ -237,9 +317,13 @@ async def invoice_swift_sepa(callback: types.CallbackQuery,
     main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
 
     chat_id, message_id = main_menu_msg
+    # chat_id = callback.message.chat.id
+    # message_id = callback.message.message_id
 
     swift_sepa_kb = create_swift_sepa_kb()
     swift_sepa_kb = add_cancel_btn_to_kb(swift_sepa_kb)
+
+    # await state.update_data(action='swift/sepa')
 
     await bot.edit_message_text(text='Выберите действие',
                                 chat_id=chat_id,
@@ -262,6 +346,18 @@ async def start_swift_sepa(callback: types.CallbackQuery,
     # await callback.answer(text='Находится в разработке',
     #                       show_alert=True)
     data = await state.get_data()
+
+    # if not data.get('action'):
+    #     await callback.answer(text='Что то пошло не так, попробуйте еще раз.')
+    #     await state.clear()
+
+    #     await start(callback,
+    #                 session,
+    #                 state,
+    #                 bot,
+    #                 text_msg='Главное меню')
+    #     return
+    
     await state.set_state(SwiftSepaStates.request_type)
     await state.update_data(order=dict())
 
@@ -271,6 +367,8 @@ async def start_swift_sepa(callback: types.CallbackQuery,
     main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
 
     chat_id, message_id = main_menu_msg
+    # chat_id = callback.message.chat.id
+    # message_id = callback.message.message_id
 
 
     # print('has_main_menu_msg?', bool(main_menu_msg))
@@ -404,25 +502,27 @@ async def feedback_form_send(callback: types.CallbackQuery,
 
     FeedbackForm = Base.classes.general_models_feedbackform
 
-    session.execute(insert(FeedbackForm).values(feedback_values))
-    try:
-        session.commit()
+    with session as session:
 
-        _text = 'Обращение успешно отправлено!'
-    except Exception as ex:
-        print(ex)
-        session.rollback()
-        _text = 'Что то пошло не так, попробуйте повторить позже'
-    
-    finally:
-        await callback.answer(text=_text,
-                              show_alert=True)
+        session.execute(insert(FeedbackForm).values(feedback_values))
+        try:
+            session.commit()
+
+            _text = 'Обращение успешно отправлено!'
+        except Exception as ex:
+            print(ex)
+            session.rollback()
+            _text = 'Что то пошло не так, попробуйте повторить позже'
         
-        await start(callback,
-                    session,
-                    state,
-                    bot,
-                    text_msg='Главное меню')
+        finally:
+            await callback.answer(text=_text,
+                                show_alert=True)
+            
+            await start(callback,
+                        session,
+                        state,
+                        bot,
+                        text_msg='Главное меню')
 
     
 @main_router.callback_query(F.data.startswith(FEEDBACK_REASON_PREFIX))
@@ -672,11 +772,13 @@ async def send_app(callback: types.CallbackQuery,
     # session.execute(insert(Order).values(order))
     # session.commit()
 
-    new_order = Order(**order)  # предполагая, что order — это словарь
-    session.add(new_order)
-    session.commit()
+    with session as session:
 
-    session.refresh(new_order)
+        new_order = Order(**order)  # предполагая, что order — это словарь
+        session.add(new_order)
+        session.commit()
+
+        session.refresh(new_order)
 
     print(new_order.__dict__)
 
@@ -873,11 +975,26 @@ async def request_type_state(callback: types.CallbackQuery,
                              state: FSMContext,
                              bot: Bot):
     data = await state.get_data()
+
+    # if not data.get('order'):
+    #     await callback.answer(text='Что то пошло не так, попробуйте еще раз.')
+    #     await state.clear()
+
+    #     await start(callback,
+    #                 session,
+    #                 state,
+    #                 bot,
+    #                 text_msg='Главное меню')
+    #     return
+
     # state_msg: tuple[str, str] = data.get('state_msg')
     # chat_id, message_id = state_msg
     # state_msg: types.Message = data.get('state_msg')
     main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
     chat_id, message_id = main_menu_msg
+
+    # chat_id = callback.message.chat.id
+    # message_id = callback.message.message_id
 
     request_type = 'Оплатить платеж' if callback.data == 'pay_payment' else 'Принять платеж'
     state_process = f'Тип заявки: {request_type}'
@@ -896,6 +1013,8 @@ async def request_type_state(callback: types.CallbackQuery,
     await state.update_data(state_process=state_process)
     # print(state_msg)
     await state.update_data(request_type=callback.data)
+
+    # await state.update_data(proccess_msg=(chat_id, message_id))
 
     await state.set_state(SwiftSepaStates.country)
 
@@ -925,6 +1044,17 @@ async def country_state(message: types.Message,
                         state: FSMContext,
                         bot: Bot):
     data = await state.get_data()
+
+    # if not data.get('order') or not data.get('proccess_msg'):
+    #     await message.answer(text='Что то пошло не так, попробуйте еще раз.')
+    #     await state.clear()
+
+    #     await start(message,
+    #                 session,
+    #                 state,
+    #                 bot,
+    #                 text_msg='Главное меню')
+    #     return
     # state_msg: tuple[str, str] = data.get('state_msg')
     # chat_id, message_id = state_msg
     main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
