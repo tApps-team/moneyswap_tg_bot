@@ -159,8 +159,7 @@ async def start(message: types.Message | types.CallbackQuery,
     # except Exception:
     #     pass
     try:
-        if not is_callback:
-            await message.delete()
+        await message.delete()
     except Exception:
         pass
 
