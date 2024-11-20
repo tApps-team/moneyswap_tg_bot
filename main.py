@@ -87,6 +87,7 @@ asyncio.set_event_loop(event_loop)
 config = Config(app=app,
                 loop=event_loop,
                 host='0.0.0.0',
+                log_level='debug',
                 port=8001)
 server = Server(config)
 
