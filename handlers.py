@@ -572,6 +572,11 @@ async def get_about(callback: types.CallbackQuery,
                                 message_id=message_id,
                                 reply_markup=kb.as_markup())
     
+    try:
+        await callback.answer()
+    except Exception:
+        pass
+    
     # await callback.answer(text='Находится в разработке',
     #                       show_alert=True)
 
@@ -582,11 +587,11 @@ async def start_support(callback: types.CallbackQuery,
                         state: FSMContext,
                         bot: Bot,
                         api_client: Client):
-    # await invoice_swift_sepa(callback,
-    #                          session,
-    #                          state,
-    #                          bot,
-    #                          api_client)
+    await invoice_swift_sepa(callback,
+                             session,
+                             state,
+                             bot,
+                             api_client)
     try:
         await callback.answer()
         # await callback.message.delete()
