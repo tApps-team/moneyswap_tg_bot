@@ -60,6 +60,14 @@ def create_swift_sepa_kb():
     return swift_sepa_kb
 
 
+def create_condition_kb():
+    condition_kb = InlineKeyboardBuilder()
+    condition_kb.add(types.InlineKeyboardButton(text='Назад',
+                                                 callback_data='back_to_swift/sepa'))
+    
+    return condition_kb
+
+
 def create_feedback_form_reasons_kb():
     reason_kb = InlineKeyboardBuilder()
 

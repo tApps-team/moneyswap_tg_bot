@@ -15,6 +15,8 @@ from fastapi import FastAPI, APIRouter
 from aiogram import Bot, Dispatcher, types
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.storage.redis import RedisStorage
+from aiogram.client.bot import DefaultBotProperties
+from aiogram.enums import ParseMode
 
 from sqlalchemy.engine import create_engine
 from sqlalchemy.orm import sessionmaker, Session
@@ -50,7 +52,9 @@ storage = RedisStorage(redis=redis_client)
 
 
 #TG BOT
-bot = Bot(TOKEN, parse_mode="HTML")
+# bot = Bot(TOKEN, parse_mode="HTML")
+bot = Bot(TOKEN,
+          default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
 #####
 api_client = Client('my_account',
