@@ -99,28 +99,35 @@ fast_api_router = APIRouter(prefix='/bot_api')
 WEBHOOK_PATH = f'/webhook'
 
 #Set webhook and create database on start
-# @app.on_event('startup')
-# async def on_startup():
-#     await bot.set_webhook(f"{PUBLIC_URL}{WEBHOOK_PATH}",
-#                           drop_pending_updates=True,
-#                           allowed_updates=['message', 'callback_query'])
-    
-    # Base.prepare(engine, reflect=True)
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Код, который будет выполнен при старте приложения
-    print("Приложение запускается...")
+@app.on_event('startup')
+async def on_startup():
+    print('startup')
     await bot.set_webhook(f"{PUBLIC_URL}{WEBHOOK_PATH}",
                           drop_pending_updates=True,
                           allowed_updates=['message', 'callback_query'])
     
-    yield  # Это место, где приложение будет работать
-    # Код, который будет выполнен при остановке приложения
-    await bot.delete_webhook()
-    print("Приложение останавливается...")
 
-app.lifespan = lifespan
+@app.on_event('shutdown')
+async def on_shutdown():
+    print('shutdown')
+    await bot.delete_webhook()
+    
+    # Base.prepare(engine, reflect=True)
+
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     # Код, который будет выполнен при старте приложения
+#     print("Приложение запускается...")
+#     await bot.set_webhook(f"{PUBLIC_URL}{WEBHOOK_PATH}",
+#                           drop_pending_updates=True,
+#                           allowed_updates=['message', 'callback_query'])
+    
+#     yield  # Это место, где приложение будет работать
+#     # Код, который будет выполнен при остановке приложения
+#     await bot.delete_webhook()
+#     print("Приложение останавливается...")
+
+# app.lifespan = lifespan
 
 # app.add_event_handler("startup", lambda: print("Событие старта приложения"))
 # app.add_event_handler("shutdown", lambda: print("Событие остановки приложения"))
