@@ -554,6 +554,10 @@ async def get_conditions(callback: types.CallbackQuery,
                                 chat_id=chat_id,
                                 message_id=message_id,
                                 reply_markup=condition_kb.as_markup())
+    try:
+        await callback.answer()
+    except Exception:
+        pass
 
 
 @main_router.callback_query(F.data == 'about')
