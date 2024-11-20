@@ -548,12 +548,12 @@ async def get_conditions(callback: types.CallbackQuery,
     chat_id = callback.message.chat.id
     message_id = callback.message.message_id
 
-    kb = add_cancel_btn_to_kb()
+    condition_kb = create_condition_kb()
 
     await bot.edit_message_text(text=condition_text,
                                 chat_id=chat_id,
                                 message_id=message_id,
-                                reply_markup=kb.as_markup())
+                                reply_markup=condition_kb.as_markup())
 
 
 @main_router.callback_query(F.data == 'about')
@@ -565,12 +565,12 @@ async def get_about(callback: types.CallbackQuery,
     chat_id = callback.message.chat.id
     message_id = callback.message.message_id
 
-    condition_kb = create_condition_kb()
+    kb = add_cancel_btn_to_kb()
 
     await bot.edit_message_text(text=about_text,
                                 chat_id=chat_id,
                                 message_id=message_id,
-                                reply_markup=condition_kb.as_markup())
+                                reply_markup=kb.as_markup())
     
     # await callback.answer(text='Находится в разработке',
     #                       show_alert=True)
@@ -582,11 +582,11 @@ async def start_support(callback: types.CallbackQuery,
                         state: FSMContext,
                         bot: Bot,
                         api_client: Client):
-    await invoice_swift_sepa(callback,
-                             session,
-                             state,
-                             bot,
-                             api_client)
+    # await invoice_swift_sepa(callback,
+    #                          session,
+    #                          state,
+    #                          bot,
+    #                          api_client)
     try:
         await callback.answer()
         # await callback.message.delete()
