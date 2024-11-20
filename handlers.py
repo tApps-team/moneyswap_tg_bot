@@ -589,7 +589,7 @@ async def start_support(callback: types.CallbackQuery,
                              api_client)
     try:
         await callback.answer()
-        await callback.message.delete()
+        # await callback.message.delete()
     except Exception:
         pass
     
