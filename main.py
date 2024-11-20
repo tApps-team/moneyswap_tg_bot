@@ -78,8 +78,8 @@ async def lifespan(app: FastAPI):
     # Код, который будет выполнен при старте приложения
     print("Приложение запускается...")
     await bot.set_webhook(f"{PUBLIC_URL}{WEBHOOK_PATH}",
-                          drop_pending_updates=True,
                           allowed_updates=['message', 'callback_query'])
+                        #   drop_pending_updates=True,
     
     yield  # Это место, где приложение будет работать
     # Код, который будет выполнен при остановке приложения
