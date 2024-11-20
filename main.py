@@ -80,7 +80,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-event_loop = asyncio.get_event_loop()
+# event_loop = asyncio.get_event_loop()
+event_loop = asyncio.new_event_loop()
+asyncio.set_event_loop(event_loop)
+
 config = Config(app=app,
                 loop=event_loop,
                 host='0.0.0.0',
@@ -116,11 +119,11 @@ async def lifespan(app: FastAPI):
     await bot.delete_webhook()
     print("Приложение останавливается...")
 
-
-app.add_event_handler("startup", lambda: print("Событие старта приложения"))
-app.add_event_handler("shutdown", lambda: print("Событие остановки приложения"))
-
 app.lifespan = lifespan
+
+# app.add_event_handler("startup", lambda: print("Событие старта приложения"))
+# app.add_event_handler("shutdown", lambda: print("Событие остановки приложения"))
+
 
 
 #Endpoint for checking
