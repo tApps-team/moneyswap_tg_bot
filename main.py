@@ -71,8 +71,25 @@ dp.include_router(main_router)
 dp.update.middleware(DbSessionMiddleware(session_pool=session,
                                          api_client=api_client))
 
+
+# FastAPI lifespan ('startup' and 'shutdown') 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Код, который будет выполнен при старте приложения
+    print("Приложение запускается...")
+    await bot.set_webhook(f"{PUBLIC_URL}{WEBHOOK_PATH}",
+                          drop_pending_updates=True,
+                          allowed_updates=['message', 'callback_query'])
+    
+    yield  # Это место, где приложение будет работать
+    # Код, который будет выполнен при остановке приложения
+    await bot.delete_webhook()
+    print("Приложение останавливается...")
+
+
 #Initialize web server
-app = FastAPI(docs_url='/docs_bot')
+app = FastAPI(docs_url='/docs_bot',
+              lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -87,7 +104,6 @@ asyncio.set_event_loop(event_loop)
 config = Config(app=app,
                 loop=event_loop,
                 host='0.0.0.0',
-                log_level='debug',
                 port=8001)
 server = Server(config)
 
@@ -99,18 +115,18 @@ fast_api_router = APIRouter(prefix='/bot_api')
 WEBHOOK_PATH = f'/webhook'
 
 #Set webhook and create database on start
-@app.on_event('startup')
-async def on_startup():
-    print('startup')
-    await bot.set_webhook(f"{PUBLIC_URL}{WEBHOOK_PATH}",
-                          drop_pending_updates=True,
-                          allowed_updates=['message', 'callback_query'])
-    
+# @app.on_event('startup')
+# async def on_startup():
+#     print('startup')
+#     await bot.set_webhook(f"{PUBLIC_URL}{WEBHOOK_PATH}",
+#                           drop_pending_updates=True,
+#                           allowed_updates=['message', 'callback_query'])
 
-@app.on_event('shutdown')
-async def on_shutdown():
-    print('shutdown')
-    await bot.delete_webhook()
+
+# @app.on_event('shutdown')
+# async def on_shutdown():
+#     print('shutdown')
+#     await bot.delete_webhook()
     
     # Base.prepare(engine, reflect=True)
 
