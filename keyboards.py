@@ -43,7 +43,7 @@ def create_start_inline_keyboard(user_id: int):
     start_kb.row(types.InlineKeyboardButton(text='Инвойсы Swift/Sepa',
                                             callback_data='invoice_swift/sepa'))
     start_kb.row(types.InlineKeyboardButton(text='О MoneySwap',
-                                            callback_data='about'))
+                                            url='https://telegra.ph/O-MoneySwap-11-21'))
     start_kb.add(types.InlineKeyboardButton(text='Поддержка',
                                             callback_data='support'))
     
@@ -55,7 +55,7 @@ def create_swift_sepa_kb():
     swift_sepa_kb.add(types.InlineKeyboardButton(text='Оплатить инвойс',
                                                  callback_data='start_swift_sepa'))
     swift_sepa_kb.row(types.InlineKeyboardButton(text='Условия - Телеграф',
-                                                 callback_data='conditions'))     ###   !!!!
+                                                 url='https://telegra.ph/Usloviya-obmena-SWIFTSEPA-s-MoneySwap-11-21'))   ###   !!!!
 
     return swift_sepa_kb
 
