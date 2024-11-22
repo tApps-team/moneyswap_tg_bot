@@ -1214,8 +1214,8 @@ async def request_type_state(callback: types.CallbackQuery,
 
     #
     await bot.edit_message_text(f'{state_process}\n<b>Введите страну...</b>',
-                                chat_id,
-                                message_id,
+                                chat_id=chat_id,
+                                message_id=message_id,
                                 reply_markup=kb.as_markup())
     #
 
@@ -1271,8 +1271,8 @@ async def country_state(message: types.Message,
 
     #
     await bot.edit_message_text(f'{state_process}\n<b>Введите сумму...</b>',
-                                chat_id,
-                                message_id,
+                                chat_id=chat_id,
+                                message_id=message_id,
                                 reply_markup=kb.as_markup())
     #
 
@@ -1313,8 +1313,8 @@ async def amount_state(message: types.Message,
 
     #
     await bot.edit_message_text(f'{state_process}\n<b>Опишите задачу, чтобы менеджеры могли быстрее все понять и оперативно начать выполнение...</b>',
-                                chat_id,
-                                message_id,
+                                chat_id=chat_id,
+                                message_id=message_id,
                                 reply_markup=kb.as_markup())
     #
 
@@ -1370,8 +1370,8 @@ async def task_text_state(message: types.Message,
 
     #
     await bot.edit_message_text(f'{state_process}\n<b>Заполнение окончено.</b>',
-                                chat_id,
-                                message_id,
+                                chat_id=chat_id,
+                                message_id=message_id,
                                 reply_markup=kb.as_markup())
     #
 
