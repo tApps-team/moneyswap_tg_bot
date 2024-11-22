@@ -54,7 +54,7 @@ def create_swift_sepa_kb():
     swift_sepa_kb = InlineKeyboardBuilder()
     swift_sepa_kb.add(types.InlineKeyboardButton(text='Оплатить инвойс',
                                                  callback_data='start_swift_sepa'))
-    swift_sepa_kb.row(types.InlineKeyboardButton(text='Условия - Телеграф',
+    swift_sepa_kb.row(types.InlineKeyboardButton(text='Условия',
                                                  url='https://telegra.ph/Usloviya-obmena-SWIFTSEPA-s-MoneySwap-11-21'))   ###   !!!!
 
     return swift_sepa_kb

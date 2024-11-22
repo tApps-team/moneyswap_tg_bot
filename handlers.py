@@ -610,40 +610,6 @@ async def start_support(callback: types.CallbackQuery,
                         state: FSMContext,
                         bot: Bot,
                         api_client: Client):
-    # data = await state.get_data()
-
-    # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
-
-    # chat_id, message_id = main_menu_msg
-    chat_id = callback.message.chat.id
-    message_id = callback.message.message_id
-
-    support_kb = create_support_kb()
-    support_kb = add_cancel_btn_to_kb(support_kb)
-
-    await bot.edit_message_text(text='Выберите действие',
-                                chat_id=chat_id,
-                                message_id=message_id,
-                                reply_markup=support_kb.as_markup())
-    
-    # await bot.edit_message_reply_markup(chat_id=chat_id,
-    #                                     message_id=message_id,
-    #                                     reply_markup=support_kb.as_markup())
-    
-    await callback.answer()
-    
-
-@main_router.callback_query(F.data == 'feedback_form')
-async def start_support(callback: types.CallbackQuery,
-                        session: Session,
-                        state: FSMContext,
-                        bot: Bot,
-                        api_client: Client):
-    # data = await state.get_data()
-
-    # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
-
-    # chat_id, message_id = main_menu_msg
     chat_id = callback.message.chat.id
     message_id = callback.message.message_id
 
@@ -665,6 +631,62 @@ async def start_support(callback: types.CallbackQuery,
     #                                     message_id=message_id)
     
     await callback.answer()
+
+    # data = await state.get_data()
+
+    # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+
+    # chat_id, message_id = main_menu_msg
+    # chat_id = callback.message.chat.id
+    # message_id = callback.message.message_id
+
+    # support_kb = create_support_kb()
+    # support_kb = add_cancel_btn_to_kb(support_kb)
+
+    # await bot.edit_message_text(text='Выберите действие',
+    #                             chat_id=chat_id,
+    #                             message_id=message_id,
+    #                             reply_markup=support_kb.as_markup())
+    
+    # # await bot.edit_message_reply_markup(chat_id=chat_id,
+    # #                                     message_id=message_id,
+    # #                                     reply_markup=support_kb.as_markup())
+    
+    # await callback.answer()
+    
+
+# @main_router.callback_query(F.data == 'feedback_form')
+# async def start_support(callback: types.CallbackQuery,
+#                         session: Session,
+#                         state: FSMContext,
+#                         bot: Bot,
+#                         api_client: Client):
+#     # data = await state.get_data()
+
+#     # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
+
+#     # chat_id, message_id = main_menu_msg
+#     chat_id = callback.message.chat.id
+#     message_id = callback.message.message_id
+
+#     await state.set_state(FeedbackFormStates.reason)
+
+#     await state.update_data(feedback_form=dict())
+
+#     reason_kb = create_feedback_form_reasons_kb()
+
+#     reason_kb = add_cancel_btn_to_kb(reason_kb)
+
+#     await bot.edit_message_text(text='Выберите причину обращения',
+#                                 chat_id=chat_id,
+#                                 message_id=message_id,
+#                                 reply_markup=reason_kb.as_markup())
+
+#     # await bot.edit_message_reply_markup(reply_markup=reason_kb.as_markup(),
+#     #                                     chat_id=chat_id,
+#     #                                     message_id=message_id)
+    
+#     await callback.answer()
 
 
 @main_router.callback_query(F.data == 'feedback_form_send')
