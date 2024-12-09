@@ -269,6 +269,7 @@ async def start(message: types.Message | types.CallbackQuery,
                 'last_name': message.from_user.last_name,
                 'language_code': message.from_user.language_code,
                 'is_premium': bool(message.from_user.is_premium),
+                'time_create': datetime.now(),
                 'is_active': True,
             }
 
