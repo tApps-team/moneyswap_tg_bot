@@ -1,6 +1,8 @@
 import os
 import json
 
+from asyncio import sleep
+
 from datetime import datetime
 
 import aiohttp
@@ -1575,6 +1577,24 @@ async def send_mass_message(bot: Bot,
             images = [types.InputMediaPhoto(media=image.file_id) for image in mass_message.general_models_masssendimage_collection]
             videos = [types.InputMediaVideo(media=video.file_id) for video in mass_message.general_models_masssendvideo_collection]
 
+            query = (
+                select(Guest)\
+                .where(Guest.tg_id.in_([686339126,
+                                        350016695]))
+            )
+
+# [60644557,
+#                                         471715294,
+#                                         561803366,
+#                                         686339126,
+#                                         283163508,
+#                                         283163508,
+#                                         311364517]
+
+            res = session.execute(query)
+
+            guests = res.fetchall()
+
             image_video_group = None
             if list(images+videos):
                 image_video_group = MediaGroupBuilder(images+videos, caption=mass_message_text)
@@ -1584,23 +1604,28 @@ async def send_mass_message(bot: Bot,
             if files:
                 file_group = MediaGroupBuilder(files)
 
-            try:
-                if image_video_group is not None:
-                    mb1 = await bot.send_media_group('350016695', media=image_video_group.build())
-                    print('MB1', mb1)
-                else:
-                    await bot.send_message('350016695',
-                                           text=mass_message_text)
-                if file_group is not None:
-                    mb2 = await bot.send_media_group('350016695', media=file_group.build())    
-                    print('MB2', mb2)
-                guest = session.query(Guest).where(Guest.tg_id == '350016695').first()
-                if not guest.is_active:
-                   session.execute(update(Guest).where(Guest.tg_id == '350016695').values(is_active=True))
-                   session.commit()
-            except Exception:
-                session.execute(update(Guest).where(Guest.tg_id == '350016695').values(is_active=False))
-                session.commit()
+            # try:
+            for guest in guests:
+                try:
+                    _tg_id = guest.tg_id
+                    if image_video_group is not None:
+                        mb1 = await bot.send_media_group(_tg_id, media=image_video_group.build())
+                        print('MB1', mb1)
+                    else:
+                        await bot.send_message(_tg_id,
+                                            text=mass_message_text)
+                    if file_group is not None:
+                        mb2 = await bot.send_media_group(_tg_id, media=file_group.build())    
+                        print('MB2', mb2)
+                    # guest = session.query(Guest).where(Guest.tg_id == '350016695').first()
+                    if not guest.is_active:
+                        session.execute(update(Guest).where(Guest.tg_id == _tg_id).values(is_active=True))
+                        session.commit()
+                except Exception:
+                    session.execute(update(Guest).where(Guest.tg_id == _tg_id).values(is_active=False))
+                    session.commit()
+                finally:
+                    await sleep(0.5)
             
             session.close()
 
