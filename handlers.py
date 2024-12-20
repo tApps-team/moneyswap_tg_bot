@@ -1593,7 +1593,7 @@ async def send_mass_message(bot: Bot,
 
             res = session.execute(query)
 
-            guests = res.fetchone()
+            guests = res.fetchall()
 
             print(guests)
 
@@ -1609,7 +1609,7 @@ async def send_mass_message(bot: Bot,
             # try:
             for guest in guests:
                 try:
-                    _tg_id = guest.tg_id
+                    _tg_id = guest[0].tg_id
                     if image_video_group is not None:
                         mb1 = await bot.send_media_group(_tg_id, media=image_video_group.build())
                         print('MB1', mb1)
