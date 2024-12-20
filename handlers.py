@@ -1593,7 +1593,7 @@ async def send_mass_message(bot: Bot,
 
             res = session.execute(query)
 
-            guests = res.fetchall()
+            guests = res.fetchone()
 
             print(guests)
 
