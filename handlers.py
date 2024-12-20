@@ -1595,6 +1595,8 @@ async def send_mass_message(bot: Bot,
 
             guests = res.fetchall()
 
+            print(guests)
+
             image_video_group = None
             if list(images+videos):
                 image_video_group = MediaGroupBuilder(images+videos, caption=mass_message_text)
@@ -1621,7 +1623,8 @@ async def send_mass_message(bot: Bot,
                     if not guest.is_active:
                         session.execute(update(Guest).where(Guest.tg_id == _tg_id).values(is_active=True))
                         session.commit()
-                except Exception:
+                except Exception as ex:
+                    print(ex)
                     session.execute(update(Guest).where(Guest.tg_id == _tg_id).values(is_active=False))
                     session.commit()
                 finally:
