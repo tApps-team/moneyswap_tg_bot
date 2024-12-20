@@ -1567,6 +1567,7 @@ async def send_mass_message(bot: Bot,
                                                         .replace('</p>', '\n')\
                                                         .replace('<br>', '')\
                                                         .replace('<p class="">', '')\
+                                                        .replace('&nbsp', ' ')
                                                         # .replace('<span', '<span class="tg-spoiler"')
 
             print(mass_message_text)
