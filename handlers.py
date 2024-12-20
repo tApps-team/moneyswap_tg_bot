@@ -1580,7 +1580,11 @@ async def send_mass_message(bot: Bot,
             query = (
                 select(Guest)\
                 .where(Guest.tg_id.in_([686339126,
-                                        350016695]))
+                                        350016695,
+                                        471715294,
+                                        561803366,
+                                        283163508,
+                                        60644557]))
             )
 
 # [60644557,
