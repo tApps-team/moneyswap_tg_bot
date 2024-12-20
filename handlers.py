@@ -1577,19 +1577,19 @@ async def send_mass_message(bot: Bot,
             images = [types.InputMediaPhoto(media=image.file_id) for image in mass_message.general_models_masssendimage_collection]
             videos = [types.InputMediaVideo(media=video.file_id) for video in mass_message.general_models_masssendvideo_collection]
 
-            # query = (
-            #     select(Guest)\
-            #     .where(Guest.tg_id.in_([686339126,
-            #                             350016695,
-            #                             471715294,
-            #                             561803366,
-            #                             283163508,
-            #                             60644557,
-            #                             311364517,
-            #                             293371619]))
-            # )
+            query = (
+                select(Guest)\
+                .where(Guest.tg_id.in_([686339126,
+                                        350016695,
+                                        471715294,
+                                        561803366,
+                                        283163508,
+                                        60644557,
+                                        311364517,
+                                        293371619]))
+            )
 
-            query = (select(Guest))
+            # query = (select(Guest))
 
 
 # [60644557,
