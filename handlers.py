@@ -293,20 +293,34 @@ async def start(message: types.Message | types.CallbackQuery,
         _start_text += f'\n\n{chat_link_text}'
 
     if not is_callback:
-        await message.answer(text=_start_text,
+        _msg = await message.answer(text=_start_text,
                              reply_markup=start_kb.as_markup(),
                              disable_web_page_preview=True,
                              disable_notification=True)
+
+        try:
+            await bot.unpin_all_chat_messages(chat_id=message.chat.id)
+        except Exception as ex:
+            print('unpin error', ex)
+        await bot.pin_chat_message(message.chat.id,
+                                    message_id=_msg.message_id)
         try:
             await message.delete()
         except Exception:
             pass
     else:
-        await bot.send_message(chat_id=message.chat.id,
+        _msg = await bot.send_message(chat_id=message.chat.id,
                                text=_start_text,
                                reply_markup=start_kb.as_markup(),
                                disable_web_page_preview=True,
                                disable_notification=True)
+        
+        try:
+            await bot.unpin_all_chat_messages(chat_id=message.chat.id)
+        except Exception as ex:
+            print('unpin error', ex)
+        await bot.pin_chat_message(message.chat.id,
+                                    message_id=_msg.message_id)
         try:
             await message.delete()
         except Exception:
