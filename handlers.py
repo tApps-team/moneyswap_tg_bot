@@ -1659,7 +1659,7 @@ async def send_mass_message(bot: Bot,
                     session.execute(update(Guest).where(Guest.tg_id == _tg_id).values(is_active=False))
                     session.commit()
                 finally:
-                    await sleep(0.5)
+                    await sleep(2)
             
             session.close()
 
