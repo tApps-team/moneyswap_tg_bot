@@ -1577,7 +1577,7 @@ async def send_mass_message(bot: Bot,
             session.expire_all()
 
             mass_message_text: str = mass_message.content
-            print(mass_message_text)
+            # print(mass_message_text)
             # validate content text
             mass_message_text: str = mass_message_text.replace('<p>','')\
                                                         .replace('</p>', '\n')\
@@ -1586,28 +1586,30 @@ async def send_mass_message(bot: Bot,
                                                         .replace('&nbsp;', ' ')
                                                         # .replace('<span', '<span class="tg-spoiler"')
 
-            print(mass_message_text)
+            # print(mass_message_text)
 
             images = [types.InputMediaPhoto(media=image.file_id) for image in mass_message.general_models_masssendimage_collection]
             videos = [types.InputMediaVideo(media=video.file_id) for video in mass_message.general_models_masssendvideo_collection]
 
             # query = (
             #     select(Guest)\
-            #     .where(Guest.tg_id.in_([686339126,
+            #     .where(Guest.tg_id.in_([60644557,
             #                             350016695,
             #                             471715294,
-            #                             561803366,
-            #                             283163508,
-            #                             60644557,
             #                             311364517,
-            #                             293371619]))
+            #                             283163508,
+            #                             5047108619,
+            #                             561803366,
+            #                             686339126,
+            #                             620839543,
+            #                             375236081,
+
+            #     ]))
             # )
 
             query = (
                 select(Guest)\
-                .where(Guest.tg_id.in_([60644557,
-                                        561803366,
-                                        686339126]))
+                .where(Guest.tg_id.in_([686339126]))
             )
 
             # query = (select(Guest))
@@ -1625,7 +1627,7 @@ async def send_mass_message(bot: Bot,
 
             guests = res.fetchall()
 
-            print(guests)
+            # print(guests)
 
             image_video_group = None
             if list(images+videos):
@@ -1643,23 +1645,29 @@ async def send_mass_message(bot: Bot,
                     _tg_id = guest.tg_id
                     if image_video_group is not None:
                         mb1 = await bot.send_media_group(_tg_id, media=image_video_group.build())
-                        print('MB1', mb1)
+                        # print('MB1', mb1)
                     else:
                         await bot.send_message(_tg_id,
                                             text=mass_message_text)
                     if file_group is not None:
                         mb2 = await bot.send_media_group(_tg_id, media=file_group.build())    
-                        print('MB2', mb2)
+                        # print('MB2', mb2)
                     # guest = session.query(Guest).where(Guest.tg_id == '350016695').first()
                     if not guest.is_active:
                         session.execute(update(Guest).where(Guest.tg_id == _tg_id).values(is_active=True))
-                        session.commit()
+                        # session.commit()
                 except Exception as ex:
                     print(ex)
                     session.execute(update(Guest).where(Guest.tg_id == _tg_id).values(is_active=False))
-                    session.commit()
+                    # session.commit()
                 finally:
-                    await sleep(2)
+                    await sleep(0.5)
+            
+            try:
+                session.commit()
+            except Exception as ex:
+                session.rollback()
+                print('send error', ex)
             
             session.close()
 
