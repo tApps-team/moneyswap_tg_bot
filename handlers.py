@@ -1591,26 +1591,26 @@ async def send_mass_message(bot: Bot,
             images = [types.InputMediaPhoto(media=image.file_id) for image in mass_message.general_models_masssendimage_collection]
             videos = [types.InputMediaVideo(media=video.file_id) for video in mass_message.general_models_masssendvideo_collection]
 
-            # query = (
-            #     select(Guest)\
-            #     .where(Guest.tg_id.in_([60644557,
-            #                             350016695,
-            #                             471715294,
-            #                             311364517,
-            #                             283163508,
-            #                             5047108619,
-            #                             561803366,
-            #                             686339126,
-            #                             620839543,
-            #                             375236081,
-
-            #     ]))
-            # )
-
             query = (
                 select(Guest)\
-                .where(Guest.tg_id.in_([686339126]))
+                .where(Guest.tg_id.in_([60644557,
+                                        350016695,
+                                        471715294,
+                                        311364517,
+                                        283163508,
+                                        5047108619,
+                                        561803366,
+                                        686339126,
+                                        620839543,
+                                        375236081,
+
+                ]))
             )
+
+            # query = (
+            #     select(Guest)\
+            #     .where(Guest.tg_id.in_([686339126]))
+            # )
 
             # query = (select(Guest))
 
