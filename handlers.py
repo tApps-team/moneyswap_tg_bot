@@ -1773,7 +1773,7 @@ async def try_send_order(bot: Bot,
 
 
 @main_router.message(F.text == 'send_link22')
-async def ignore_any_message(message: types.Message,
+async def send_link_test(message: types.Message,
                                 session: Session,
                                 state: FSMContext,
                                 bot: Bot):
@@ -1784,11 +1784,11 @@ async def ignore_any_message(message: types.Message,
 
 
     # sugar
-    # _chat_id = 293371619
+    _chat_id = 293371619
 
 
     # me
-    _chat_id = 686339126
+    # _chat_id = 686339126
 
     await bot.send_message(chat_id=_chat_id,
                             text=_text)
