@@ -1590,7 +1590,8 @@ async def send_mass_message(bot: Bot,
 
             images = [types.InputMediaPhoto(media=image.file_id) for image in mass_message.general_models_masssendimage_collection]
             videos = [types.InputMediaVideo(media=video.file_id) for video in mass_message.general_models_masssendvideo_collection]
-
+            
+            #test for moneyswap team
             query = (
                 select(Guest)\
                 .where(Guest.tg_id.in_([60644557,
@@ -1606,12 +1607,14 @@ async def send_mass_message(bot: Bot,
 
                 ]))
             )
-
+            
+            #test for me only
             # query = (
             #     select(Guest)\
             #     .where(Guest.tg_id.in_([686339126]))
             # )
 
+            # mass_send for all guests
             # query = (select(Guest))
 
 
@@ -1658,7 +1661,8 @@ async def send_mass_message(bot: Bot,
                         # session.commit()
                 except Exception as ex:
                     print(ex)
-                    session.execute(update(Guest).where(Guest.tg_id == _tg_id).values(is_active=False))
+                    if guest.is_active:
+                        session.execute(update(Guest).where(Guest.tg_id == _tg_id).values(is_active=False))
                     # session.commit()
                 finally:
                     await sleep(0.5)
@@ -1746,10 +1750,10 @@ async def try_send_order(bot: Bot,
             else:
                 print('ссылка из базы', guest.chat_link)
 
-                chat_link_text = f'Ссылка на чат по Вашему обращению -> {chat_link}\n\n<i>*Можете удалить это сообщение, чтобы не портить вид чата, мы будем дублировать ссылку на чат в главном сообщении.</i>'
+            chat_link_text = f'Ссылка на чат по Вашему обращению -> {chat_link}\n\n<i>*Можете удалить это сообщение, чтобы не портить вид чата, мы будем дублировать ссылку на чат в главном сообщении.</i>'
 
-                await bot.send_message(chat_id=user_id,
-                                    text=chat_link_text)
+            await bot.send_message(chat_id=user_id,
+                                text=chat_link_text)
                 
                 # query = (
                 #     update(
@@ -1767,6 +1771,31 @@ async def try_send_order(bot: Bot,
                 #     print(ex)
                 #     session.rollback()
 
+
+@main_router.message(F.text == 'send_link22')
+async def ignore_any_message(message: types.Message,
+                                session: Session,
+                                state: FSMContext,
+                                bot: Bot):
+    _text = 'Добрый день.\nПолучили от вас запрос на помощь в покупке квартиры в Таиланде.\nДля вас создан чат для продолжения консультации по вопросу https://t.me/+7JWLAnMKyUUwMWEy'
+    
+    # guest
+    # _chat_id = 7327884297
+
+
+    # sugar
+    # _chat_id = 293371619
+
+
+    # me
+    _chat_id = 686339126
+
+    await bot.send_message(chat_id=_chat_id,
+                            text=_text)
+    try:
+        await message.delete()
+    except Exception as ex:
+        print(ex)
 
 
 
