@@ -1780,18 +1780,22 @@ async def send_link_test(message: types.Message,
     _text = 'Добрый день.\nПолучили от вас запрос на помощь в покупке квартиры в Таиланде.\nДля вас создан чат для продолжения консультации по вопросу https://t.me/+7JWLAnMKyUUwMWEy'
     
     # guest
-    # _chat_id = 7327884297
+    _chat_id = 7327884297
 
 
     # sugar
-    _chat_id = 293371619
+    # _chat_id = 293371619
 
 
     # me
     # _chat_id = 686339126
-
-    await bot.send_message(chat_id=_chat_id,
-                            text=_text)
+    try:
+        await bot.send_message(chat_id=_chat_id,
+                                text=_text)
+    except Exception as ex:
+        print('send error', ex)
+    else:
+        print('message sent successfully')
     try:
         await message.delete()
     except Exception as ex:
