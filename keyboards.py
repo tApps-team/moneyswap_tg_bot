@@ -103,6 +103,10 @@ def create_swift_start_kb():
     kb.add(types.InlineKeyboardButton(text='Принять платеж',
                                       callback_data='access_payment'))
     
+    kb.row(types.InlineKeyboardButton(text='Условия',
+                                      url='https://telegra.ph/Usloviya-obmena-SWIFTSEPA-s-MoneySwap-11-21'))   ###   !!!!
+
+    
     return kb
 
 

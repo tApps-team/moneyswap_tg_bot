@@ -429,11 +429,15 @@ async def invoice_swift_sepa(callback: types.CallbackQuery,
 
     # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
 
+    await state.set_state(SwiftSepaStates.request_type)
+    await state.update_data(order=dict())
+
     # chat_id, message_id = main_menu_msg
     chat_id = callback.message.chat.id
     message_id = callback.message.message_id
 
-    swift_sepa_kb = create_swift_sepa_kb()
+    # swift_sepa_kb = create_swift_sepa_kb()
+    swift_sepa_kb = create_swift_start_kb()
     swift_sepa_kb = add_cancel_btn_to_kb(swift_sepa_kb)
 
     # await state.update_data(action='swift/sepa')
