@@ -739,9 +739,21 @@ async def feedback_form_send(callback: types.CallbackQuery,
         _feedback_form = FeedbackForm(**feedback_values)
         session.add(_feedback_form)
 
+    #     new_order = Order(**order)  # предполагая, что order — это словарь
+    #     session.add(new_order)
+
+
+    # print(new_order.__dict__)
+
+    # user_id = new_order.guest_id
+    # order_id = new_order.id
+    # marker = 'swift/sepa'
+
         # session.execute(insert(FeedbackForm).values(feedback_values))
         try:
-            session.flush((_feedback_form,))
+    #     session.refresh(new_order)
+            session.commit()
+            session.refresh(_feedback_form)
 
             user_id = callback.from_user.id
             marker = 'feedback_form'
