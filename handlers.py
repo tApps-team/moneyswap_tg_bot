@@ -736,16 +736,31 @@ async def feedback_form_send(callback: types.CallbackQuery,
 
     with session as session:
 
-        session.execute(insert(FeedbackForm).values(feedback_values))
+        _feedback_form = FeedbackForm(**feedback_values)
+        session.add(_feedback_form)
+
+        # session.execute(insert(FeedbackForm).values(feedback_values))
         try:
-            session.commit()
+            session.flush()
+
+            user_id = callback.from_user.id
+            marker = 'feedback_form'
+            order_id = _feedback_form.id
 
             _text = 'Обращение успешно отправлено!'
         except Exception as ex:
             print(ex)
             session.rollback()
             _text = 'Что то пошло не так, попробуйте повторить позже'
-        
+
+        else:
+            _url = f'https://api.moneyswap.online/send_to_tg_group?user_id={user_id}&order_id={order_id}&marker={marker}'
+            timeout = aiohttp.ClientTimeout(total=5)
+            async with aiohttp.ClientSession() as session:
+                async with session.get(_url,
+                                    timeout=timeout) as response:
+                    pass
+
         finally:
             await callback.answer(text=_text,
                                 show_alert=True)
