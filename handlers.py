@@ -741,7 +741,7 @@ async def feedback_form_send(callback: types.CallbackQuery,
 
         # session.execute(insert(FeedbackForm).values(feedback_values))
         try:
-            session.flush()
+            session.flush((_feedback_form,))
 
             user_id = callback.from_user.id
             marker = 'feedback_form'
@@ -753,23 +753,35 @@ async def feedback_form_send(callback: types.CallbackQuery,
             session.rollback()
             _text = 'Что то пошло не так, попробуйте повторить позже'
 
-        else:
+        # else:
+        #     _url = f'https://api.moneyswap.online/send_to_tg_group?user_id={user_id}&order_id={order_id}&marker={marker}'
+        #     timeout = aiohttp.ClientTimeout(total=5)
+        #     async with aiohttp.ClientSession() as session:
+        #         async with session.get(_url,
+        #                             timeout=timeout) as response:
+        #             pass
+
+        # finally:
+        await callback.answer(text=_text,
+                            show_alert=True)
+        
+        await start(callback,
+                    session,
+                    state,
+                    bot,
+                    text_msg='Главное меню')
+
+        try:
             _url = f'https://api.moneyswap.online/send_to_tg_group?user_id={user_id}&order_id={order_id}&marker={marker}'
             timeout = aiohttp.ClientTimeout(total=5)
             async with aiohttp.ClientSession() as session:
                 async with session.get(_url,
                                     timeout=timeout) as response:
                     pass
+        except Exception as ex:
+            print(ex)
+            pass
 
-        finally:
-            await callback.answer(text=_text,
-                                show_alert=True)
-            
-            await start(callback,
-                        session,
-                        state,
-                        bot,
-                        text_msg='Главное меню')
 
     
 @main_router.callback_query(F.data.startswith(FEEDBACK_REASON_PREFIX))
