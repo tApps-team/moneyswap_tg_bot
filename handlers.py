@@ -642,7 +642,7 @@ async def start_support(callback: types.CallbackQuery,
 
     reason_kb = add_cancel_btn_to_kb(reason_kb)
 
-    await bot.edit_message_text(text='Выберите причину обращения\nЕсли есть какие-то вопросы, обращайтесь напрямую <a href="https://t.me/MoneySwap_support">Support</a> или <a href="https://t.me/moneyswap_admin">Admin</a>. Мы всегда готовы вам помочь!',
+    await bot.edit_message_text(text='Выберите причину обращения\n\nЕсли есть вопросы, Вы можете обратиться напрямую в <a href="https://t.me/MoneySwap_support">Support</a> или <a href="https://t.me/moneyswap_admin">Admin</a>.\nМы всегда готовы Вам помочь!',
                                 chat_id=chat_id,
                                 message_id=message_id,
                                 disable_web_page_preview=True,
