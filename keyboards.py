@@ -37,9 +37,9 @@ def create_start_inline_keyboard(user_id: int):
     start_kb = InlineKeyboardBuilder()
 
     start_kb.add(types.InlineKeyboardButton(text='Безналичные',
-                                            web_app=WebAppInfo(url=f'https://www.bestexchanges.world/?direction=noncash&user_id={user_id}')))
+                                            web_app=WebAppInfo(url=f'https://app.moneyswap.online/?direction=noncash&user_id={user_id}')))
     start_kb.add(types.InlineKeyboardButton(text='Наличные',
-                                            web_app=WebAppInfo(url=f'https://www.bestexchanges.world/?direction=cash&user_id={user_id}')))
+                                            web_app=WebAppInfo(url=f'https://app.moneyswap.online/?direction=cash&user_id={user_id}')))
     start_kb.row(types.InlineKeyboardButton(text='Инвойсы Swift/Sepa',
                                             callback_data='invoice_swift/sepa'))
     start_kb.row(types.InlineKeyboardButton(text='О MoneySwap',
