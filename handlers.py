@@ -1502,7 +1502,7 @@ async def send_mass_message_test(bot: Bot,
             print(mass_message_text)
             # validate content text
             mass_message_text: str = mass_message_text.replace('<p>','')\
-                                                        .replace('</p>', '\n')\
+                                                        .replace('</p>', '')\
                                                         .replace('<br>', '')\
                                                         .replace('<p class="">', '')\
                                                         .replace('&nbsp;', ' ')\
