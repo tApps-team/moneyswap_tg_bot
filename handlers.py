@@ -1499,14 +1499,14 @@ async def send_mass_message_test(bot: Bot,
             session.expire_all()
 
             mass_message_text: str = mass_message.content
-            # print(mass_message_text)
+            print(mass_message_text)
             # validate content text
             mass_message_text: str = mass_message_text.replace('<p>','')\
                                                         .replace('</p>', '\n')\
                                                         .replace('<br>', '')\
                                                         .replace('<p class="">', '')\
-                                                        .replace('&nbsp;', ' ')
-                                                        # .replace('<span', '<span class="tg-spoiler"')
+                                                        .replace('&nbsp;', ' ')\
+                                                        .replace('<span', '<span class="tg-spoiler"')
 
             # print(mass_message_text)
 
