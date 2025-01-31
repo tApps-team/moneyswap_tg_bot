@@ -1473,6 +1473,131 @@ async def send(message: types.Message,
 
 #     await message.delete()
 
+async def send_mass_message_test(bot: Bot,
+                            session: Session,
+                            user_id: int,
+                            name_send: str):
+        with session as session:
+            Guest = Base.classes.general_models_guest
+            # session: Session
+
+            # get MassSendMessage model from DB
+            MassSendMessage = Base.classes.general_models_masssendmessage
+            # mass_message = session.query(MassSendMessage)\
+            #                         .options(joinedload(MassSendMessage.general_models_masssendimage_collection),
+            #                                  joinedload(MassSendMessage.general_models_masssendvideo_collection))\
+            #                         .first()
+            mass_message = session.query(MassSendMessage)\
+                                    .options(joinedload(MassSendMessage.general_models_masssendimage_collection),
+                                             joinedload(MassSendMessage.general_models_masssendvideo_collection))\
+                                    .where(MassSendMessage.name == name_send).first()
+
+            # try add file_id for each related file passed object
+            await try_add_file_ids(bot, session, mass_message)
+            # refresh all DB records
+            session.expire_all()
+
+            mass_message_text: str = mass_message.content
+            # print(mass_message_text)
+            # validate content text
+            mass_message_text: str = mass_message_text.replace('<p>','')\
+                                                        .replace('</p>', '\n')\
+                                                        .replace('<br>', '')\
+                                                        .replace('<p class="">', '')\
+                                                        .replace('&nbsp;', ' ')
+                                                        # .replace('<span', '<span class="tg-spoiler"')
+
+            # print(mass_message_text)
+
+            images = [types.InputMediaPhoto(media=image.file_id) for image in mass_message.general_models_masssendimage_collection]
+            videos = [types.InputMediaVideo(media=video.file_id) for video in mass_message.general_models_masssendvideo_collection]
+            
+            #test for moneyswap team
+            # query = (
+            #     select(Guest)\
+            #     .where(Guest.tg_id.in_([60644557,
+            #                             350016695,
+            #                             471715294,
+            #                             311364517,
+            #                             283163508,
+            #                             5047108619,
+            #                             561803366,
+            #                             686339126,
+            #                             620839543,
+            #                             375236081,
+
+            #     ]))
+            # )
+            
+            #test for me only
+            query = (
+                select(Guest)\
+                .where(Guest.tg_id == user_id)
+            )
+
+            # mass_send for all guests
+            # query = (select(Guest))
+
+
+# [60644557,
+#                                         471715294,
+#                                         561803366,
+#                                         686339126,
+#                                         283163508,
+#                                         283163508,
+#                                         311364517]
+
+            res = session.execute(query)
+
+            guests = res.fetchall()
+
+            # print(guests)
+
+            image_video_group = None
+            if list(images+videos):
+                image_video_group = MediaGroupBuilder(images+videos, caption=mass_message_text)
+            
+            files = [types.InputMediaDocument(media=file.file_id) for file in mass_message.general_models_masssendfile_collection]
+            file_group = None
+            if files:
+                file_group = MediaGroupBuilder(files)
+
+            # try:
+            for guest in guests:
+                try:
+                    guest = guest[0]
+                    _tg_id = guest.tg_id
+                    if image_video_group is not None:
+                        mb1 = await bot.send_media_group(_tg_id, media=image_video_group.build())
+                        # print('MB1', mb1)
+                    else:
+                        await bot.send_message(_tg_id,
+                                            text=mass_message_text)
+                    if file_group is not None:
+                        mb2 = await bot.send_media_group(_tg_id, media=file_group.build())    
+                        # print('MB2', mb2)
+                    # guest = session.query(Guest).where(Guest.tg_id == '350016695').first()
+                    if not guest.is_active:
+                        session.execute(update(Guest).where(Guest.tg_id == _tg_id).values(is_active=True))
+                        # session.commit()
+                except Exception as ex:
+                    print(ex)
+                    if guest.is_active:
+                        session.execute(update(Guest).where(Guest.tg_id == _tg_id).values(is_active=False))
+                    # session.commit()
+                finally:
+                    await sleep(0.3)
+            
+            try:
+                session.commit()
+            except Exception as ex:
+                session.rollback()
+                print('send error', ex)
+            
+            session.close()
+
+
+
 
 async def send_mass_message(bot: Bot,
                             session: Session,
