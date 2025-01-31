@@ -1506,8 +1506,8 @@ async def send_mass_message_test(bot: Bot,
                                                         .replace('<br>', '')\
                                                         .replace('<p class="">', '')\
                                                         .replace('&nbsp;', ' ')\
-                                                        .replace('<span>', '')\
-                                                        .replace('</span>', '')   
+                                                        # .replace('<span>', '')\
+                                                        # .replace('</span>', '')   
 
             # print(mass_message_text)
 
