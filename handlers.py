@@ -1,5 +1,6 @@
 import os
 import json
+import time
 
 from asyncio import sleep
 
@@ -1602,6 +1603,8 @@ async def send_mass_message_test(bot: Bot,
 async def send_mass_message(bot: Bot,
                             session: Session,
                             name_send: str):
+        start_send_time = time.time()
+
         with session as session:
             Guest = Base.classes.general_models_guest
             # session: Session
@@ -1676,6 +1679,8 @@ async def send_mass_message(bot: Bot,
 
             guests = res.fetchall()
 
+            start_users_count = len([guest for guest in guests if guest[0].is_active == True])
+
             # print(guests)
 
             image_video_group = None
@@ -1713,12 +1718,37 @@ async def send_mass_message(bot: Bot,
                 finally:
                     await sleep(0.3)
             
+            end_send_time = time.time()
+            
             try:
                 session.commit()
+                _text = ''
             except Exception as ex:
                 session.rollback()
+                _text = ''
                 print('send error', ex)
-            
+            finally:
+                execute_time = end_send_time - start_send_time
+
+                # query = (
+                #     select(
+                #         Guest.id
+                #     )\
+                #     .where(Guest.is_active == False)
+                # )
+
+                end_active_users_count = session.query(Guest.id).where(Guest.is_active == True).count()
+
+                try:
+                    _url = f'https://api.moneyswap.online/send_mass_message_info?execute_time={execute_time}&start_users_count={start_users_count}&end_users_count={end_active_users_count}'
+                    timeout = aiohttp.ClientTimeout(total=5)
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(_url,
+                                            timeout=timeout) as response:
+                            pass
+                except Exception as ex:
+                    print(ex)
+                    pass
             session.close()
 
 
