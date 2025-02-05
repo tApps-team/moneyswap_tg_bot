@@ -1738,7 +1738,7 @@ async def send_mass_message(bot: Bot,
                 #     .where(Guest.is_active == False)
                 # )
 
-                end_active_users_count = session.query(Guest.id).where(Guest.is_active == True).count()
+                end_active_users_count = session.query(Guest.tg_id).where(Guest.is_active == True).count()
 
                 try:
                     _url = f'https://api.moneyswap.online/send_mass_message_info?execute_time={execute_time}&start_users_count={start_users_count}&end_users_count={end_active_users_count}'

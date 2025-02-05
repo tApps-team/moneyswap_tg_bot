@@ -7,7 +7,7 @@ from config import WEBAPP_URL_ONE, WEBAPP_URL_TWO, WEBAPP_URL_THREE, FEEDBACK_RE
 
 reason_list = (
     ('Ошибка', 'error'),
-    ('Проблемма с обменником', 'exchange_problem'),
+    ('Проблема с обменником', 'exchange_problem'),
     ('Сотрудничество', 'cooperation'),
     ('Другое', 'other'),
 )
@@ -72,7 +72,8 @@ def create_feedback_form_reasons_kb():
     reason_kb = InlineKeyboardBuilder()
 
     # for reason, data in reason_list:
-    for data, reason in reason_dict.items():
+    # for data, reason in reason_dict.items():
+    for reason, data in reason_list:
         reason_kb.row(types.InlineKeyboardButton(text=reason,
                                                  callback_data=f'{FEEDBACK_REASON_PREFIX}__{data}'))
         
