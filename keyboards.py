@@ -1,8 +1,10 @@
 from aiogram import types
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 from aiogram.types.web_app_info import WebAppInfo
+
 from config import WEBAPP_URL_ONE, WEBAPP_URL_TWO, WEBAPP_URL_THREE, FEEDBACK_REASON_PREFIX
 
+from utils.multilanguage import start_text, start_kb_text
 
 
 reason_list = (
@@ -33,18 +35,51 @@ def create_start_keyboard(user_id: int):
     return start_kb
 
 
-def create_start_inline_keyboard(user_id: int):
+# def create_start_inline_keyboard(user_id: int,
+#                                  language_code: str):
+#     if language_code == 'ru':
+#         tuple_text = start_kb_text.get('ru')
+#         telegraf_link = 'https://telegra.ph/O-MoneySwap-11-21'
+#     else:
+#         tuple_text = start_kb_text.get('en')
+#         telegraf_link = ' https://telegra.ph/About-MoneySwap-02-06'
+
+#     start_kb = InlineKeyboardBuilder()
+
+#     start_kb.add(types.InlineKeyboardButton(text='Безналичные',
+#                                             web_app=WebAppInfo(url=f'https://app.moneyswap.online/?direction=noncash&user_id={user_id}')))
+#     start_kb.add(types.InlineKeyboardButton(text='Наличные',
+#                                             web_app=WebAppInfo(url=f'https://app.moneyswap.online/?direction=cash&user_id={user_id}')))
+#     start_kb.row(types.InlineKeyboardButton(text='Инвойсы Swift/Sepa',
+#                                             callback_data='invoice_swift/sepa'))
+#     start_kb.row(types.InlineKeyboardButton(text='О MoneySwap',
+#                                             url='https://telegra.ph/O-MoneySwap-11-21'))
+#     start_kb.add(types.InlineKeyboardButton(text='Поддержка',
+#                                             callback_data='support'))
+    
+#     return start_kb
+
+
+def create_start_inline_keyboard(user_id: int,
+                                 language_code: str):
+    if language_code == 'ru':
+        tuple_text = start_kb_text.get('ru')
+        telegraf_link = 'https://telegra.ph/O-MoneySwap-11-21'
+    else:
+        tuple_text = start_kb_text.get('en')
+        telegraf_link = ' https://telegra.ph/About-MoneySwap-02-06'
+
     start_kb = InlineKeyboardBuilder()
 
-    start_kb.add(types.InlineKeyboardButton(text='Безналичные',
+    start_kb.add(types.InlineKeyboardButton(text=tuple_text[0],
                                             web_app=WebAppInfo(url=f'https://app.moneyswap.online/?direction=noncash&user_id={user_id}')))
-    start_kb.add(types.InlineKeyboardButton(text='Наличные',
+    start_kb.add(types.InlineKeyboardButton(text=tuple_text[1],
                                             web_app=WebAppInfo(url=f'https://app.moneyswap.online/?direction=cash&user_id={user_id}')))
-    start_kb.row(types.InlineKeyboardButton(text='Инвойсы Swift/Sepa',
+    start_kb.row(types.InlineKeyboardButton(text=tuple_text[2],
                                             callback_data='invoice_swift/sepa'))
-    start_kb.row(types.InlineKeyboardButton(text='О MoneySwap',
-                                            url='https://telegra.ph/O-MoneySwap-11-21'))
-    start_kb.add(types.InlineKeyboardButton(text='Поддержка',
+    start_kb.row(types.InlineKeyboardButton(text=tuple_text[3],
+                                            url=telegraf_link))
+    start_kb.add(types.InlineKeyboardButton(text=tuple_text[4],
                                             callback_data='support'))
     
     return start_kb

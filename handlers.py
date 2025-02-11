@@ -36,6 +36,7 @@ from keyboards import (create_start_keyboard,
 from states import SwiftSepaStates, FeedbackFormStates
 
 from utils.handlers import try_add_file_ids_to_db, try_add_file_ids, swift_sepa_data
+from utils.multilanguage import start_text_dict
 
 from db.base import Base
 
@@ -240,9 +241,12 @@ async def start(message: types.Message | types.CallbackQuery,
                 state: FSMContext,
                 bot: Bot,
                 text_msg: str = None):
+    language_code = message.from_user.language_code
+
     is_callback = isinstance(message, types.CallbackQuery)
 
-    _start_text = start_text
+    # _start_text = start_text
+    _start_text = start_text_dict.get(language_code)
     utm_source = None
 
     if isinstance(message, types.Message):
@@ -287,10 +291,15 @@ async def start(message: types.Message | types.CallbackQuery,
         else:
             chat_link  = guest.chat_link
 
-    start_kb = create_start_inline_keyboard(tg_id)
+    start_kb = create_start_inline_keyboard(tg_id,
+                                            language_code)
 
     if chat_link:
-        chat_link_text = f'Cсылка на чата по Вашим обращениям -> {chat_link}'
+        if language_code == 'ru':
+            chat_link_text = f'Cсылка на чата по Вашим обращениям -> {chat_link}'
+        else:
+            chat_link_text = f'Link to chat for your requests -> {chat_link}'
+        
         _start_text += f'\n\n{chat_link_text}'
 
     if not is_callback:
@@ -426,6 +435,7 @@ async def invoice_swift_sepa(callback: types.CallbackQuery,
                             state: FSMContext,
                             bot: Bot,
                             api_client: Client):
+    callback.from_user.language_code
     # data = await state.get_data()
 
     # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
