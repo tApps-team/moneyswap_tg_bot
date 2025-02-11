@@ -4,7 +4,7 @@ from aiogram.types.web_app_info import WebAppInfo
 
 from config import WEBAPP_URL_ONE, WEBAPP_URL_TWO, WEBAPP_URL_THREE, FEEDBACK_REASON_PREFIX
 
-from utils.multilanguage import start_text, start_kb_text
+from utils.multilanguage import start_text_dict, start_kb_text
 
 
 reason_list = (
@@ -63,10 +63,10 @@ def create_start_keyboard(user_id: int):
 def create_start_inline_keyboard(user_id: int,
                                  language_code: str):
     if language_code == 'ru':
-        tuple_text = start_kb_text.get('ru')
+        tuple_text = start_text_dict.get('ru')
         telegraf_link = 'https://telegra.ph/O-MoneySwap-11-21'
     else:
-        tuple_text = start_kb_text.get('en')
+        tuple_text = start_text_dict.get('en')
         telegraf_link = ' https://telegra.ph/About-MoneySwap-02-06'
 
     start_kb = InlineKeyboardBuilder()
