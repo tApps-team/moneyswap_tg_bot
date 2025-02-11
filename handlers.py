@@ -1169,7 +1169,17 @@ async def request_type_state(callback: types.CallbackQuery,
     message_id = callback.message.message_id
 
     request_type = 'Оплатить платеж' if callback.data == 'pay_payment' else 'Принять платеж'
-    state_process = f'Тип заявки: {request_type}'
+
+    if language_code == 'ru':
+        state_process = f'Тип заявки: {request_type}'
+        _text = f'{state_process}\n<b>Опишите задачу, чтобы менеджеры могли быстрее все понять и оперативно начать выполнение...</b>'
+    else:
+        request_dict = {
+            'Оплатить платеж': 'Make a Payment',
+            'Принять платеж': 'Receive a Payment',
+        }
+        state_process = f'Request Type: {request_dict.get(request_type)}'
+        _text = f'{state_process}\n<b>Describe your request so that managers can quickly understand and promptly start processing it…</b>'
     #
     order = data.get('order')
     order['request_type'] = request_type
@@ -1201,7 +1211,8 @@ async def request_type_state(callback: types.CallbackQuery,
     #                             message_id=message_id,
     #                             reply_markup=kb.as_markup())
     #
-    await bot.edit_message_text(f'{state_process}\n<b>Опишите задачу, чтобы менеджеры могли быстрее все понять и оперативно начать выполнение...</b>',
+
+    await bot.edit_message_text(text=_text,
                                 chat_id=chat_id,
                                 message_id=message_id,
                                 reply_markup=kb.as_markup())
@@ -1320,6 +1331,8 @@ async def task_text_state(message: types.Message,
                           state: FSMContext,
                           bot: Bot,
                           api_client: Client):
+    language_code = message.from_user.language_code
+
     data = await state.get_data()
     # state_msg: types.Message = data.get('state_msg')
     # state_msg: tuple[str, str] = data.get('state_msg')
@@ -1336,12 +1349,18 @@ async def task_text_state(message: types.Message,
     #
 
     state_process = data.get('state_process')
-    state_process += f'\nКомментарий: {message.text}'
+
+    if language_code == 'ru':
+        state_process += f'\nКомментарий: {message.text}'
+        state_done_text = 'Заполнение окончено.'
+    else:
+        state_process += f'\nComment: {message.text}'
+        state_done_text = 'Request is done.'
     await state.update_data(state_process=state_process)
 
     # preview_response_text = await swift_sepa_data(state)
 
-    kb = create_kb_to_main()
+    kb = create_kb_to_main(language_code)
 
     # async with api_client as app:
     #     channel = await app.create_channel(title='Test111')
@@ -1358,7 +1377,7 @@ async def task_text_state(message: types.Message,
     # await message.answer(text=chat_link.invite_link)
 
     #
-    await bot.edit_message_text(f'{state_process}\n<b>Заполнение окончено.</b>',
+    await bot.edit_message_text(f'{state_process}\n<b>{state_done_text}</b>',
                                 chat_id=chat_id,
                                 message_id=message_id,
                                 reply_markup=kb.as_markup())

@@ -171,11 +171,16 @@ def add_cancel_btn_to_kb(language_code: str,
     return kb
     
 
-def create_kb_to_main():
+def create_kb_to_main(language_code: str):
+    if language_code == 'ru':
+        _tuple_text = ('На главную', 'Отправить заявку')
+    else:
+        _tuple_text = ('Back to main', 'Send request')
+
     kb = InlineKeyboardBuilder()
-    kb.add(types.InlineKeyboardButton(text='На главную',
+    kb.add(types.InlineKeyboardButton(text=_tuple_text[0],
                                       callback_data='to_main'))
-    kb.add(types.InlineKeyboardButton(text='Отправить заявку',
+    kb.add(types.InlineKeyboardButton(text=_tuple_text[1],
                                       callback_data='send_app'))
     
     return kb
