@@ -439,6 +439,8 @@ async def invoice_swift_sepa(callback: types.CallbackQuery,
                             bot: Bot,
                             api_client: Client):
     language_code = callback.from_user.language_code
+
+    _text = 'Выберите действие' if language_code == 'ru' else 'Choose an action'
     # data = await state.get_data()
 
     # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
@@ -457,7 +459,7 @@ async def invoice_swift_sepa(callback: types.CallbackQuery,
 
     # await state.update_data(action='swift/sepa')
 
-    await bot.edit_message_text(text='Выберите действие',
+    await bot.edit_message_text(text=_text,
                                 chat_id=chat_id,
                                 message_id=message_id,
                                 reply_markup=swift_sepa_kb.as_markup())
