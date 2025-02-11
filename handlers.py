@@ -438,7 +438,7 @@ async def invoice_swift_sepa(callback: types.CallbackQuery,
                             state: FSMContext,
                             bot: Bot,
                             api_client: Client):
-    callback.from_user.language_code
+    language_code = callback.from_user.language_code
     # data = await state.get_data()
 
     # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
@@ -451,8 +451,9 @@ async def invoice_swift_sepa(callback: types.CallbackQuery,
     message_id = callback.message.message_id
 
     # swift_sepa_kb = create_swift_sepa_kb()
-    swift_sepa_kb = create_swift_start_kb()
-    swift_sepa_kb = add_cancel_btn_to_kb(swift_sepa_kb)
+    swift_sepa_kb = create_swift_start_kb(language_code)
+    swift_sepa_kb = add_cancel_btn_to_kb(language_code,
+                                         swift_sepa_kb)
 
     # await state.update_data(action='swift/sepa')
 
@@ -536,6 +537,7 @@ async def start_swift_sepa(callback: types.CallbackQuery,
                             state: FSMContext,
                             bot: Bot,
                             api_client: Client):
+    language_code = callback.from_user.language_code
     # data = await state.get_data()
 
     # if not data.get('action'):
@@ -552,8 +554,9 @@ async def start_swift_sepa(callback: types.CallbackQuery,
     await state.set_state(SwiftSepaStates.request_type)
     await state.update_data(order=dict())
 
-    swift_start_kb = create_swift_start_kb()
-    kb = add_cancel_btn_to_kb(swift_start_kb)
+    swift_start_kb = create_swift_start_kb(language_code)
+    kb = add_cancel_btn_to_kb(language_code,
+                              swift_start_kb)
 
     # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
 
@@ -645,6 +648,7 @@ async def start_support(callback: types.CallbackQuery,
                         state: FSMContext,
                         bot: Bot,
                         api_client: Client):
+    language_code = callback.from_user.language_code
     chat_id = callback.message.chat.id
     message_id = callback.message.message_id
 
@@ -654,7 +658,8 @@ async def start_support(callback: types.CallbackQuery,
 
     reason_kb = create_feedback_form_reasons_kb()
 
-    reason_kb = add_cancel_btn_to_kb(reason_kb)
+    reason_kb = add_cancel_btn_to_kb(language_code,
+                                     reason_kb)
 
     await bot.edit_message_text(text='Выберите причину обращения\n\nЕсли есть вопросы, Вы можете обратиться напрямую в <a href="https://t.me/MoneySwap_support">Support</a> или <a href="https://t.me/moneyswap_admin">Admin</a>.\nМы всегда готовы Вам помочь!',
                                 chat_id=chat_id,
@@ -823,6 +828,7 @@ async def request_type_state(callback: types.CallbackQuery,
     # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
 
     # chat_id, message_id = main_menu_msg
+    language_code = callback.from_user.language_code
     chat_id = callback.message.chat.id
     message_id = callback.message.message_id
 
@@ -835,7 +841,7 @@ async def request_type_state(callback: types.CallbackQuery,
 
     await state.set_state(FeedbackFormStates.description)
 
-    kb = add_cancel_btn_to_kb()
+    kb = add_cancel_btn_to_kb(language_code)
 
     await bot.edit_message_text(text='Опишите проблему, если это нужно\nЕсли нет напишите "Нет"',
                                 chat_id=chat_id,
@@ -855,6 +861,7 @@ async def request_type_state(message: types.Message,
                              session: Session,
                              state: FSMContext,
                              bot: Bot):
+    language_code = message.from_user.language_code
     # reason = callback.data.split('__')[-1]
     description = message.text
 
@@ -872,7 +879,7 @@ async def request_type_state(message: types.Message,
 
     await state.set_state(FeedbackFormStates.contact)
     
-    kb = add_cancel_btn_to_kb()
+    kb = add_cancel_btn_to_kb(language_code)
 
     await bot.edit_message_text(text='Укажите контактные данные, по которым мы сможем с Вами связаться\n(E-mail, ссылка на Телеграм или что то другое)',
                                 chat_id=chat_id,
@@ -892,6 +899,7 @@ async def country_state(message: types.Message,
                         session: Session,
                         state: FSMContext,
                         bot: Bot):
+    language_code = message.from_user.language_code
     contact = message.text
 
     data = await state.get_data()
@@ -908,7 +916,7 @@ async def country_state(message: types.Message,
 
     await state.set_state(FeedbackFormStates.username)
 
-    kb = add_cancel_btn_to_kb()
+    kb = add_cancel_btn_to_kb(language_code)
 
     await bot.edit_message_text(text='Укажите имя, чтобы мы знали как к Вам обращаться',
                                 chat_id=chat_id,
@@ -929,6 +937,7 @@ async def country_state(message: types.Message,
                         session: Session,
                         state: FSMContext,
                         bot: Bot):
+    language_code = message.from_user.language_code
     username = message.text
 
     data = await state.get_data()
@@ -945,7 +954,8 @@ async def country_state(message: types.Message,
 
     feedback_confirm_kb = create_feedback_confirm_kb()
 
-    feedback_confirm_kb = add_cancel_btn_to_kb(feedback_confirm_kb)
+    feedback_confirm_kb = add_cancel_btn_to_kb(language_code,
+                                               feedback_confirm_kb)
 
     await bot.edit_message_text(text='Заполнение завершено\nВыберите действие',
                                 chat_id=chat_id,
@@ -1134,6 +1144,7 @@ async def request_type_state(callback: types.CallbackQuery,
                              session: Session,
                              state: FSMContext,
                              bot: Bot):
+    language_code = callback.from_user.language_code
     data = await state.get_data()
 
     # if not data.get('order'):
@@ -1180,7 +1191,7 @@ async def request_type_state(callback: types.CallbackQuery,
     await state.set_state(SwiftSepaStates.task_text)
 
 
-    kb = add_cancel_btn_to_kb()
+    kb = add_cancel_btn_to_kb(language_code)
 
     #
     # await bot.edit_message_text(f'{state_process}\n<b>Введите страну...</b>',
@@ -1209,6 +1220,7 @@ async def country_state(message: types.Message,
                         session: Session,
                         state: FSMContext,
                         bot: Bot):
+    language_code = message.from_user.language_code
     data = await state.get_data()
 
     # if not data.get('order') or not data.get('proccess_msg'):
@@ -1241,7 +1253,7 @@ async def country_state(message: types.Message,
 
     await state.set_state(SwiftSepaStates.amount)
 
-    kb = add_cancel_btn_to_kb()
+    kb = add_cancel_btn_to_kb(language_code)
 
     #
     await bot.edit_message_text(f'{state_process}\n<b>Введите сумму...</b>',
@@ -1262,6 +1274,7 @@ async def amount_state(message: types.Message,
                        session: Session,
                        state: FSMContext,
                        bot: Bot):
+    language_code = message.from_user.language_code
     data = await state.get_data()
     # state_msg: types.Message = data.get('state_msg')
     # state_msg: tuple[str, str] = data.get('state_msg')
@@ -1283,7 +1296,7 @@ async def amount_state(message: types.Message,
 
     await state.set_state(SwiftSepaStates.task_text)
 
-    kb = add_cancel_btn_to_kb()
+    kb = add_cancel_btn_to_kb(language_code)
 
     #
     await bot.edit_message_text(f'{state_process}\n<b>Опишите задачу, чтобы менеджеры могли быстрее все понять и оперативно начать выполнение...</b>',

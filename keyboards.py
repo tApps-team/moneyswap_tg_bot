@@ -4,7 +4,9 @@ from aiogram.types.web_app_info import WebAppInfo
 
 from config import WEBAPP_URL_ONE, WEBAPP_URL_TWO, WEBAPP_URL_THREE, FEEDBACK_REASON_PREFIX
 
-from utils.multilanguage import start_text_dict, start_kb_text
+from utils.multilanguage import (start_text_dict,
+                                 start_kb_text,
+                                 start_swift_sepa_text)
 
 
 reason_list = (
@@ -132,24 +134,38 @@ def create_support_kb():
     return support_kb
 
 
-def create_swift_start_kb():
+
+def create_swift_start_kb(language_code: str):
+    if language_code == 'ru':
+        swift_sepa_tuple = start_swift_sepa_text.get('ru')
+        telegraf_url = 'https://telegra.ph/Usloviya-obmena-SWIFTSEPA-s-MoneySwap-11-21'
+    else:
+        swift_sepa_tuple = start_swift_sepa_text.get('en')
+        telegraf_url = 'https://telegra.ph/SWIFTSEPA-Exchange-Terms-with-MoneySwap-02-06'  
+
+    # swift_sepa_tuple = start_swift_sepa_text.get('ru') if language_code == 'ru' \
+    #                     else start_swift_sepa_text.get('en')
     kb = InlineKeyboardBuilder()
-    kb.add(types.InlineKeyboardButton(text='Оплатить платеж',
+    kb.add(types.InlineKeyboardButton(text=swift_sepa_tuple[0],
                                       callback_data='pay_payment'))
-    kb.add(types.InlineKeyboardButton(text='Принять платеж',
+    kb.add(types.InlineKeyboardButton(text=swift_sepa_tuple[1],
                                       callback_data='access_payment'))
     
-    kb.row(types.InlineKeyboardButton(text='Условия',
-                                      url='https://telegra.ph/Usloviya-obmena-SWIFTSEPA-s-MoneySwap-11-21'))   ###   !!!!
+    kb.row(types.InlineKeyboardButton(text=swift_sepa_tuple[2],
+                                      url=telegraf_url))
 
-    
     return kb
 
 
-def add_cancel_btn_to_kb(kb: InlineKeyboardBuilder = None):
+def add_cancel_btn_to_kb(language_code: str,
+                         kb: InlineKeyboardBuilder = None):
+    if language_code == 'ru':
+        _text = 'Отменить'
+    else:
+        _text = 'Cancel'
     if kb is None:
         kb = InlineKeyboardBuilder()
-    kb.row(types.InlineKeyboardButton(text='Отменить',
+    kb.row(types.InlineKeyboardButton(text=_text,
                                       callback_data='cancel'))
     
     return kb
