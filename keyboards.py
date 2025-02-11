@@ -67,7 +67,7 @@ def create_start_inline_keyboard(user_id: int,
         telegraf_link = 'https://telegra.ph/O-MoneySwap-11-21'
     else:
         tuple_text = start_text_dict.get('en')
-        telegraf_link = ' https://telegra.ph/About-MoneySwap-02-06'
+        telegraf_link = 'https://telegra.ph/About-MoneySwap-02-06'
 
     start_kb = InlineKeyboardBuilder()
 
