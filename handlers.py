@@ -247,7 +247,9 @@ async def start(message: types.Message | types.CallbackQuery,
     is_callback = isinstance(message, types.CallbackQuery)
 
     # _start_text = start_text
-    _start_text = start_text_dict.get(language_code)
+    _start_text = start_text_dict.get('ru') if language_code == 'ru'\
+          else start_text_dict.get('en')
+    
     utm_source = None
 
     if isinstance(message, types.Message):
