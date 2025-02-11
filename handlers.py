@@ -242,6 +242,7 @@ async def start(message: types.Message | types.CallbackQuery,
                 bot: Bot,
                 text_msg: str = None):
     language_code = message.from_user.language_code
+    print(language_code)
 
     is_callback = isinstance(message, types.CallbackQuery)
 
