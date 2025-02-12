@@ -692,7 +692,10 @@ async def start_support(callback: types.CallbackQuery,
                         state: FSMContext,
                         bot: Bot,
                         api_client: Client):
-    language_code = callback.from_user.language_code
+    data = await state.get_data()
+
+    select_language = data.get('select_language')
+    # language_code = callback.from_user.language_code
     chat_id = callback.message.chat.id
     message_id = callback.message.message_id
 
@@ -702,10 +705,15 @@ async def start_support(callback: types.CallbackQuery,
 
     reason_kb = create_feedback_form_reasons_kb()
 
-    reason_kb = add_cancel_btn_to_kb(language_code,
+    reason_kb = add_cancel_btn_to_kb(select_language,
                                      reason_kb)
+    
+    if select_language == 'ru':
+        _text = '<b>Выберите причину обращения</b>\n\nЕсли есть вопросы, Вы можете обратиться напрямую в <a href="https://t.me/MoneySwap_support">Support</a> или <a href="https://t.me/moneyswap_admin">Admin</a>.\nМы всегда готовы Вам помочь!'
+    else:
+        _text = '<b>Select the reason for your inquiry</b>\n\nIf you have any questions, you can contact <a href="https://t.me/MoneySwap_support">Support</a> or <a href="https://t.me/moneyswap_admin">Admin</a> directly. We are always ready to help!'
 
-    await bot.edit_message_text(text='Выберите причину обращения\n\nЕсли есть вопросы, Вы можете обратиться напрямую в <a href="https://t.me/MoneySwap_support">Support</a> или <a href="https://t.me/moneyswap_admin">Admin</a>.\nМы всегда готовы Вам помочь!',
+    await bot.edit_message_text(text=_text,
                                 chat_id=chat_id,
                                 message_id=message_id,
                                 disable_web_page_preview=True,
@@ -782,6 +790,8 @@ async def feedback_form_send(callback: types.CallbackQuery,
                             api_client: Client):
     data = await state.get_data()
 
+    select_language = data.get('select_language')
+
     # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
 
     # chat_id, message_id = main_menu_msg
@@ -823,11 +833,13 @@ async def feedback_form_send(callback: types.CallbackQuery,
             marker = 'feedback_form'
             order_id = _feedback_form.id
 
-            _text = 'Обращение успешно отправлено!'
+            _text = 'Обращение успешно отправлено!' if select_language == 'ru'\
+                    else 'Request has been send successfully!'
         except Exception as ex:
             print(ex)
             session.rollback()
-            _text = 'Что то пошло не так, попробуйте повторить позже'
+            _text = 'Что то пошло не так, попробуйте повторить позже' if select_language == 'ru'\
+                    else 'Something wrong, try repeat later'
 
         # else:
         #     _url = f'https://api.moneyswap.online/send_to_tg_group?user_id={user_id}&order_id={order_id}&marker={marker}'
@@ -865,14 +877,18 @@ async def request_type_state(callback: types.CallbackQuery,
                              session: Session,
                              state: FSMContext,
                              bot: Bot):
+    data = await state.get_data()
+
+    select_language = data.get('select_language')
+    
     reason = callback.data.split('__')[-1]
 
-    data = await state.get_data()
+    # data = await state.get_data()
 
     # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
 
     # chat_id, message_id = main_menu_msg
-    language_code = callback.from_user.language_code
+    # language_code = callback.from_user.language_code
     chat_id = callback.message.chat.id
     message_id = callback.message.message_id
 
@@ -885,9 +901,12 @@ async def request_type_state(callback: types.CallbackQuery,
 
     await state.set_state(FeedbackFormStates.description)
 
-    kb = add_cancel_btn_to_kb(language_code)
+    kb = add_cancel_btn_to_kb(select_language)
 
-    await bot.edit_message_text(text='Опишите проблему, если это нужно\nЕсли нет напишите "Нет"',
+    _text = '<b>Опишите проблему, если это нужно</b>\nЕсли нет напишите "Нет"' if select_language == 'ru'\
+                else '<b>Describe the issue if necessary</b>\nIf not, type “No”'
+
+    await bot.edit_message_text(text=_text,
                                 chat_id=chat_id,
                                 message_id=message_id,
                                 reply_markup=kb.as_markup())
@@ -905,11 +924,15 @@ async def request_type_state(message: types.Message,
                              session: Session,
                              state: FSMContext,
                              bot: Bot):
-    language_code = message.from_user.language_code
+    data = await state.get_data()
+
+    select_language = data.get('select_language')
+    # language_code = message.from_user.language_code
+
     # reason = callback.data.split('__')[-1]
     description = message.text
 
-    data = await state.get_data()
+    # data = await state.get_data()
 
     state_msg: tuple[str,str] = data.get('state_msg')
 
@@ -923,9 +946,14 @@ async def request_type_state(message: types.Message,
 
     await state.set_state(FeedbackFormStates.contact)
     
-    kb = add_cancel_btn_to_kb(language_code)
+    kb = add_cancel_btn_to_kb(select_language)
 
-    await bot.edit_message_text(text='Укажите контактные данные, по которым мы сможем с Вами связаться\n(E-mail, ссылка на Телеграм или что то другое)',
+    if select_language == 'ru':
+        _text = '<b>Укажите контактные данные, по которым мы сможем с Вами связаться</b>\n(E-mail, ссылка на Телеграм или что то другое)'
+    else:
+        _text = '<b>Provide contact details where we can contact you</b>\n(E-mail, Telegram link or something else)'
+
+    await bot.edit_message_text(text=_text,
                                 chat_id=chat_id,
                                 message_id=message_id,
                                 reply_markup=kb.as_markup())
@@ -943,10 +971,13 @@ async def country_state(message: types.Message,
                         session: Session,
                         state: FSMContext,
                         bot: Bot):
-    language_code = message.from_user.language_code
+    data = await state.get_data()
+
+    select_language = data.get('select_language')
+    # language_code = message.from_user.language_code
     contact = message.text
 
-    data = await state.get_data()
+    # data = await state.get_data()
 
     state_msg: tuple[str,str] = data.get('state_msg')
 
@@ -960,9 +991,12 @@ async def country_state(message: types.Message,
 
     await state.set_state(FeedbackFormStates.username)
 
-    kb = add_cancel_btn_to_kb(language_code)
+    kb = add_cancel_btn_to_kb(select_language)
 
-    await bot.edit_message_text(text='Укажите имя, чтобы мы знали как к Вам обращаться',
+    _text = 'Укажите имя, чтобы мы знали как к Вам обращаться' if select_language == 'ru'\
+                else 'Please provide your name so we know how to call you'
+
+    await bot.edit_message_text(text=_text,
                                 chat_id=chat_id,
                                 message_id=message_id,
                                 reply_markup=kb.as_markup())
@@ -981,10 +1015,13 @@ async def country_state(message: types.Message,
                         session: Session,
                         state: FSMContext,
                         bot: Bot):
-    language_code = message.from_user.language_code
+    data = await state.get_data()
+
+    select_language = data.get('select_language')
+    # language_code = message.from_user.language_code
     username = message.text
 
-    data = await state.get_data()
+    # data = await state.get_data()
 
     state_msg: tuple[str,str] = data.get('state_msg')
 
@@ -996,12 +1033,15 @@ async def country_state(message: types.Message,
 
     await state.update_data(feedback_form=feedback_form)
 
-    feedback_confirm_kb = create_feedback_confirm_kb()
+    feedback_confirm_kb = create_feedback_confirm_kb(select_language)
 
-    feedback_confirm_kb = add_cancel_btn_to_kb(language_code,
+    feedback_confirm_kb = add_cancel_btn_to_kb(select_language,
                                                feedback_confirm_kb)
+    
+    _text = 'Заполнение завершено\nВыберите действие' if select_language == 'ru'\
+            else 'Request is done\nChoose an action'
 
-    await bot.edit_message_text(text='Заполнение завершено\nВыберите действие',
+    await bot.edit_message_text(text=_text,
                                 chat_id=chat_id,
                                 message_id=message_id,
                                 reply_markup=feedback_confirm_kb.as_markup())
@@ -1088,6 +1128,7 @@ async def send_order(callback: types.CallbackQuery,
                    api_client: Client):
     
     data = await state.get_data()
+    select_language = data.get('select_language')
     order: dict = data.get('order')
     time_create = datetime.now()
     order.update({'guest_id': callback.from_user.id,
@@ -1128,6 +1169,9 @@ async def send_order(callback: types.CallbackQuery,
     user_id = new_order.guest_id
     order_id = new_order.id
     marker = 'swift/sepa'
+
+    _text = 'Ваша заявка успешно отправлена!' if select_language == 'ru'\
+                 else 'your request has been sent successfully!'
 
     await callback.answer(text='Ваша заявка успешно отправлена!',
                           show_alert=True)

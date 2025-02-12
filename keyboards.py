@@ -117,10 +117,12 @@ def create_feedback_form_reasons_kb():
     return reason_kb
 
 
-def create_feedback_confirm_kb():
+def create_feedback_confirm_kb(language_code: str):
     feedback_confirm_kb = InlineKeyboardBuilder()
 
-    feedback_confirm_kb.add(types.InlineKeyboardButton(text='Отправить',
+    _text = 'Отправить' if language_code == 'ru' else 'Send'
+
+    feedback_confirm_kb.add(types.InlineKeyboardButton(text=_text,
                                                        callback_data='feedback_form_send'))
     
     return feedback_confirm_kb
@@ -192,9 +194,9 @@ def add_switch_language_btn(_kb: InlineKeyboardBuilder,
         _text = 'Switch language to 🇺🇸'
         _callback_data = 'lang_to_en'
     else:
-        _text = 'Switch language to 🇷🇺'
+        _text = 'Сменить язык на 🇷🇺'
         _callback_data = 'lang_to_ru'
-        
+
     _kb.row(types.InlineKeyboardButton(text=_text,
                                        callback_data=_callback_data))
 
