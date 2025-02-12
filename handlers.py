@@ -703,7 +703,7 @@ async def start_support(callback: types.CallbackQuery,
 
     await state.update_data(feedback_form=dict())
 
-    reason_kb = create_feedback_form_reasons_kb()
+    reason_kb = create_feedback_form_reasons_kb(select_language)
 
     reason_kb = add_cancel_btn_to_kb(select_language,
                                      reason_kb)
