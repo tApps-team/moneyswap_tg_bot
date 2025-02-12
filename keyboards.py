@@ -184,3 +184,18 @@ def create_kb_to_main(language_code: str):
                                       callback_data='send_app'))
     
     return kb
+
+
+def add_switch_language_btn(_kb: InlineKeyboardBuilder,
+                            select_language: str):
+    if select_language == 'ru':
+        _text = 'Switch language to 🇺🇸'
+        _callback_data = 'lang_to_en'
+    else:
+        _text = 'Switch language to 🇷🇺'
+        _callback_data = 'lang_to_ru'
+        
+    _kb.row(types.InlineKeyboardButton(text=_text,
+                                       callback_data=_callback_data))
+
+    return _kb

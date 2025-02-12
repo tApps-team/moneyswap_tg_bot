@@ -31,7 +31,8 @@ from keyboards import (create_start_keyboard,
                        create_feedback_form_reasons_kb,
                        reason_dict,
                        create_feedback_confirm_kb,
-                       create_condition_kb)
+                       create_condition_kb,
+                       add_switch_language_btn)
 
 from states import SwiftSepaStates, FeedbackFormStates
 
@@ -241,13 +242,20 @@ async def start(message: types.Message | types.CallbackQuery,
                 state: FSMContext,
                 bot: Bot,
                 text_msg: str = None):
-    language_code = message.from_user.language_code
-    print(language_code)
+    data = await state.get_data()
+
+    select_language = data.get('select_language')
+
+    if not select_language:
+        select_language = 'ru'
+
+    # language_code = message.from_user.language_code
+    # print(language_code)
 
     is_callback = isinstance(message, types.CallbackQuery)
 
     # _start_text = start_text
-    _start_text = start_text_dict.get('ru') if language_code == 'ru'\
+    _start_text = start_text_dict.get('ru') if select_language == 'ru'\
           else start_text_dict.get('en')
     
     utm_source = None
@@ -295,10 +303,12 @@ async def start(message: types.Message | types.CallbackQuery,
             chat_link  = guest.chat_link
 
     start_kb = create_start_inline_keyboard(tg_id,
-                                            language_code)
+                                            select_language)
+    start_kb = add_switch_language_btn(start_kb,
+                                       select_language)
 
     if chat_link:
-        if language_code == 'ru':
+        if select_language == 'ru':
             chat_link_text = f'Cсылка на чата по Вашим обращениям -> {chat_link}'
         else:
             chat_link_text = f'Link to chat for your requests -> {chat_link}'
@@ -340,6 +350,27 @@ async def start(message: types.Message | types.CallbackQuery,
             pass
 
 
+@main_router.callback_query(F.data.startswith('lang'))
+async def request_type_state(callback: types.CallbackQuery,
+                             session: Session,
+                             state: FSMContext,
+                             bot: Bot):
+    callback_data = callback.data.split('_')[-1]
+
+    if callback_data == 'ru':
+        select_language = 'ru'
+    else:
+        select_language = 'en'
+    
+    await state.update_data(select_language=select_language)
+
+    await start(callback,
+                session,
+                state,
+                bot,
+                text_msg='Главное меню')
+
+
 # @main_router.message(F.text == 'Swift/Sepa')
 # async def start_swift_sepa(message: types.Message,
 #                            state: FSMContext,
@@ -377,13 +408,17 @@ async def back_to_main(callback: types.CallbackQuery,
                        state: FSMContext,
                        session: Session,
                        bot: Bot):
-    # data = await state.get_data()
+    data = await state.get_data()
+
+    select_language = data.get('select_language')
     # start_msg = state_data.get('start_msg')
     # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
     # chat_link_msg: tuple[str,str] = data.get('chat_link_msg')
 
     await state.clear()
 
+    if select_language:
+        await state.update_data(select_language=select_language)
     # if main_menu_msg:
     #     await state.update_data(main_menu_msg=main_menu_msg)
 
@@ -438,9 +473,12 @@ async def invoice_swift_sepa(callback: types.CallbackQuery,
                             state: FSMContext,
                             bot: Bot,
                             api_client: Client):
-    language_code = callback.from_user.language_code
+    data = await state.get_data()
 
-    _text = 'Выберите действие' if language_code == 'ru' else 'Choose an action'
+    select_language = data.get('select_language')
+    # language_code = callback.from_user.language_code
+
+    _text = 'Выберите действие' if select_language == 'ru' else 'Choose an action'
     # data = await state.get_data()
 
     # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
@@ -453,8 +491,8 @@ async def invoice_swift_sepa(callback: types.CallbackQuery,
     message_id = callback.message.message_id
 
     # swift_sepa_kb = create_swift_sepa_kb()
-    swift_sepa_kb = create_swift_start_kb(language_code)
-    swift_sepa_kb = add_cancel_btn_to_kb(language_code,
+    swift_sepa_kb = create_swift_start_kb(select_language)
+    swift_sepa_kb = add_cancel_btn_to_kb(select_language,
                                          swift_sepa_kb)
 
     # await state.update_data(action='swift/sepa')
@@ -539,7 +577,10 @@ async def start_swift_sepa(callback: types.CallbackQuery,
                             state: FSMContext,
                             bot: Bot,
                             api_client: Client):
-    language_code = callback.from_user.language_code
+    data = await state.get_data()
+
+    select_language = data.get('select_language')
+    # language_code = callback.from_user.language_code
     # data = await state.get_data()
 
     # if not data.get('action'):
@@ -556,8 +597,8 @@ async def start_swift_sepa(callback: types.CallbackQuery,
     await state.set_state(SwiftSepaStates.request_type)
     await state.update_data(order=dict())
 
-    swift_start_kb = create_swift_start_kb(language_code)
-    kb = add_cancel_btn_to_kb(language_code,
+    swift_start_kb = create_swift_start_kb(select_language)
+    kb = add_cancel_btn_to_kb(select_language,
                               swift_start_kb)
 
     # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
@@ -1146,8 +1187,11 @@ async def request_type_state(callback: types.CallbackQuery,
                              session: Session,
                              state: FSMContext,
                              bot: Bot):
-    language_code = callback.from_user.language_code
     data = await state.get_data()
+
+    select_language = data.get('select_language')
+    # language_code = callback.from_user.language_code
+    # data = await state.get_data()
 
     # if not data.get('order'):
     #     await callback.answer(text='Что то пошло не так, попробуйте еще раз.')
@@ -1170,7 +1214,7 @@ async def request_type_state(callback: types.CallbackQuery,
 
     request_type = 'Оплатить платеж' if callback.data == 'pay_payment' else 'Принять платеж'
 
-    if language_code == 'ru':
+    if select_language == 'ru':
         state_process = f'Тип заявки: {request_type}'
         _text = f'{state_process}\n<b>Опишите задачу, чтобы менеджеры могли быстрее все понять и оперативно начать выполнение...</b>'
     else:
@@ -1203,7 +1247,7 @@ async def request_type_state(callback: types.CallbackQuery,
     await state.set_state(SwiftSepaStates.task_text)
 
 
-    kb = add_cancel_btn_to_kb(language_code)
+    kb = add_cancel_btn_to_kb(select_language)
 
     #
     # await bot.edit_message_text(f'{state_process}\n<b>Введите страну...</b>',
@@ -1331,9 +1375,12 @@ async def task_text_state(message: types.Message,
                           state: FSMContext,
                           bot: Bot,
                           api_client: Client):
-    language_code = message.from_user.language_code
-
     data = await state.get_data()
+
+    select_language = data.get('select_language')
+    # language_code = message.from_user.language_code
+
+    # data = await state.get_data()
     # state_msg: types.Message = data.get('state_msg')
     # state_msg: tuple[str, str] = data.get('state_msg')
     # chat_id, message_id = state_msg
@@ -1350,7 +1397,7 @@ async def task_text_state(message: types.Message,
 
     state_process = data.get('state_process')
 
-    if language_code == 'ru':
+    if select_language == 'ru':
         state_process += f'\nКомментарий: {message.text}'
         state_done_text = 'Заполнение окончено.'
     else:
@@ -1360,7 +1407,7 @@ async def task_text_state(message: types.Message,
 
     # preview_response_text = await swift_sepa_data(state)
 
-    kb = create_kb_to_main(language_code)
+    kb = create_kb_to_main(select_language)
 
     # async with api_client as app:
     #     channel = await app.create_channel(title='Test111')
