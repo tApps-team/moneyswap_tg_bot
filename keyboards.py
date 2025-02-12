@@ -10,10 +10,10 @@ from utils.multilanguage import (start_text_dict,
 
 
 reason_list = (
-    ('Ошибка', 'error'),
-    ('Проблема с обменником', 'exchange_problem'),
-    ('Сотрудничество', 'cooperation'),
-    ('Другое', 'other'),
+    (('Ошибка', 'Error'), 'error'),
+    (('Проблема с обменником', 'Issue with the Exchanger'), 'exchange_problem'),
+    (('Сотрудничество', 'Partnership'), 'cooperation'),
+    (('Другое', 'Other'), 'other'),
 )
 
 reason_dict = {
@@ -105,13 +105,14 @@ def create_condition_kb():
     return condition_kb
 
 
-def create_feedback_form_reasons_kb():
+def create_feedback_form_reasons_kb(language_code: str):
     reason_kb = InlineKeyboardBuilder()
 
     # for reason, data in reason_list:
     # for data, reason in reason_dict.items():
     for reason, data in reason_list:
-        reason_kb.row(types.InlineKeyboardButton(text=reason,
+        _text = reason[0] if language_code == 'ru' else reason[-1]
+        reason_kb.row(types.InlineKeyboardButton(text=_text,
                                                  callback_data=f'{FEEDBACK_REASON_PREFIX}__{data}'))
         
     return reason_kb
