@@ -74,9 +74,9 @@ def create_start_inline_keyboard(user_id: int,
     start_kb = InlineKeyboardBuilder()
 
     start_kb.add(types.InlineKeyboardButton(text=tuple_text[0],
-                                            web_app=WebAppInfo(url=f'https://app.moneyswap.online/?direction=noncash&user_id={user_id}')))
+                                            web_app=WebAppInfo(url=f'https://app.moneyswap.online/?direction=noncash&user_id={user_id}&user_lang={language_code}')))
     start_kb.add(types.InlineKeyboardButton(text=tuple_text[1],
-                                            web_app=WebAppInfo(url=f'https://app.moneyswap.online/?direction=cash&user_id={user_id}')))
+                                            web_app=WebAppInfo(url=f'https://app.moneyswap.online/?direction=cash&user_id={user_id}&user_lang={language_code}')))
     start_kb.row(types.InlineKeyboardButton(text=tuple_text[2],
                                             callback_data='invoice_swift/sepa'))
     start_kb.row(types.InlineKeyboardButton(text=tuple_text[3],
