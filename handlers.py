@@ -247,8 +247,9 @@ async def start(message: types.Message | types.CallbackQuery,
     select_language = data.get('select_language')
 
     if not select_language:
-        print('TEST LANGUAGE', type(select_language), select_language)
+        # print('TEST LANGUAGE', type(select_language), select_language)
         select_language = 'ru'
+        await state.update_data(select_language=select_language)
 
     # language_code = message.from_user.language_code
     # print(language_code)
