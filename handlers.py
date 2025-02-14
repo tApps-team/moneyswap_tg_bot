@@ -416,6 +416,9 @@ async def back_to_main(callback: types.CallbackQuery,
     data = await state.get_data()
 
     select_language = data.get('select_language')
+
+    if not select_language:
+        select_language = 'ru'
     # start_msg = state_data.get('start_msg')
     # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
     # chat_link_msg: tuple[str,str] = data.get('chat_link_msg')
@@ -481,6 +484,9 @@ async def invoice_swift_sepa(callback: types.CallbackQuery,
     data = await state.get_data()
 
     select_language = data.get('select_language')
+
+    if not select_language:
+        select_language = 'ru'
     # language_code = callback.from_user.language_code
 
     _text = 'Выберите действие' if select_language == 'ru' else 'Choose an action'
@@ -585,6 +591,9 @@ async def start_swift_sepa(callback: types.CallbackQuery,
     data = await state.get_data()
 
     select_language = data.get('select_language')
+
+    if not select_language:
+        select_language = 'ru'
     # language_code = callback.from_user.language_code
     # data = await state.get_data()
 
@@ -699,6 +708,9 @@ async def start_support(callback: types.CallbackQuery,
     data = await state.get_data()
 
     select_language = data.get('select_language')
+
+    if not select_language:
+        select_language = 'ru'
     # language_code = callback.from_user.language_code
     chat_id = callback.message.chat.id
     message_id = callback.message.message_id
@@ -796,6 +808,9 @@ async def feedback_form_send(callback: types.CallbackQuery,
 
     select_language = data.get('select_language')
 
+    if not select_language:
+        select_language = 'ru'
+
     # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
 
     # chat_id, message_id = main_menu_msg
@@ -884,6 +899,9 @@ async def request_type_state(callback: types.CallbackQuery,
     data = await state.get_data()
 
     select_language = data.get('select_language')
+
+    if not select_language:
+        select_language = 'ru'
     
     reason = callback.data.split('__')[-1]
 
@@ -931,6 +949,9 @@ async def request_type_state(message: types.Message,
     data = await state.get_data()
 
     select_language = data.get('select_language')
+
+    if not select_language:
+        select_language = 'ru'
     # language_code = message.from_user.language_code
 
     # reason = callback.data.split('__')[-1]
@@ -978,6 +999,9 @@ async def country_state(message: types.Message,
     data = await state.get_data()
 
     select_language = data.get('select_language')
+
+    if not select_language:
+        select_language = 'ru'
     # language_code = message.from_user.language_code
     contact = message.text
 
@@ -1022,6 +1046,9 @@ async def country_state(message: types.Message,
     data = await state.get_data()
 
     select_language = data.get('select_language')
+
+    if not select_language:
+        select_language = 'ru'
     # language_code = message.from_user.language_code
     username = message.text
 
@@ -1132,7 +1159,12 @@ async def send_order(callback: types.CallbackQuery,
                    api_client: Client):
     
     data = await state.get_data()
+
     select_language = data.get('select_language')
+
+    if not select_language:
+        select_language = 'ru'
+
     order: dict = data.get('order')
     time_create = datetime.now()
     order.update({'guest_id': callback.from_user.id,
@@ -1239,6 +1271,9 @@ async def request_type_state(callback: types.CallbackQuery,
     data = await state.get_data()
 
     select_language = data.get('select_language')
+
+    if not select_language:
+        select_language = 'ru'
     # language_code = callback.from_user.language_code
     # data = await state.get_data()
 
@@ -1427,6 +1462,9 @@ async def task_text_state(message: types.Message,
     data = await state.get_data()
 
     select_language = data.get('select_language')
+
+    if not select_language:
+        select_language = 'ru'
     # language_code = message.from_user.language_code
 
     # data = await state.get_data()
