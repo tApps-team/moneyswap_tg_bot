@@ -247,6 +247,7 @@ async def start(message: types.Message | types.CallbackQuery,
     select_language = data.get('select_language')
 
     if not select_language:
+        print('TEST LANGUAGE', type(select_language), select_language)
         select_language = 'ru'
 
     # language_code = message.from_user.language_code
@@ -370,6 +371,8 @@ async def request_type_state(callback: types.CallbackQuery,
                 state,
                 bot,
                 text_msg='Главное меню')
+    
+    await callback.answer()
 
 
 # @main_router.message(F.text == 'Swift/Sepa')
