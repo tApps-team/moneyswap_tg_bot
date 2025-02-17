@@ -198,7 +198,7 @@ async def custom_message(user_id: int,
     except Exception as ex:
         print(ex)
     else:
-        print('сообщение успешно отправлено!')
+        print(f'сообщение {text} успешно отправлено!')
 # app.include_router(fast_api_router)
 # fast_api_router = APIRouter()
 
