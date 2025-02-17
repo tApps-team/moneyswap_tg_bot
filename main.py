@@ -188,6 +188,17 @@ async def test_moder_send(user_id: int,
                             user_id=user_id,
                             name_send=name_send)
 
+
+@app.get('/custom_message')
+async def custom_message(user_id: int,
+                         text: str):
+    try:
+        await bot.send_message(chat_id=user_id,
+                            text=text)
+    except Exception as ex:
+        print(ex)
+    else:
+        print('сообщение успешно отправлено!')
 # app.include_router(fast_api_router)
 # fast_api_router = APIRouter()
 
