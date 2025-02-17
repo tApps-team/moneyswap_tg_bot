@@ -1989,8 +1989,6 @@ async def try_send_order(bot: Bot,
                                             headers={'Authorization': f'Bearer {BEARER_TOKEN}',
                                                     'CONTENT-TYPE': 'application/json'})
                 response_json = await response.json()
-                # print(type(response_json))
-                # print(response_json)
                 
             chat_link = response_json.get('chat')
 
@@ -2004,14 +2002,19 @@ async def try_send_order(bot: Bot,
                 session.commit()
             else:
                 print('не получилось')
+                return
         else:
             print('ссылка из базы', guest.chat_link)
 
         chat_link_text = f'Ссылка на чат по Вашему обращению -> {chat_link}\n\n<i>*Можете удалить это сообщение, чтобы не портить вид чата, мы будем дублировать ссылку на чат в главном сообщении.</i>'
 
-        await bot.send_message(chat_id=user_id,
-                            text=chat_link_text)
-                
+        try:
+            await bot.send_message(chat_id=user_id,
+                                text=chat_link_text)
+        except Exception as ex:
+            print(ex)
+        else:
+            print('Cообщение с ссылкой на чат успешно отправлено')
                 # query = (
                 #     update(
                 #         CustomOrder,
