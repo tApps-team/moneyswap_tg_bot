@@ -1984,7 +1984,7 @@ async def try_send_order(bot: Bot,
             print('json', json_order)
         
             async with aiohttp.ClientSession() as aiosession:
-                response = await aiosession.post(url='https://api.moneyport.pro/api/partners/create-order',
+                response = await aiosession.post(url='https://api.moneyport.ru/api/partners/create-order',
                                             data=json_order,
                                             headers={'Authorization': f'Bearer {BEARER_TOKEN}',
                                                     'CONTENT-TYPE': 'application/json'})
