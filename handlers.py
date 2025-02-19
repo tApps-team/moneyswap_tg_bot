@@ -2001,7 +2001,20 @@ async def try_send_order(bot: Bot,
                 # guest.chat_link = chat_link
                 session.commit()
             else:
-                print('не получилось')
+                print('не получилось отправить, проблема на стороне MoneyPort')
+                try:
+                    result_text = f'Сообщение с ссылкой на MoneyPort не получилось отправить пользователю {user_id}, проблема на стороне MoneyPort'
+                    _url = f'https://api.moneyswap.online/send_result_chat_link?result_text={result_text}'
+                    
+                    timeout = aiohttp.ClientTimeout(total=5)
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(_url,
+                                            timeout=timeout) as response:
+                            pass
+                except Exception as ex:
+                    print(ex)
+                    pass
+
                 return
         else:
             print('ссылка из базы', guest.chat_link)
@@ -2016,7 +2029,7 @@ async def try_send_order(bot: Bot,
             print('Cообщение с ссылкой на чат не было отправлено.')
             # отправляю уведомление в бота уведолмений об ошибке
             try:
-                result_text = f'Сообщение с ссылкой на MoneyPort для пользователю {user_id} не было доставлено'
+                result_text = f'Сообщение с ссылкой на MoneyPort пользователю {user_id} не было доставлено'
                 _url = f'https://api.moneyswap.online/send_result_chat_link?result_text={result_text}'
                 
                 timeout = aiohttp.ClientTimeout(total=5)
