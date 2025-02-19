@@ -2010,56 +2010,68 @@ async def try_send_order(bot: Bot,
 
         try:
             await bot.send_message(chat_id=user_id,
-                                text=chat_link_text)
+                                   text=chat_link_text)
         except Exception as ex:
             print(ex)
+            # отправляю уведомление в бота уведолмений об ошибке
+            try:
+                result_text = f'Сообщение с ссылкой на MoneyPort для пользователю {user_id} не было доставлено'
+                _url = f'https://api.moneyswap.online/send_result_chat_link?{result_text}'
+                
+                timeout = aiohttp.ClientTimeout(total=5)
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(_url,
+                                        timeout=timeout) as response:
+                        pass
+            except Exception as ex:
+                print(ex)
+                pass
         else:
             print('Cообщение с ссылкой на чат успешно отправлено')
-                # query = (
-                #     update(
-                #         CustomOrder,
-                #     )\
-                #     .where(CustomOrder.id == order_id,
-                #         CustomOrder.guset_id == user_id)\
-                #     .values(status='Завершен')
-                # )
+            # отправляю уведомление в бота уведолмений об успешной отправке ссылки на MoneyPort чат
+            try:
+                result_text = f'Сообщение с ссылкой на MoneyPort чат успешно отправлено пользователю {user_id}'
+                _url = f'https://api.moneyswap.online/send_result_chat_link?{result_text}'
 
-                # session.execute(query)
-                # try:
-                #     session.commit()
-                # except Exception as ex:
-                #     print(ex)
-                #     session.rollback()
+                timeout = aiohttp.ClientTimeout(total=5)
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(_url,
+                                        timeout=timeout) as response:
+                        pass
+            except Exception as ex:
+                print(ex)
+                pass
 
 
-@main_router.message(F.text == 'send_link22')
-async def send_link_test(message: types.Message,
-                                session: Session,
-                                state: FSMContext,
-                                bot: Bot):
-    _text = 'Добрый день.\nПолучили от вас запрос на помощь в покупке квартиры в Таиланде.\nДля вас создан чат для продолжения консультации по вопросу https://t.me/+7JWLAnMKyUUwMWEy'
+
+# @main_router.message(F.text == 'send_link22')
+# async def send_link_test(message: types.Message,
+#                                 session: Session,
+#                                 state: FSMContext,
+#                                 bot: Bot):
+#     _text = 'Добрый день.\nПолучили от вас запрос на помощь в покупке квартиры в Таиланде.\nДля вас создан чат для продолжения консультации по вопросу https://t.me/+7JWLAnMKyUUwMWEy'
     
-    # guest
-    _chat_id = 7327884297
+#     # guest
+#     _chat_id = 7327884297
 
 
-    # sugar
-    # _chat_id = 293371619
+#     # sugar
+#     # _chat_id = 293371619
 
 
-    # me
-    # _chat_id = 686339126
-    try:
-        await bot.send_message(chat_id=_chat_id,
-                                text=_text)
-    except Exception as ex:
-        print('send error', ex)
-    else:
-        print('message sent successfully')
-    try:
-        await message.delete()
-    except Exception as ex:
-        print(ex)
+#     # me
+#     # _chat_id = 686339126
+#     try:
+#         await bot.send_message(chat_id=_chat_id,
+#                                 text=_text)
+#     except Exception as ex:
+#         print('send error', ex)
+#     else:
+#         print('message sent successfully')
+#     try:
+#         await message.delete()
+#     except Exception as ex:
+#         print(ex)
 
 
 
