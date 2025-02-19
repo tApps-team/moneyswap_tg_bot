@@ -2016,7 +2016,7 @@ async def try_send_order(bot: Bot,
             # отправляю уведомление в бота уведолмений об ошибке
             try:
                 result_text = f'Сообщение с ссылкой на MoneyPort для пользователю {user_id} не было доставлено'
-                _url = f'https://api.moneyswap.online/send_result_chat_link?{result_text}'
+                _url = f'https://api.moneyswap.online/send_result_chat_link?result_text={result_text}'
                 
                 timeout = aiohttp.ClientTimeout(total=5)
                 async with aiohttp.ClientSession() as session:
