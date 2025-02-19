@@ -2013,6 +2013,7 @@ async def try_send_order(bot: Bot,
                                    text=chat_link_text)
         except Exception as ex:
             print(ex)
+            print('Cообщение с ссылкой на чат не было отправлено.')
             # отправляю уведомление в бота уведолмений об ошибке
             try:
                 result_text = f'Сообщение с ссылкой на MoneyPort для пользователю {user_id} не было доставлено'
@@ -2027,7 +2028,7 @@ async def try_send_order(bot: Bot,
                 print(ex)
                 pass
         else:
-            print('Cообщение с ссылкой на чат успешно отправлено')
+            print('Cообщение с ссылкой на чат успешно отправлено.')
             # отправляю уведомление в бота уведолмений об успешной отправке ссылки на MoneyPort чат
             try:
                 result_text = f'Сообщение с ссылкой на MoneyPort чат успешно отправлено пользователю {user_id}'
