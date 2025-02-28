@@ -13,6 +13,7 @@ from aiogram.types import BufferedInputFile, URLInputFile
 from aiogram.utils.media_group import MediaGroupBuilder
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
+from aiogram.exceptions import TelegramForbiddenError
 
 from pyrogram import Client
 
@@ -319,10 +320,13 @@ async def start(message: types.Message | types.CallbackQuery,
         _start_text += f'\n\n{chat_link_text}'
 
     if not is_callback:
-        _msg = await message.answer(text=_start_text,
-                             reply_markup=start_kb.as_markup(),
-                             disable_web_page_preview=True,
-                             disable_notification=True)
+        try:
+            _msg = await message.answer(text=_start_text,
+                                reply_markup=start_kb.as_markup(),
+                                disable_web_page_preview=True,
+                                disable_notification=True)
+        except TelegramForbiddenError:
+            return
 
         try:
             await bot.unpin_all_chat_messages(chat_id=message.chat.id)
@@ -335,12 +339,14 @@ async def start(message: types.Message | types.CallbackQuery,
         except Exception:
             pass
     else:
-        _msg = await bot.send_message(chat_id=message.chat.id,
-                               text=_start_text,
-                               reply_markup=start_kb.as_markup(),
-                               disable_web_page_preview=True,
-                               disable_notification=True)
-        
+        try:
+            _msg = await bot.send_message(chat_id=message.chat.id,
+                                text=_start_text,
+                                reply_markup=start_kb.as_markup(),
+                                disable_web_page_preview=True,
+                                disable_notification=True)
+        except TelegramForbiddenError:
+            return
         try:
             await bot.unpin_all_chat_messages(chat_id=message.chat.id)
         except Exception as ex:
@@ -507,12 +513,13 @@ async def invoice_swift_sepa(callback: types.CallbackQuery,
                                          swift_sepa_kb)
 
     # await state.update_data(action='swift/sepa')
-
-    await bot.edit_message_text(text=_text,
-                                chat_id=chat_id,
-                                message_id=message_id,
-                                reply_markup=swift_sepa_kb.as_markup())
-    
+    try:
+        await bot.edit_message_text(text=_text,
+                                    chat_id=chat_id,
+                                    message_id=message_id,
+                                    reply_markup=swift_sepa_kb.as_markup())
+    except TelegramForbiddenError:
+        return
     # await bot.edit_message_reply_markup(chat_id=chat_id,
     #                                     message_id=message_id,
     #                                     reply_markup=swift_sepa_kb.as_markup())
@@ -621,11 +628,13 @@ async def start_swift_sepa(callback: types.CallbackQuery,
     chat_id = callback.message.chat.id
     message_id = callback.message.message_id
 
-    await bot.edit_message_text(text='<b>Выберите тип заявки</b>',
-                                chat_id=chat_id,
-                                message_id=message_id,
-                                reply_markup=kb.as_markup())
-    
+    try:
+        await bot.edit_message_text(text='<b>Выберите тип заявки</b>',
+                                    chat_id=chat_id,
+                                    message_id=message_id,
+                                    reply_markup=kb.as_markup())
+    except TelegramForbiddenError:
+        return
     try:
         await callback.answer()
     except Exception:
@@ -729,11 +738,23 @@ async def start_support(callback: types.CallbackQuery,
     else:
         _text = '<b>Select the reason for your inquiry</b>\n\nIf you have any questions, you can contact <a href="https://t.me/MoneySwap_support">Support</a> or <a href="https://t.me/moneyswap_admin">Admin</a> directly. We are always ready to help!'
 
-    await bot.edit_message_text(text=_text,
+    try:
+        await bot.edit_message_text(text=_text,
+                                    chat_id=chat_id,
+                                    message_id=message_id,
+                                    disable_web_page_preview=True,
+                                    reply_markup=reason_kb.as_markup())
+    except TelegramForbiddenError:
+        return
+    except Exception:
+        try:
+            await bot.send_message(text=_text,
                                 chat_id=chat_id,
-                                message_id=message_id,
                                 disable_web_page_preview=True,
                                 reply_markup=reason_kb.as_markup())
+        except TelegramForbiddenError:
+            return
+        
 
     # await bot.edit_message_reply_markup(reply_markup=reason_kb.as_markup(),
     #                                     chat_id=chat_id,
