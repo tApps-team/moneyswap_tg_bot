@@ -2024,7 +2024,7 @@ async def try_send_order(bot: Bot,
             else:
                 print('не получилось отправить, проблема на стороне MoneyPort')
                 try:
-                    result_text = f'Сообщение с ссылкой на MoneyPort не получилось отправить пользователю {user_id}, проблема на стороне MoneyPort'
+                    result_text = f'❌Сообщение с ссылкой на MoneyPort не получилось отправить пользователю {user_id}, проблема на стороне MoneyPort'
                     _url = f'https://api.moneyswap.online/send_result_chat_link?result_text={result_text}'
                     
                     timeout = aiohttp.ClientTimeout(total=5)
@@ -2045,12 +2045,27 @@ async def try_send_order(bot: Bot,
         try:
             await bot.send_message(chat_id=user_id,
                                    text=chat_link_text)
+        except TelegramForbiddenError as ex:
+            print(ex)
+            try:
+                result_text = f'❌Сообщение с ссылкой на MoneyPort пользователю {user_id} не было доставлено (Пользователь заблокировал бота)'
+                _url = f'https://api.moneyswap.online/send_result_chat_link?result_text={result_text}'
+                
+                timeout = aiohttp.ClientTimeout(total=5)
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(_url,
+                                        timeout=timeout) as response:
+                        pass
+            except Exception as ex:
+                print(ex)
+                pass
+
         except Exception as ex:
             print(ex)
             print('Cообщение с ссылкой на чат не было отправлено.')
             # отправляю уведомление в бота уведолмений об ошибке
             try:
-                result_text = f'Сообщение с ссылкой на MoneyPort пользователю {user_id} не было доставлено'
+                result_text = f'❌Сообщение с ссылкой на MoneyPort пользователю {user_id} не было доставлено'
                 _url = f'https://api.moneyswap.online/send_result_chat_link?result_text={result_text}'
                 
                 timeout = aiohttp.ClientTimeout(total=5)
@@ -2065,7 +2080,7 @@ async def try_send_order(bot: Bot,
             print('Cообщение с ссылкой на чат успешно отправлено.')
             # отправляю уведомление в бота уведолмений об успешной отправке ссылки на MoneyPort чат
             try:
-                result_text = f'Сообщение с ссылкой на MoneyPort чат успешно отправлено пользователю {user_id}'
+                result_text = f'✅Сообщение с ссылкой на MoneyPort чат успешно отправлено пользователю {user_id}'
                 _url = f'https://api.moneyswap.online/send_result_chat_link?result_text={result_text}'
 
                 timeout = aiohttp.ClientTimeout(total=5)
