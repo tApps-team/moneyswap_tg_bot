@@ -2036,7 +2036,7 @@ async def try_send_order(bot: Bot,
                     print(ex)
                     pass
 
-                return
+                return {'status': 'error'}
         else:
             print('ссылка из базы', guest.chat_link)
 
@@ -2059,6 +2059,8 @@ async def try_send_order(bot: Bot,
             except Exception as ex:
                 print(ex)
                 pass
+            else:
+                return {'status': 'error'}
 
         except Exception as ex:
             print(ex)
@@ -2076,6 +2078,8 @@ async def try_send_order(bot: Bot,
             except Exception as ex:
                 print(ex)
                 pass
+            else:
+                return {'status': 'error'}
         else:
             print('Cообщение с ссылкой на чат успешно отправлено.')
             # отправляю уведомление в бота уведолмений об успешной отправке ссылки на MoneyPort чат
@@ -2091,6 +2095,8 @@ async def try_send_order(bot: Bot,
             except Exception as ex:
                 print(ex)
                 pass
+            else:
+                return {'status': 'success'}
 
 
 
