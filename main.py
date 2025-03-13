@@ -174,10 +174,10 @@ async def send_mass_message_for_all_users(name_send: str):
 @app.get('/test_swift_sepa')
 async def test_swift_sepa(user_id: int,
                           order_id: int):
-    await try_send_order(bot=bot,
-                         session=session(),
-                         user_id=user_id,
-                         order_id=order_id)
+    return await try_send_order(bot=bot,
+                                session=session(),
+                                user_id=user_id,
+                                order_id=order_id)
     
 
 @app.get('/test_moder_send')
