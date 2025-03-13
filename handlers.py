@@ -2026,10 +2026,10 @@ async def try_send_order(bot: Bot,
                 try:
                     result_text = f'❌Сообщение с ссылкой на MoneyPort не получилось отправить пользователю {user_id}, проблема на стороне MoneyPort'
                     
-                    if user_id == 686339126:
-                        _url = f'https://api.moneyswap.online/test_send_result_chat_link?result_text={result_text}' 
-                    else:
-                        _url = f'https://api.moneyswap.online/send_result_chat_link?result_text={result_text}'
+                    # if user_id == 686339126:
+                    #     _url = f'https://api.moneyswap.online/test_send_result_chat_link?result_text={result_text}' 
+                    # else:
+                    _url = f'https://api.moneyswap.online/send_result_chat_link?result_text={result_text}'
                     
                     timeout = aiohttp.ClientTimeout(total=5)
                     async with aiohttp.ClientSession() as session:
@@ -2054,10 +2054,10 @@ async def try_send_order(bot: Bot,
             try:
                 result_text = f'❌Сообщение с ссылкой на MoneyPort пользователю {user_id} не было доставлено (Пользователь заблокировал бота)'
                 
-                if user_id == 686339126:
-                    _url = f'https://api.moneyswap.online/test_send_result_chat_link?result_text={result_text}'                    
-                else:
-                    _url = f'https://api.moneyswap.online/send_result_chat_link?result_text={result_text}'
+                # if user_id == 686339126:
+                #     _url = f'https://api.moneyswap.online/test_send_result_chat_link?result_text={result_text}'                    
+                # else:
+                _url = f'https://api.moneyswap.online/send_result_chat_link?result_text={result_text}'
                 
                 timeout = aiohttp.ClientTimeout(total=5)
                 async with aiohttp.ClientSession() as session:
@@ -2077,10 +2077,10 @@ async def try_send_order(bot: Bot,
             try:
                 result_text = f'❌Сообщение с ссылкой на MoneyPort пользователю {user_id} не было доставлено'
                 
-                if user_id == 686339126:
-                    _url = f'https://api.moneyswap.online/test_send_result_chat_link?result_text={result_text}' 
-                else:
-                    _url = f'https://api.moneyswap.online/send_result_chat_link?result_text={result_text}'
+                # if user_id == 686339126:
+                #     _url = f'https://api.moneyswap.online/test_send_result_chat_link?result_text={result_text}' 
+                # else:
+                _url = f'https://api.moneyswap.online/send_result_chat_link?result_text={result_text}'
                 
                 timeout = aiohttp.ClientTimeout(total=5)
                 async with aiohttp.ClientSession() as session:
@@ -2098,10 +2098,10 @@ async def try_send_order(bot: Bot,
             try:
                 result_text = f'✅Сообщение с ссылкой на MoneyPort чат успешно отправлено пользователю {user_id}'
                 
-                if user_id == 686339126:
-                    _url = f'https://api.moneyswap.online/test_send_result_chat_link?result_text={result_text}' 
-                else:
-                    _url = f'https://api.moneyswap.online/send_result_chat_link?result_text={result_text}'
+                # if user_id == 686339126:
+                #     _url = f'https://api.moneyswap.online/test_send_result_chat_link?result_text={result_text}' 
+                # else:
+                _url = f'https://api.moneyswap.online/send_result_chat_link?result_text={result_text}'
 
                 timeout = aiohttp.ClientTimeout(total=5)
                 async with aiohttp.ClientSession() as session:
