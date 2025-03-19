@@ -857,7 +857,7 @@ async def feedback_form_send(callback: types.CallbackQuery,
             )\
             .where(
                 and_(
-                    FeedbackForm.reason == reason_dict.get(feedback_form['reason']),
+                    FeedbackForm.reasons == reason_dict.get(feedback_form['reason']),
                     FeedbackForm.username == feedback_form['username'],
                     FeedbackForm.email == feedback_form['contact'],
                     FeedbackForm.time_create >= check_datetime,
