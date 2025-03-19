@@ -4,7 +4,7 @@ import time
 
 from asyncio import sleep
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import aiohttp
 
@@ -18,7 +18,7 @@ from aiogram.exceptions import TelegramForbiddenError
 from pyrogram import Client
 
 from sqlalchemy.orm import Session, joinedload, sessionmaker
-from sqlalchemy import insert, select, update
+from sqlalchemy import insert, select, update, and_
 
 from config import BEARER_TOKEN, FEEDBACK_REASON_PREFIX
 
@@ -848,10 +848,39 @@ async def feedback_form_send(callback: types.CallbackQuery,
 
     FeedbackForm = Base.classes.general_models_feedbackform
 
-    with session as session:
+
+    with session as _session:
+        check_datetime = datetime.now() - timedelta(minutes=2)
+        check_feedback_query = (
+            select(
+                FeedbackForm.id
+            )\
+            .where(
+                and_(
+                    FeedbackForm.reason == reason_dict.get(feedback_form['reason']),
+                    FeedbackForm.username == feedback_form['username'],
+                    FeedbackForm.email == feedback_form['contact'],
+                    FeedbackForm.time_create >= check_datetime,
+                )
+            )
+        )
+        check_feedback = _session.execute(check_feedback_query)
+        check_feedback = check_feedback.scalar_one_or_none()
+
+        if check_feedback:
+            _text = 'Обращение уже было отправлено или Вы пытаетесь отправить одно и то же обращение, ожидайте с Вами свяжутся'
+            await callback.answer(text=_text,
+                                  show_alert=True)
+        
+            await start(callback,
+                        session,
+                        state,
+                        bot,
+                        text_msg='Главное меню')
+            return
 
         _feedback_form = FeedbackForm(**feedback_values)
-        session.add(_feedback_form)
+        _session.add(_feedback_form)
 
     #     new_order = Order(**order)  # предполагая, что order — это словарь
     #     session.add(new_order)
@@ -866,8 +895,8 @@ async def feedback_form_send(callback: types.CallbackQuery,
         # session.execute(insert(FeedbackForm).values(feedback_values))
         try:
     #     session.refresh(new_order)
-            session.commit()
-            session.refresh(_feedback_form)
+            _session.commit()
+            _session.refresh(_feedback_form)
 
             user_id = callback.from_user.id
             marker = 'feedback_form'
@@ -877,7 +906,7 @@ async def feedback_form_send(callback: types.CallbackQuery,
                     else 'Request has been send successfully!'
         except Exception as ex:
             print(ex)
-            session.rollback()
+            _session.rollback()
             _text = 'Что то пошло не так, попробуйте повторить позже' if select_language == 'ru'\
                     else 'Something wrong, try repeat later'
 
@@ -902,9 +931,9 @@ async def feedback_form_send(callback: types.CallbackQuery,
         try:
             _url = f'https://api.moneyswap.online/send_to_tg_group?user_id={user_id}&order_id={order_id}&marker={marker}'
             timeout = aiohttp.ClientTimeout(total=5)
-            async with aiohttp.ClientSession() as session:
-                async with session.get(_url,
-                                    timeout=timeout) as response:
+            async with aiohttp.ClientSession() as aiosession:
+                async with aiosession.get(_url,
+                                        timeout=timeout) as response:
                     pass
         except Exception as ex:
             print(ex)
