@@ -6,10 +6,14 @@ start_text_dict = {
     'en': '💱<b>Welcome to MoneySwap!</b>\n\nOur bot will help you find the best deal for your exchange needs 💸\n\n👉🏻 <b>To start searching</b>, select a category: “Non-cash,” “Cash,” or “Swift/Sepa”, then click the appropriate button below.\n\nIf you have any questions, contact <a href="https://t.me/MoneySwap_support">Support</a> or <a href="https://t.me/moneyswap_admin">Admin</a>. We are always ready to help!',
 }
 
+# start_kb_text = {
+#     'ru': ('Безналичные', 'Наличные', 'Инвойсы Swift/Sepa', 'О MoneySwap', 'Поддержка'),
+#     'en': ('Non-cash', 'Cash', 'Invoices Swift/Sepa', 'About MoneySwap', 'Support'),
+# }
 
 start_kb_text = {
-    'ru': ('Безналичные', 'Наличные', 'Инвойсы Swift/Sepa', 'О MoneySwap', 'Поддержка'),
-    'en': ('Non-cash', 'Cash', 'Invoices Swift/Sepa', 'About MoneySwap', 'Support'),
+    'ru': ('Безналичные', 'Наличные', 'SWIFT переводы от 3к$ (Оплатить/Принять инвойс)', 'О MoneySwap', 'Поддержка'),
+    'en': ('Non-cash', 'Cash', 'SWIFT transfers from 3k$ (Pay/Accept invoice)', 'About MoneySwap', 'Support'),
 }
 
 
