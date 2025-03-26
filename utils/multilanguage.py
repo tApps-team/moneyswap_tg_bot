@@ -12,8 +12,8 @@ start_text_dict = {
 # }
 
 start_kb_text = {
-    'ru': ('Безналичные', 'Наличные', 'SWIFT переводы от 3к$ (Оплатить/Принять инвойс)', 'О MoneySwap', 'Поддержка'),
-    'en': ('Non-cash', 'Cash', 'SWIFT transfers from 3k$ (Pay/Accept invoice)', 'About MoneySwap', 'Support'),
+    'ru': ('Безналичные', 'Наличные', 'SWIFT переводы (Оплатить/Принять инвойс)', 'О MoneySwap', 'Поддержка'),
+    'en': ('Non-cash', 'Cash', 'SWIFT transfers from (Pay/Accept invoice)', 'About MoneySwap', 'Support'),
 }
 
 
