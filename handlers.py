@@ -23,7 +23,7 @@ from sqlalchemy import insert, select, update, and_
 from config import BEARER_TOKEN, FEEDBACK_REASON_PREFIX
 
 from keyboards import (create_start_keyboard,
-                       create_start_inline_keyboard,
+                       create_start_inline_keyboard, create_swift_condition_kb,
                        create_swift_start_kb,
                        add_cancel_btn_to_kb,
                        create_kb_to_main,
@@ -495,20 +495,27 @@ async def invoice_swift_sepa(callback: types.CallbackQuery,
         select_language = 'ru'
     # language_code = callback.from_user.language_code
 
-    _text = 'Выберите действие' if select_language == 'ru' else 'Choose an action'
+    # _text = 'Выберите действие' if select_language == 'ru' else 'Choose an action'
+    _text = '<b>Введите сумму платежа</b>\n\n⚠️ <u>Внимание: минимальная сумма платежа составляет 3000$.</u>' if select_language == 'ru'\
+                 else '<b>Input payment amount</b>\n\n⚠️ <u>Please note: the minimum payment amount is 3000$</u>'
+
     # data = await state.get_data()
 
     # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
 
-    await state.set_state(SwiftSepaStates.request_type)
-    await state.update_data(order=dict())
+    # await state.set_state(SwiftSepaStates.request_type)
+    await state.set_state(SwiftSepaStates.amount)
+
 
     # chat_id, message_id = main_menu_msg
     chat_id = callback.message.chat.id
     message_id = callback.message.message_id
 
+    await state.update_data(order=dict(),
+                            state_msg=(chat_id, message_id))
     # swift_sepa_kb = create_swift_sepa_kb()
-    swift_sepa_kb = create_swift_start_kb(select_language)
+    # swift_sepa_kb = create_swift_start_kb(select_language)
+    swift_sepa_kb = create_swift_condition_kb(select_language)
     swift_sepa_kb = add_cancel_btn_to_kb(select_language,
                                          swift_sepa_kb)
 
@@ -1256,10 +1263,14 @@ async def send_order(callback: types.CallbackQuery,
     order_id = new_order.id
     marker = 'swift/sepa'
 
-    _text = 'Ваша заявка успешно отправлена!' if select_language == 'ru'\
-                 else 'your request has been sent successfully!'
+    # _text = 'Ваша заявка успешно отправлена!' if select_language == 'ru'\
+    #              else 'your request has been sent successfully!'
+    if select_language == 'ru':
+        _text = '✅ Ваша заявка успешно принята. Ожидайте результатов проверки.\n\nПри положительном решении <b><u>Вам будет отправлена ссылка на вступление в чат</u></b> с персональным менеджером от нашей партнерской компании, который будет сопровождать и вести ваш перевод.'
+    else:
+        _text = '✅ Your request has been successfully accepted. Wait for the verification results.\n\nIf the decision is positive, <b><u>you will be sent a link to join a chat</u></b> with a personal manager from our partner company, who will accompany and manage your transfer.'
 
-    await callback.answer(text='Ваша заявка успешно отправлена!',
+    await callback.answer(text=_text,
                           show_alert=True)
     
     await start(callback,
@@ -1320,6 +1331,8 @@ async def request_type_state(callback: types.CallbackQuery,
                              bot: Bot):
     data = await state.get_data()
 
+    state_process = data.get('state_process')
+    state_msg = data.get('state_msg')
     select_language = data.get('select_language')
 
     if not select_language:
@@ -1343,26 +1356,32 @@ async def request_type_state(callback: types.CallbackQuery,
     # state_msg: types.Message = data.get('state_msg')
     # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
     # chat_id, message_id = main_menu_msg
-    chat_id = callback.message.chat.id
-    message_id = callback.message.message_id
+    # chat_id = callback.message.chat.id
+    # message_id = callback.message.message_id
+    chat_id, message_id = state_msg
 
     request_type = 'Оплатить платеж' if callback.data == 'pay_payment' else 'Принять платеж'
 
     if select_language == 'ru':
-        state_process = f'Тип заявки: {request_type}'
-        _text = f'{state_process}\n<b>Опишите задачу, чтобы менеджеры могли быстрее все понять и оперативно начать выполнение...</b>'
+        state_process += f'\nТип заявки: {request_type}'
+        _text = f'{state_process}\n<b>Подробно опишите перевод</b>\n\n<u>Укажите все необходимые детали: из какой страны и в какую осуществляется перевод, назначение платежа и любые другие значимые детали.</u>'
     else:
         request_dict = {
             'Оплатить платеж': 'Make a Payment',
             'Принять платеж': 'Receive a Payment',
         }
-        state_process = f'Request Type: {request_dict.get(request_type)}'
-        _text = f'{state_process}\n<b>Describe your request so that managers can quickly understand and promptly start processing it…</b>'
+        state_process += f'\nRequest Type: {request_dict.get(request_type)}'
+        _text = f'{state_process}\n<b>Describe your request in detail</b>\n\n<u>Please provide all necessary details: from and to which country the transfer is made, the purpose of the payment and any other significant details.</u>'
     #
     order = data.get('order')
     order['request_type'] = request_type
-    await state.update_data(order=order)
-    await state.update_data(state_msg=(chat_id, message_id))
+
+    await state.update_data(order=order,
+                            state_process=state_process,
+                            request_type=callback.data)
+    # await state.update_data(state_process=state_process)
+    # await state.update_data(request_type=callback.data)
+    # await state.update_data(state_msg=(chat_id, message_id))
     #
     # username_from_state = data.get('username')
     # print(username_from_state)
@@ -1371,15 +1390,12 @@ async def request_type_state(callback: types.CallbackQuery,
     # print(callback.from_user.username)
     # await state.update_data(username=callback.message.from_user.username)
     #
-    await state.update_data(state_process=state_process)
     # print(state_msg)
-    await state.update_data(request_type=callback.data)
 
     # await state.update_data(proccess_msg=(chat_id, message_id))
 
     # await state.set_state(SwiftSepaStates.country)
     await state.set_state(SwiftSepaStates.task_text)
-
 
     kb = add_cancel_btn_to_kb(select_language)
 
@@ -1466,31 +1482,43 @@ async def amount_state(message: types.Message,
                        state: FSMContext,
                        bot: Bot):
     language_code = message.from_user.language_code
+    
     data = await state.get_data()
-    # state_msg: types.Message = data.get('state_msg')
-    # state_msg: tuple[str, str] = data.get('state_msg')
-    # chat_id, message_id = state_msg
+    
+    select_language = data.get('select_language')
     state_msg: tuple[str,str] = data.get('state_msg')
     chat_id, message_id = state_msg
 
-    await state.update_data(amount=message.text)
+    if select_language == 'ru':
+        state_process = f'Сумма: {message.text}'
+        _text = f'{state_process}\n\n<b>Выберите тип заявки</b>'
+    else:
+        # request_dict = {
+        #     'Оплатить платеж': 'Make a Payment',
+        #     'Принять платеж': 'Receive a Payment',
+        # }
+        state_process = f'Amount: {message.text}'
+        _text = f'{state_process}\n\n<b>Choose request type</b>'
 
-    #
     order = data.get('order')
     order['amount'] = message.text
-    await state.update_data(order=order)
-    #
 
-    state_process = data.get('state_process')
-    state_process += f'\nСумма: {message.text}'
-    await state.update_data(state_process=state_process)
+    await state.update_data(order=order,
+                            amount=message.text,
+                            state_process=state_process)
+    # await state.update_data(amount=message.text)
+    # await state.update_data(state_process=state_process)
 
-    await state.set_state(SwiftSepaStates.task_text)
+    # state_process = data.get('state_process')
+    # state_process += f'\nСумма: {message.text}'
 
+    # await state.set_state(SwiftSepaStates.task_text)
+    await state.set_state(SwiftSepaStates.request_type)
+
+    kb = create_swift_start_kb(language_code)
     kb = add_cancel_btn_to_kb(language_code)
 
-    #
-    await bot.edit_message_text(f'{state_process}\n<b>Опишите задачу, чтобы менеджеры могли быстрее все понять и оперативно начать выполнение...</b>',
+    await bot.edit_message_text(text=_text,
                                 chat_id=chat_id,
                                 message_id=message_id,
                                 reply_markup=kb.as_markup())
@@ -1515,22 +1543,15 @@ async def task_text_state(message: types.Message,
 
     if not select_language:
         select_language = 'ru'
-    # language_code = message.from_user.language_code
 
-    # data = await state.get_data()
-    # state_msg: types.Message = data.get('state_msg')
-    # state_msg: tuple[str, str] = data.get('state_msg')
-    # chat_id, message_id = state_msg
     state_msg: tuple[str,str] = data.get('state_msg')
     chat_id, message_id = state_msg
 
     await state.update_data(task_text=message.text)
 
-    #
     order = data.get('order')
     order['comment'] = message.text
     await state.update_data(order=order)
-    #
 
     state_process = data.get('state_process')
 
@@ -1540,6 +1561,7 @@ async def task_text_state(message: types.Message,
     else:
         state_process += f'\nComment: {message.text}'
         state_done_text = 'Request is done.'
+
     await state.update_data(state_process=state_process)
 
     # preview_response_text = await swift_sepa_data(state)
@@ -1561,7 +1583,7 @@ async def task_text_state(message: types.Message,
     # await message.answer(text=chat_link.invite_link)
 
     #
-    await bot.edit_message_text(f'{state_process}\n<b>{state_done_text}</b>',
+    await bot.edit_message_text(f'{state_process}\n\n<b>{state_done_text}</b>',
                                 chat_id=chat_id,
                                 message_id=message_id,
                                 reply_markup=kb.as_markup())
@@ -1987,7 +2009,8 @@ async def send_mass_message(bot: Bot,
 async def try_send_order(bot: Bot,
                          session: Session,
                          user_id: int,
-                         order_id: int):
+                         order_id: int,
+                         order_status: str | None):
     with session as session:
         CustomOrder = Base.classes.general_models_customorder
         Guest = Base.classes.general_models_guest
@@ -2013,10 +2036,27 @@ async def try_send_order(bot: Bot,
     if order:
         order, guest = order[0]
         chat_link = guest.chat_link
+        language_code = guest.language_code
 
         print(order.__dict__)
         
-        # if chat_link is None:
+        if order_status is not None and order_status == 'reject':
+            if language_code == 'ru':
+                _text = '❌ Заявка отклонена\n\nК сожалению, Ваша заявка отклонена. Мы не сможем осуществить данный перевод.'
+            else:
+                _text = '❌ Request rejected\n\nUnfortunately, your request has been rejected. We will not be able to complete this transfer.'
+
+            try:
+                await bot.send_message(chat_id=user_id,
+                                       text=_text)
+            # except TelegramForbiddenError as ex:
+            #     print(ex)
+            except Exception as ex:
+                print(ex)
+            
+            return
+        # else:
+
         if chat_link is None:
             print('делаю пост запрос')
 
@@ -2026,7 +2066,7 @@ async def try_send_order(bot: Bot,
             # json_order = {
             #     "order": '{' + body + '}'
             # }
-            body = {'comment': f'Тип заявки: {order.request_type}| {order.comment}'}
+            body = {'comment': f'Тип заявки: {order.request_type} | Сумма: {order.amount} | Коммент: {order.comment}'}
 
             json_order = json.dumps(body,
                                     ensure_ascii=False)
@@ -2073,7 +2113,11 @@ async def try_send_order(bot: Bot,
         else:
             print('ссылка из базы', guest.chat_link)
 
-        chat_link_text = f'Ссылка на чат по Вашему обращению -> {chat_link}\n\n<i>*Можете удалить это сообщение, чтобы не портить вид чата, мы будем дублировать ссылку на чат в главном сообщении.</i>'
+        # chat_link_text = f'Ссылка на чат по Вашему обращению -> {chat_link}\n\n<i>*Можете удалить это сообщение, чтобы не портить вид чата, мы будем дублировать ссылку на чат в главном сообщении.</i>'
+        if language_code == 'ru':
+            chat_link_text = f'✅ Заявка одобрена\n\nВаша заявка успешно прошла проверку. Для обсуждения деталей вступите в чат с персональным менеджером нашей партнерской компании → {chat_link}'
+        else:
+            chat_link_text = f'✅ Request approved\n\nYour request has been successfully verified. To discuss details, join the chat with the personal manager of our partner company → {chat_link}'
 
         try:
             await bot.send_message(chat_id=user_id,

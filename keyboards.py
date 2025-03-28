@@ -154,6 +154,28 @@ def create_swift_start_kb(language_code: str):
     kb.add(types.InlineKeyboardButton(text=swift_sepa_tuple[1],
                                       callback_data='access_payment'))
     
+    # kb.row(types.InlineKeyboardButton(text=swift_sepa_tuple[2],
+    #                                   url=telegraf_url))
+
+    return kb
+
+
+def create_swift_condition_kb(language_code: str):
+    if language_code == 'ru':
+        swift_sepa_tuple = start_swift_sepa_text.get('ru')
+        telegraf_url = 'https://telegra.ph/Usloviya-obmena-SWIFTSEPA-s-MoneySwap-11-21'
+    else:
+        swift_sepa_tuple = start_swift_sepa_text.get('en')
+        telegraf_url = 'https://telegra.ph/SWIFTSEPA-Exchange-Terms-with-MoneySwap-02-06'  
+
+    # swift_sepa_tuple = start_swift_sepa_text.get('ru') if language_code == 'ru' \
+    #                     else start_swift_sepa_text.get('en')
+    kb = InlineKeyboardBuilder()
+    # kb.add(types.InlineKeyboardButton(text=swift_sepa_tuple[0],
+    #                                   callback_data='pay_payment'))
+    # kb.add(types.InlineKeyboardButton(text=swift_sepa_tuple[1],
+    #                                   callback_data='access_payment'))
+    
     kb.row(types.InlineKeyboardButton(text=swift_sepa_tuple[2],
                                       url=telegraf_url))
 
