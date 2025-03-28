@@ -1516,7 +1516,8 @@ async def amount_state(message: types.Message,
     await state.set_state(SwiftSepaStates.request_type)
 
     kb = create_swift_start_kb(language_code)
-    kb = add_cancel_btn_to_kb(language_code)
+    kb = add_cancel_btn_to_kb(language_code,
+                              kb=kb)
 
     await bot.edit_message_text(text=_text,
                                 chat_id=chat_id,
