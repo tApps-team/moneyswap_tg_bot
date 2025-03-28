@@ -1266,9 +1266,9 @@ async def send_order(callback: types.CallbackQuery,
     # _text = 'Ваша заявка успешно отправлена!' if select_language == 'ru'\
     #              else 'your request has been sent successfully!'
     if select_language == 'ru':
-        _text = '✅ Ваша заявка успешно принята. При положительном решении Вам будет отправлена ссылка на вступление в чат с персональным менеджером от нашей партнерской компании, который будет сопровождать ваш перевод'
+        _text = '⏳ Ваша заявка успешно принята. При положительном решении Вам будет отправлена ссылка на вступление в чат с персональным менеджером от нашей партнерской компании, который будет сопровождать ваш перевод'
     else:
-        _text = '✅ Your request has been successfully accepted. If the decision is positive, you will be sent a link to join the chat with a personal manager from our partner company, who will accompany your transfer'
+        _text = '⏳ Your request has been successfully accepted. If the decision is positive, you will be sent a link to join the chat with a personal manager from our partner company, who will accompany your transfer'
 
     await callback.answer(text=_text,
                           show_alert=True)
