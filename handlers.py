@@ -496,8 +496,8 @@ async def invoice_swift_sepa(callback: types.CallbackQuery,
     # language_code = callback.from_user.language_code
 
     # _text = 'Выберите действие' if select_language == 'ru' else 'Choose an action'
-    _text = '<b>Введите сумму и <u>валюту</u> платежа</b>\n\n⚠️ <u>Внимание: минимальная сумма платежа составляет 3000$.</u>' if select_language == 'ru'\
-                 else '<b>Input payment amount</b>\n\n⚠️ <u>Please note: the minimum payment amount is 3000$</u>'
+    _text = '<b>Введите сумму и валюту платежа</b>\n\n⚠️ <u>Внимание: минимальная сумма платежа составляет 3000$.</u>' if select_language == 'ru'\
+                 else '<b>Input payment and valute amount</b>\n\n⚠️ <u>Please note: the minimum payment amount is 3000$</u>'
 
     # data = await state.get_data()
 
