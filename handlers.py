@@ -1481,7 +1481,7 @@ async def amount_state(message: types.Message,
                        session: Session,
                        state: FSMContext,
                        bot: Bot):
-    language_code = message.from_user.language_code
+    # language_code = message.from_user.language_code
     
     data = await state.get_data()
     
@@ -1515,8 +1515,8 @@ async def amount_state(message: types.Message,
     # await state.set_state(SwiftSepaStates.task_text)
     await state.set_state(SwiftSepaStates.request_type)
 
-    kb = create_swift_start_kb(language_code)
-    kb = add_cancel_btn_to_kb(language_code,
+    kb = create_swift_start_kb(select_language)
+    kb = add_cancel_btn_to_kb(select_language,
                               kb=kb)
 
     await bot.edit_message_text(text=_text,
