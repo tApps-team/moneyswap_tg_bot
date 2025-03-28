@@ -496,7 +496,7 @@ async def invoice_swift_sepa(callback: types.CallbackQuery,
     # language_code = callback.from_user.language_code
 
     # _text = 'Выберите действие' if select_language == 'ru' else 'Choose an action'
-    _text = '<b>Введите сумму платежа</b>\n\n⚠️ <u>Внимание: минимальная сумма платежа составляет 3000$.</u>' if select_language == 'ru'\
+    _text = '<b>Введите сумму и <u>валюту</u> платежа</b>\n\n⚠️ <u>Внимание: минимальная сумма платежа составляет 3000$.</u>' if select_language == 'ru'\
                  else '<b>Input payment amount</b>\n\n⚠️ <u>Please note: the minimum payment amount is 3000$</u>'
 
     # data = await state.get_data()
@@ -2043,9 +2043,9 @@ async def try_send_order(bot: Bot,
         
         if order_status is not None and order_status == 'reject':
             if language_code == 'ru':
-                _text = '❌ Заявка отклонена\n\nК сожалению, Ваша заявка отклонена. Мы не сможем осуществить данный перевод.'
+                _text = '❌ <b>Заявка отклонена</b>\n\nК сожалению, Ваша заявка отклонена. Мы не сможем осуществить данный перевод.'
             else:
-                _text = '❌ Request rejected\n\nUnfortunately, your request has been rejected. We will not be able to complete this transfer.'
+                _text = '❌ <b>Request rejected</b>\n\nUnfortunately, your request has been rejected. We will not be able to complete this transfer.'
 
             try:
                 await bot.send_message(chat_id=user_id,
@@ -2116,9 +2116,9 @@ async def try_send_order(bot: Bot,
 
         # chat_link_text = f'Ссылка на чат по Вашему обращению -> {chat_link}\n\n<i>*Можете удалить это сообщение, чтобы не портить вид чата, мы будем дублировать ссылку на чат в главном сообщении.</i>'
         if language_code == 'ru':
-            chat_link_text = f'✅ Заявка одобрена\n\nВаша заявка успешно прошла проверку. Для обсуждения деталей вступите в чат с персональным менеджером нашей партнерской компании → {chat_link}'
+            chat_link_text = f'✅ <b>Заявка одобрена</b>\n\nВаша заявка успешно прошла проверку. Для обсуждения деталей вступите в чат с персональным менеджером нашей партнерской компании → {chat_link}'
         else:
-            chat_link_text = f'✅ Request approved\n\nYour request has been successfully verified. To discuss details, join the chat with the personal manager of our partner company → {chat_link}'
+            chat_link_text = f'✅ <b>Request approved</b>\n\nYour request has been successfully verified. To discuss details, join the chat with the personal manager of our partner company → {chat_link}'
 
         try:
             await bot.send_message(chat_id=user_id,
