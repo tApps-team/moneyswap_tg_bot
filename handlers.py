@@ -1364,14 +1364,14 @@ async def request_type_state(callback: types.CallbackQuery,
 
     if select_language == 'ru':
         state_process += f'\nТип заявки: {request_type}'
-        _text = f'{state_process}\n<b>Подробно опишите перевод</b>\n\n<u>Укажите все необходимые детали: из какой страны и в какую осуществляется перевод, назначение платежа и любые другие значимые детали.</u>'
+        _text = f'{state_process}\n\n<b>Подробно опишите перевод</b>\n\n<u>Укажите все необходимые детали: из какой страны и в какую осуществляется перевод, назначение платежа и любые другие значимые детали.</u>'
     else:
         request_dict = {
             'Оплатить платеж': 'Make a Payment',
             'Принять платеж': 'Receive a Payment',
         }
         state_process += f'\nRequest Type: {request_dict.get(request_type)}'
-        _text = f'{state_process}\n<b>Describe your request in detail</b>\n\n<u>Please provide all necessary details: from and to which country the transfer is made, the purpose of the payment and any other significant details.</u>'
+        _text = f'{state_process}\n\n<b>Describe your request in detail</b>\n\n<u>Please provide all necessary details: from and to which country the transfer is made, the purpose of the payment and any other significant details.</u>'
     #
     order = data.get('order')
     order['request_type'] = request_type
