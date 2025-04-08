@@ -1495,7 +1495,7 @@ async def amount_state(message: types.Message,
     chat_id, message_id = state_msg
 
     if select_language == 'ru':
-        state_process += f'Сумма: {message.text}'
+        state_process += f'\nСумма: {message.text}'
         # _text = f'{state_process}\n\n<b>Выберите тип заявки</b>'
         _text = f'{state_process}\n\n<b>Подробно опишите перевод</b>\n\n<u>Укажите все необходимые детали: из какой страны и в какую осуществляется перевод, назначение платежа и любые другие значимые детали.</u>'
     else:
@@ -1503,7 +1503,7 @@ async def amount_state(message: types.Message,
         #     'Оплатить платеж': 'Make a Payment',
         #     'Принять платеж': 'Receive a Payment',
         # }
-        state_process += f'Amount: {message.text}'
+        state_process += f'\nAmount: {message.text}'
         # _text = f'{state_process}\n\n<b>Choose request type</b>'
         _text = f'{state_process}\n\n<b>Describe your request in detail</b>\n\n<u>Please provide all necessary details: from and to which country the transfer is made, the purpose of the payment and any other significant details.</u>'
 
