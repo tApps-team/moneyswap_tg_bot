@@ -495,16 +495,16 @@ async def invoice_swift_sepa(callback: types.CallbackQuery,
         select_language = 'ru'
     # language_code = callback.from_user.language_code
 
-    # _text = 'Выберите действие' if select_language == 'ru' else 'Choose an action'
-    _text = '<b>Введите сумму и валюту платежа</b>\n\n⚠️ <u>Внимание: минимальная сумма платежа составляет 3000$.</u>' if select_language == 'ru'\
-                 else '<b>Input payment and valute amount</b>\n\n⚠️ <u>Please note: the minimum payment amount is 3000$</u>'
+    _text = 'Выберите действие' if select_language == 'ru' else 'Choose an action'
+    # _text = '<b>Введите сумму и валюту платежа</b>\n\n⚠️ <u>Внимание: минимальная сумма платежа составляет 3000$.</u>' if select_language == 'ru'\
+    #              else '<b>Input payment and valute amount</b>\n\n⚠️ <u>Please note: the minimum payment amount is 3000$</u>'
 
     # data = await state.get_data()
 
     # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
 
-    # await state.set_state(SwiftSepaStates.request_type)
-    await state.set_state(SwiftSepaStates.amount)
+    await state.set_state(SwiftSepaStates.request_type)
+    # await state.set_state(SwiftSepaStates.amount)
 
 
     # chat_id, message_id = main_menu_msg
@@ -514,8 +514,8 @@ async def invoice_swift_sepa(callback: types.CallbackQuery,
     await state.update_data(order=dict(),
                             state_msg=(chat_id, message_id))
     # swift_sepa_kb = create_swift_sepa_kb()
-    # swift_sepa_kb = create_swift_start_kb(select_language)
-    swift_sepa_kb = create_swift_condition_kb(select_language)
+    swift_sepa_kb = create_swift_start_kb(select_language)
+    # swift_sepa_kb = create_swift_condition_kb(select_language)
     swift_sepa_kb = add_cancel_btn_to_kb(select_language,
                                          swift_sepa_kb)
 
@@ -1331,7 +1331,7 @@ async def request_type_state(callback: types.CallbackQuery,
                              bot: Bot):
     data = await state.get_data()
 
-    state_process = data.get('state_process')
+    # state_process = data.get('state_process')
     state_msg = data.get('state_msg')
     select_language = data.get('select_language')
 
@@ -1361,17 +1361,21 @@ async def request_type_state(callback: types.CallbackQuery,
     chat_id, message_id = state_msg
 
     request_type = 'Оплатить платеж' if callback.data == 'pay_payment' else 'Принять платеж'
+    # _text = '<b>Введите сумму и валюту платежа</b>\n\n⚠️ <u>Внимание: минимальная сумма платежа составляет 3000$.</u>' if select_language == 'ru'\
+    #              else '<b>Input payment and valute amount</b>\n\n⚠️ <u>Please note: the minimum payment amount is 3000$</u>'
 
     if select_language == 'ru':
-        state_process += f'\nТип заявки: {request_type}'
-        _text = f'{state_process}\n\n<b>Подробно опишите перевод</b>\n\n<u>Укажите все необходимые детали: из какой страны и в какую осуществляется перевод, назначение платежа и любые другие значимые детали.</u>'
+        state_process = f'\nТип заявки: {request_type}'
+        # _text = f'{state_process}\n\n<b>Подробно опишите перевод</b>\n\n<u>Укажите все необходимые детали: из какой страны и в какую осуществляется перевод, назначение платежа и любые другие значимые детали.</u>'
+        _text = f'{state_process}\n\n<b>Введите сумму и валюту платежа</b>\n\n⚠️ <u>Внимание: минимальная сумма платежа составляет 3000$.</u>'
     else:
         request_dict = {
             'Оплатить платеж': 'Make a Payment',
             'Принять платеж': 'Receive a Payment',
         }
-        state_process += f'\nRequest Type: {request_dict.get(request_type)}'
-        _text = f'{state_process}\n\n<b>Describe your request in detail</b>\n\n<u>Please provide all necessary details: from and to which country the transfer is made, the purpose of the payment and any other significant details.</u>'
+        state_process = f'\nRequest Type: {request_dict.get(request_type)}'
+        # _text = f'{state_process}\n\n<b>Describe your request in detail</b>\n\n<u>Please provide all necessary details: from and to which country the transfer is made, the purpose of the payment and any other significant details.</u>'
+        _text = f'{state_process}\n\n<b>Input payment and valute amount</b>\n\n⚠️ <u>Please note: the minimum payment amount is 3000$</u>'
     #
     order = data.get('order')
     order['request_type'] = request_type
@@ -1395,7 +1399,7 @@ async def request_type_state(callback: types.CallbackQuery,
     # await state.update_data(proccess_msg=(chat_id, message_id))
 
     # await state.set_state(SwiftSepaStates.country)
-    await state.set_state(SwiftSepaStates.task_text)
+    await state.set_state(SwiftSepaStates.amount)
 
     kb = add_cancel_btn_to_kb(select_language)
 
@@ -1487,18 +1491,21 @@ async def amount_state(message: types.Message,
     
     select_language = data.get('select_language')
     state_msg: tuple[str,str] = data.get('state_msg')
+    state_process: tuple[str,str] = data.get('state_process')
     chat_id, message_id = state_msg
 
     if select_language == 'ru':
-        state_process = f'Сумма: {message.text}'
-        _text = f'{state_process}\n\n<b>Выберите тип заявки</b>'
+        state_process += f'Сумма: {message.text}'
+        # _text = f'{state_process}\n\n<b>Выберите тип заявки</b>'
+        _text = f'{state_process}\n\n<b>Подробно опишите перевод</b>\n\n<u>Укажите все необходимые детали: из какой страны и в какую осуществляется перевод, назначение платежа и любые другие значимые детали.</u>'
     else:
         # request_dict = {
         #     'Оплатить платеж': 'Make a Payment',
         #     'Принять платеж': 'Receive a Payment',
         # }
-        state_process = f'Amount: {message.text}'
-        _text = f'{state_process}\n\n<b>Choose request type</b>'
+        state_process += f'Amount: {message.text}'
+        # _text = f'{state_process}\n\n<b>Choose request type</b>'
+        _text = f'{state_process}\n\n<b>Describe your request in detail</b>\n\n<u>Please provide all necessary details: from and to which country the transfer is made, the purpose of the payment and any other significant details.</u>'
 
     order = data.get('order')
     order['amount'] = message.text
@@ -1513,9 +1520,9 @@ async def amount_state(message: types.Message,
     # state_process += f'\nСумма: {message.text}'
 
     # await state.set_state(SwiftSepaStates.task_text)
-    await state.set_state(SwiftSepaStates.request_type)
+    await state.set_state(SwiftSepaStates.task_text)
 
-    kb = create_swift_start_kb(select_language)
+    # kb = create_swift_start_kb(select_language)
     kb = add_cancel_btn_to_kb(select_language,
                               kb=kb)
 

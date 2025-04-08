@@ -154,8 +154,8 @@ def create_swift_start_kb(language_code: str):
     kb.add(types.InlineKeyboardButton(text=swift_sepa_tuple[1],
                                       callback_data='access_payment'))
     
-    # kb.row(types.InlineKeyboardButton(text=swift_sepa_tuple[2],
-    #                                   url=telegraf_url))
+    kb.row(types.InlineKeyboardButton(text=swift_sepa_tuple[2],
+                                      url=telegraf_url))
 
     return kb
 
