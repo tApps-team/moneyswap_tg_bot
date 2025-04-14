@@ -195,3 +195,23 @@ async def swift_sepa_data(state: FSMContext):
          task_text),
         )
     return res
+
+
+def validate_amount(amount_text: str):
+    len_amount_text = len(amount_text.split())
+
+    if len_amount_text == 1:
+        if amount_text.isdigit():
+            return True
+        elif amount_text[1:].isdigit():
+            return True
+        elif amount_text[:-1].isdigit():
+            return True
+        else:
+            return False
+    else:
+        amount_list = amount_text.split()
+        
+        for amount_el in amount_list:
+            if amount_el.isdigit():
+                return True

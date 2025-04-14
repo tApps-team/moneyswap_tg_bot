@@ -37,7 +37,7 @@ from keyboards import (create_start_keyboard,
 
 from states import SwiftSepaStates, FeedbackFormStates
 
-from utils.handlers import try_add_file_ids_to_db, try_add_file_ids, swift_sepa_data
+from utils.handlers import try_add_file_ids_to_db, try_add_file_ids, swift_sepa_data, validate_amount
 from utils.multilanguage import start_text_dict
 
 from db.base import Base
@@ -1493,6 +1493,23 @@ async def amount_state(message: types.Message,
     state_msg: tuple[str,str] = data.get('state_msg')
     state_process: tuple[str,str] = data.get('state_process')
     chat_id, message_id = state_msg
+
+    #validation
+    amount_text = message.text.strip()
+
+    if not validate_amount():
+        validation_text = f'Некорректные данные, введите корректное значение (Пример формата: 3000$, $3000, 3000 $, 3000 usd)'
+        # await state.update_data(validation_text=validation_text)
+        _text = state_process + f'<b>{validation_text}</b>'
+        
+        kb = add_cancel_btn_to_kb(select_language)
+        
+        await bot.edit_message_text(text=_text,
+                                    chat_id=chat_id,
+                                    message_id=message_id,
+                                    reply_markup=kb.as_markup())
+        return
+        # возвращаемся к этому же шагу
 
     if select_language == 'ru':
         state_process += f'\nСумма: {message.text}'
