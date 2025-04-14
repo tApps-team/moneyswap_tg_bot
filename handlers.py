@@ -1511,7 +1511,7 @@ async def amount_state(message: types.Message,
                                     chat_id=chat_id,
                                     message_id=message_id,
                                     reply_markup=kb.as_markup())
-        await message.delete()
+        # await message.delete()
         return
         # возвращаемся к этому же шагу
 
