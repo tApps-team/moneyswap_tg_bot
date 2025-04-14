@@ -1497,7 +1497,7 @@ async def amount_state(message: types.Message,
     #validation
     amount_text = message.text.strip()
 
-    if not validate_amount():
+    if not validate_amount(amount_text):
         validation_text = f'Некорректные данные, введите корректное значение (Пример формата: 3000$, $3000, 3000 $, 3000 usd)'
         # await state.update_data(validation_text=validation_text)
         _text = state_process + f'<b>{validation_text}</b>'
@@ -1508,6 +1508,7 @@ async def amount_state(message: types.Message,
                                     chat_id=chat_id,
                                     message_id=message_id,
                                     reply_markup=kb.as_markup())
+        await message.delete()
         return
         # возвращаемся к этому же шагу
 
