@@ -1498,7 +1498,10 @@ async def amount_state(message: types.Message,
     amount_text = message.text.strip()
 
     if not validate_amount(amount_text):
-        validation_text = f'Некорректные данные, введите корректное значение (Пример формата: 3000$, $3000, 3000 $, 3000 usd)'
+        if select_language == 'ru':
+            validation_text = f'\n\nНекорректные данные, введите корректное значение (Пример формата: 3000$, $3000, 3000 $, 3000 usd)'
+        else:
+            validation_text = f'\n\nIncorrect data, please enter a correct value (Example format: 3000$, $3000, 3000 $, 3000 usd)'
         # await state.update_data(validation_text=validation_text)
         _text = state_process + f'<b>{validation_text}</b>'
         
