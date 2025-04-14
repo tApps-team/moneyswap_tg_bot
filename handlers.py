@@ -1498,6 +1498,8 @@ async def amount_state(message: types.Message,
     amount_text = message.text.strip()
 
     if not validate_amount(amount_text):
+        await state.set_state(SwiftSepaStates.amount)
+
         if select_language == 'ru':
             validation_text = f'\n\nНекорректные данные, введите корректное значение (Пример формата: 3000$, $3000, 3000 $, 3000 usd)'
         else:
@@ -1511,7 +1513,8 @@ async def amount_state(message: types.Message,
                                     chat_id=chat_id,
                                     message_id=message_id,
                                     reply_markup=kb.as_markup())
-        # await message.delete()
+        
+        await message.delete()
         return
         # возвращаемся к этому же шагу
 
