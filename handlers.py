@@ -1501,9 +1501,9 @@ async def amount_state(message: types.Message,
         await state.set_state(SwiftSepaStates.amount)
 
         if select_language == 'ru':
-            validation_text = f'\n\n❗️Некорректные данные (передано - {amount_text})\n\nВведите корректное значение (Пример формата: 3000$, $3000, 3000 $, 3000 usd)'
+            validation_text = f'\n\n❗️Некорректные данные (передано - {amount_text})\n\nВведите корректное значение (Пример формата: 3000$, $3000, 3000 $, 3000 usd, 3000 долларов)'
         else:
-            validation_text = f'\n\n❗️Incorrect data (send - {amount_text})\n\nPlease enter a correct value (Example format: 3000$, $3000, 3000 $, 3000 usd)'
+            validation_text = f'\n\n❗️Incorrect data (send - {amount_text})\n\nPlease enter a correct value (Example format: 3000$, $3000, 3000 $, 3000 usd, 3000 dollars)'
         # await state.update_data(validation_text=validation_text)
         _text = state_process + f'<b>{validation_text}</b>'
         
