@@ -22,7 +22,7 @@ from sqlalchemy import insert, select, update, and_
 
 from config import BEARER_TOKEN, FEEDBACK_REASON_PREFIX
 
-from keyboards import (create_start_keyboard,
+from keyboards import (create_add_review_kb, create_start_keyboard,
                        create_start_inline_keyboard, create_swift_condition_kb,
                        create_swift_start_kb,
                        add_cancel_btn_to_kb,
@@ -37,7 +37,7 @@ from keyboards import (create_start_keyboard,
 
 from states import SwiftSepaStates, FeedbackFormStates
 
-from utils.handlers import try_add_file_ids_to_db, try_add_file_ids, swift_sepa_data, validate_amount
+from utils.handlers import get_exchange_name, try_add_file_ids_to_db, try_add_file_ids, swift_sepa_data, validate_amount
 from utils.multilanguage import start_text_dict
 
 from db.base import Base
@@ -254,6 +254,7 @@ async def start(message: types.Message | types.CallbackQuery,
 
     # language_code = message.from_user.language_code
     # print(language_code)
+    review_msg_dict = None
 
     is_callback = isinstance(message, types.CallbackQuery)
 
@@ -268,6 +269,16 @@ async def start(message: types.Message | types.CallbackQuery,
 
         if len(query_param) > 1:
             utm_source = query_param[-1]
+
+            if utm_source.startswith('review'):
+                params = utm_source.split('_')
+                
+                review_msg_dict = {
+                    'marker': params[1],
+                    'exchange_id': params[-1],
+                }
+
+                utm_source = 'from_site'
             
     with session as session:
         Guest = Base.classes.general_models_guest
@@ -305,6 +316,33 @@ async def start(message: types.Message | types.CallbackQuery,
             session.commit()
         else:
             chat_link  = guest.chat_link
+
+    has_pinned_message = message.chat.pinned_message.text
+
+    if review_msg_dict and has_pinned_message:
+        exchange_name = get_exchange_name(review_msg_dict,
+                                          session)
+        if exchange_name is not None:
+            _kb = create_add_review_kb(review_msg_dict,
+                                       select_language)
+            # _text = f'Оставить отзыв на обменник {exchange_name}'
+            if select_language == 'ru':
+                _text = f'Оставить отзыв на обменник {exchange_name}'
+            else:
+                _text = f'Add review to exchanger {exchange_name}'
+        else:
+            _kb = None
+
+            if select_language == 'ru':
+                _text = 'Не удалось найти обменник для отзыва'
+            else:
+                _text = 'Exchanger to add review not found'
+
+        await bot.send_message(chat_id=message.from_user.id,
+                               text=_text,
+                               reply_markup=_kb.as_markup())
+            
+        return
 
     start_kb = create_start_inline_keyboard(tg_id,
                                             select_language)
@@ -357,6 +395,14 @@ async def start(message: types.Message | types.CallbackQuery,
             await message.delete()
         except Exception:
             pass
+    if review_msg_dict:
+        exchange_name = get_exchange_name(review_msg_dict,
+                                          session)
+        if exchange_name is not None:
+            _kb = create_add_review_kb(review_msg_dict)
+            await bot.send_message(chat_id=message.from_user.id,
+                                text=f'Оставить отзыв на обменник {exchange_name}',
+                                reply_markup=_kb.as_markup())
 
 
 @main_router.callback_query(F.data.startswith('lang'))

@@ -224,3 +224,18 @@ def add_switch_language_btn(_kb: InlineKeyboardBuilder,
                                        callback_data=_callback_data))
 
     return _kb
+
+
+def create_add_review_kb(review_msg_dict: dict,
+                         selected_language: str):
+    _kb = InlineKeyboardBuilder()
+
+    marker = review_msg_dict.get('marker')
+    exchange_id = review_msg_dict.get('exchange_id')
+
+    url = f'https://t.me/MoneySwap_robot/MoneySwap?startapp={exchange_id}__{marker}'
+    _text = 'Оставить отзыв' if selected_language == 'ru' else 'Add review'
+    _kb.row(types.InlineKeyboardButton(text=_text,
+                                        url=url))
+    
+    return _kb

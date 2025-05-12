@@ -1,7 +1,7 @@
 from aiogram import types, Bot
 from aiogram.fsm.context import FSMContext
 
-from sqlalchemy import update
+from sqlalchemy import update, select
 from sqlalchemy.orm import Session
 
 from db.base import Base
@@ -215,3 +215,35 @@ def validate_amount(amount_text: str):
         for amount_el in amount_list:
             if amount_el.isdigit():
                 return True
+            
+
+def get_exchange_name(review_msg_dict: dict,
+                      session: Session):
+    marker = review_msg_dict.get('marker')
+    exchange_id = review_msg_dict.get('exchange_id')
+
+    if marker and exchange_id:
+        match marker:
+            case 'no_cash':
+                Exchange = Base.classes.no_cash_exchange
+                # MassSendFile = Base.classes.general_models_masssendfile
+            case 'both':
+                Exchange = Base.classes.no_cash_exchange
+            case 'cash':
+                Exchange = Base.classes.cash_exchange
+            case 'partner':
+                Exchange = Base.classes.partners_exchange
+        
+        query = (
+            select(
+                Exchange.name,
+            )\
+            .where(
+                Exchange.id == exchange_id,
+                )
+        )
+        res = session.execute(query)
+
+        exchange_name = res.scalar_one_or_none()
+
+        return exchange_name
