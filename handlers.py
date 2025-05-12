@@ -343,6 +343,7 @@ async def start(message: types.Message | types.CallbackQuery,
         await bot.send_message(chat_id=message.from_user.id,
                                text=_text,
                                reply_markup=_kb.as_markup())
+        await message.delete()
             
         return
 
