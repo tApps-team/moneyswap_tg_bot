@@ -321,7 +321,7 @@ async def start(message: types.Message | types.CallbackQuery,
 
     # has_pinned_message = message.chat.pinned_message
 
-    if review_msg_dict and first_visit:
+    if review_msg_dict and not first_visit:
         exchange_name = get_exchange_name(review_msg_dict,
                                           session)
         if exchange_name is not None:
