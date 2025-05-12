@@ -317,7 +317,7 @@ async def start(message: types.Message | types.CallbackQuery,
         else:
             chat_link  = guest.chat_link
 
-    has_pinned_message = message.chat.pinned_message.text
+    has_pinned_message = message.chat.pinned_message
 
     if review_msg_dict and has_pinned_message:
         exchange_name = get_exchange_name(review_msg_dict,
