@@ -272,6 +272,18 @@ async def start(message: types.Message | types.CallbackQuery,
 
             if utm_source.startswith('review'):
                 params = utm_source.split('_')
+
+                if len(params) != 3:
+                    if select_language == 'ru':
+                        _text = 'Не удалось найти обменник на отзыв, некорректные данные в url'
+                    else:
+                        _text = 'Exchange to add review not found, uncorrect data in url'
+
+                    await bot.send_message(chat_id=message.from_user.id,
+                                           text=_text)
+                    await message.delete()
+                    
+                    return
                 
                 review_msg_dict = {
                     'marker': params[1],
