@@ -314,12 +314,14 @@ async def start(message: types.Message | types.CallbackQuery,
                 )
             session.execute(insert(Guest).values(**value_dict))
             session.commit()
+            first_visit = True
         else:
             chat_link  = guest.chat_link
+            first_visit = True
 
-    has_pinned_message = message.chat.pinned_message
+    # has_pinned_message = message.chat.pinned_message
 
-    if review_msg_dict and has_pinned_message:
+    if review_msg_dict and first_visit:
         exchange_name = get_exchange_name(review_msg_dict,
                                           session)
         if exchange_name is not None:
