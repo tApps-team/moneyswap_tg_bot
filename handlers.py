@@ -317,7 +317,7 @@ async def start(message: types.Message | types.CallbackQuery,
             first_visit = True
         else:
             chat_link  = guest.chat_link
-            first_visit = True
+            first_visit = False
 
     # has_pinned_message = message.chat.pinned_message
 
