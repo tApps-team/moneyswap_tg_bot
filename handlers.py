@@ -399,7 +399,8 @@ async def start(message: types.Message | types.CallbackQuery,
         exchange_name = get_exchange_name(review_msg_dict,
                                           session)
         if exchange_name is not None:
-            _kb = create_add_review_kb(review_msg_dict)
+            _kb = create_add_review_kb(review_msg_dict,
+                                       select_language)
             await bot.send_message(chat_id=message.from_user.id,
                                 text=f'Оставить отзыв на обменник {exchange_name}',
                                 reply_markup=_kb.as_markup())
