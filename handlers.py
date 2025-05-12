@@ -271,7 +271,7 @@ async def start(message: types.Message | types.CallbackQuery,
             utm_source = query_param[-1]
 
             if utm_source.startswith('review'):
-                params = utm_source.split('_')
+                params = utm_source.split('__')
 
                 if len(params) != 3:
                     if select_language == 'ru':
