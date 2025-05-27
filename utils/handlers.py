@@ -1,7 +1,7 @@
 from aiogram import types, Bot
 from aiogram.fsm.context import FSMContext
 
-from sqlalchemy import update, select
+from sqlalchemy import update, select, insert
 from sqlalchemy.orm import Session
 
 from db.base import Base
@@ -247,3 +247,73 @@ def get_exchange_name(review_msg_dict: dict,
         exchange_name = res.scalar_one_or_none()
 
         return exchange_name
+    
+
+def try_activate_admin_exchange(user_id: int,
+                                session: Session):
+    AdminExchangeOrder = Base.classes.general_models_exchangeadminorder
+    AdminExchange = Base.classes.general_models_exchangeadmin
+    record_added = False
+
+    query = (
+        select(
+            AdminExchangeOrder
+        )\
+        .where(AdminExchangeOrder.user_id == user_id)
+    )
+
+    res = session.execute(query)
+
+    _order = res.scalar_one_or_none()
+
+    if not _order:
+        return
+        # ошибка, заявка и юзер не совпадают
+        # pass
+
+    # Exchange = Base.classes.no_cash_exchange
+
+    # Exchange = Base.classes.cash_exchange
+
+    # Exchange = Base.classes.partners_exchange
+
+    for _exchange_marker, _exchange in (('no_cash', Base.classes.no_cash_exchange),
+                                      ('cash', Base.classes.cash_exchange),
+                                      ('partner', Base.classes.partners_exchange)):
+        query = (
+            select(
+                _exchange
+            )\
+            .where(
+                _exchange.name == _order.exchange_name,
+            )
+        )
+
+        res = session.execute(query)
+
+        res_exchange = res.scalar_one_or_none()
+
+        if res_exchange:
+            insert_data = {
+                'user_id': user_id,
+                'exchange_name': res_exchange.name,
+                'exchange_id': res_exchange.id,
+                'exchange_marker': _exchange_marker,
+            }
+            insert_query = (
+                insert(
+                    AdminExchange
+                )\
+                .values(**insert_data)
+            )
+            session.execute(insert_query)
+            record_added = True
+    
+    if record_added:
+        try:
+            session.commit()
+        except Exception as ex:
+            print('ERROR WITH ADMIN ADD EXCHANGE', ex)
+            session.rollback()
+        else:
+            return _order.exchange_name

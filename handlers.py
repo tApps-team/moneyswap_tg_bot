@@ -37,7 +37,7 @@ from keyboards import (create_add_review_kb, create_start_keyboard,
 
 from states import SwiftSepaStates, FeedbackFormStates
 
-from utils.handlers import get_exchange_name, try_add_file_ids_to_db, try_add_file_ids, swift_sepa_data, validate_amount
+from utils.handlers import get_exchange_name, try_activate_admin_exchange, try_add_file_ids_to_db, try_add_file_ids, swift_sepa_data, validate_amount
 from utils.multilanguage import start_text_dict
 
 from db.base import Base
@@ -255,6 +255,7 @@ async def start(message: types.Message | types.CallbackQuery,
     # language_code = message.from_user.language_code
     # print(language_code)
     review_msg_dict = None
+    activate_admin_exchange = None
 
     is_callback = isinstance(message, types.CallbackQuery)
 
@@ -291,6 +292,10 @@ async def start(message: types.Message | types.CallbackQuery,
                 }
 
                 utm_source = 'from_site'
+            
+            elif utm_source.startswith('admin'):
+                activate_admin_exchange = True
+                utm_source = 'from_admin_activate'
             
     with session as session:
         Guest = Base.classes.general_models_guest
@@ -358,6 +363,17 @@ async def start(message: types.Message | types.CallbackQuery,
         await message.delete()
             
         return
+    
+    elif activate_admin_exchange and not first_visit:
+        has_added = try_activate_admin_exchange(message.from_user.id)
+
+        if has_added:
+            await message.answer(text=f'Обменник {has_added} успешно привязан к вашему профилю✅')
+        else:
+            await message.answer(text=f'К сожалению, не смогли найти подходящую заявку на подключения, связитесь с тех.поддержкой для решения проблемы')
+        await message.delete()
+            
+        return
 
     start_kb = create_start_inline_keyboard(tg_id,
                                             select_language)
@@ -419,6 +435,19 @@ async def start(message: types.Message | types.CallbackQuery,
             await bot.send_message(chat_id=message.from_user.id,
                                 text=f'Оставить отзыв на обменник {exchange_name}',
                                 reply_markup=_kb.as_markup())
+    if activate_admin_exchange:
+        has_added = try_activate_admin_exchange(message.from_user.id)
+
+        if has_added:
+            await message.answer(text=f'Обменник {has_added} успешно привязан к вашему профилю✅')
+        else:
+            await message.answer(text=f'К сожалению, не смогли найти подходящую заявку на подключения, связитесь с тех.поддержкой для решения проблемы')
+        try:
+            await message.delete()
+        except Exception:
+            pass
+        
+        return
 
 
 @main_router.callback_query(F.data.startswith('lang'))
