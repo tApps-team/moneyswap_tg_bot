@@ -365,7 +365,8 @@ async def start(message: types.Message | types.CallbackQuery,
         return
     
     elif activate_admin_exchange and not first_visit:
-        has_added = try_activate_admin_exchange(message.from_user.id)
+        has_added = try_activate_admin_exchange(message.from_user.id,
+                                                session=session)
 
         if has_added:
             await message.answer(text=f'Обменник {has_added} успешно привязан к вашему профилю✅')
@@ -436,7 +437,8 @@ async def start(message: types.Message | types.CallbackQuery,
                                 text=f'Оставить отзыв на обменник {exchange_name}',
                                 reply_markup=_kb.as_markup())
     if activate_admin_exchange:
-        has_added = try_activate_admin_exchange(message.from_user.id)
+        has_added = try_activate_admin_exchange(message.from_user.id,
+                                                session=session)
 
         if has_added:
             await message.answer(text=f'Обменник {has_added} успешно привязан к вашему профилю✅')
