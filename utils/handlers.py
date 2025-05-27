@@ -259,7 +259,8 @@ def try_activate_admin_exchange(user_id: int,
         select(
             AdminExchangeOrder
         )\
-        .where(AdminExchangeOrder.user_id == user_id)
+        .where(AdminExchangeOrder.user_id == user_id,
+               AdminExchangeOrder.moderation == False)
     )
 
     res = session.execute(query)
