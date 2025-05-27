@@ -310,6 +310,7 @@ def try_activate_admin_exchange(user_id: int,
             record_added = True
     
     if record_added:
+        _order.moderation = True
         try:
             session.commit()
         except Exception as ex:

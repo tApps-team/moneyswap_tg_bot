@@ -372,8 +372,11 @@ async def start(message: types.Message | types.CallbackQuery,
             await message.answer(text=f'Обменник {has_added} успешно привязан к вашему профилю✅')
         else:
             await message.answer(text=f'К сожалению, не смогли найти подходящую заявку на подключения, связитесь с тех.поддержкой для решения проблемы')
-        await message.delete()
-            
+        try:
+            await message.delete()
+        except Exception:    
+            pass
+        
         return
 
     start_kb = create_start_inline_keyboard(tg_id,
