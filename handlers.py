@@ -1868,30 +1868,39 @@ async def send_notification_to_exchange_admin(user_id: int,
     match marker:
         case 'no_cash':
             Review = Base.classes.no_cash_review
+            Exchange = Base.classes.no_cash_exchange
         case 'cash':
             Review = Base.classes.cash_review
+            Exchange = Base.classes.cash_exchange
         case 'partner':
             Review = Base.classes.partners_review
+            Exchange = Base.classes.partners_exchange
 
     query = (
         select(
-            Review
+            Review,
+            Exchange
         )\
-        .options(selectinload(Review.exchange))\
+        .join(Exchange,
+              Review.exchange_id == Exchange.id)
         .where(Review.id == review_id)
     )
 
     res = session.execute(query)
 
-    review = res.scalar_one_or_none()
-    
-    print(22)
+    res = res.fetchall()
+
+    try:
+        review, exchange = res[0]
+    except Exception as ex:
+        print('error, empty res',ex)
+        return
 
     if not review:
         print('error, review not found')
         return
     
-    _text = f'Новый отзыв на прикрепленный обменник {review.exchange.name}'
+    _text = f'Новый отзыв на прикрепленный обменник {exchange.name}'
     try:
         print('send')
         await bot.send_message(chat_id=user_id,
