@@ -1884,6 +1884,8 @@ async def send_notification_to_exchange_admin(user_id: int,
     res = session.execute(query)
 
     review = res.scalar_one_or_none()
+    
+    print(22)
 
     if not review:
         print('error, review not found')
@@ -1891,6 +1893,7 @@ async def send_notification_to_exchange_admin(user_id: int,
     
     _text = f'Новый отзыв на прикрепленный обменник {review.exchange.name}'
     try:
+        print('send')
         await bot.send_message(chat_id=user_id,
                             text=_text)
     except Exception as ex:

@@ -192,7 +192,7 @@ async def test_moder_send(user_id: int,
 
 
 @app.get('/send_notification_to_exchange_admin')
-async def test_moder_send(user_id: int,
+async def send_notification_to_admin(user_id: int,
                           review_id: int,
                           marker: str):
     await send_notification_to_exchange_admin(user_id,
