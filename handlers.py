@@ -17,7 +17,7 @@ from aiogram.exceptions import TelegramForbiddenError
 
 from pyrogram import Client
 
-from sqlalchemy.orm import Session, joinedload, sessionmaker
+from sqlalchemy.orm import Session, joinedload, sessionmaker, selectinload
 from sqlalchemy import insert, select, update, and_
 
 from config import BEARER_TOKEN, FEEDBACK_REASON_PREFIX
@@ -1860,6 +1860,42 @@ async def send(message: types.Message,
 #     session.commit()
 
 #     await message.delete()
+async def send_notification_to_exchange_admin(user_id: int,
+                                              review_id: int,
+                                              marker: str,
+                                              session: Session,
+                                              bot: Bot):
+    match marker:
+        case 'no_cash':
+            Review = Base.classes.no_cash_review
+        case 'cash':
+            Review = Base.classes.cash_review
+        case 'partner':
+            Review = Base.classes.partners_review
+
+    query = (
+        select(
+            Review
+        )\
+        .options(selectinload(Review.exchange))\
+        .where(Review.id == review_id)
+    )
+
+    res = session.execute(query)
+
+    review = res.scalar_one_or_none()
+
+    if not review:
+        print('error, review not found')
+        return
+    
+    _text = f'Новый отзыв на прикрепленный обменник {review.exchange.name}'
+    try:
+        await bot.send_message(chat_id=user_id,
+                            text=_text)
+    except Exception as ex:
+        print(ex)
+
 
 async def send_mass_message_test(bot: Bot,
                             session: Session,

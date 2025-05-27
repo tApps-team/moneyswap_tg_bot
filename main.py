@@ -33,7 +33,7 @@ from config import (TOKEN,
                     API_HASH,
                     REDIS_HOST,
                     REDIS_PASSWORD)
-from handlers import main_router, send_mass_message, send_mass_message_test, try_send_order
+from handlers import main_router, send_mass_message, send_mass_message_test, send_notification_to_exchange_admin, try_send_order
 
 
 ###DEV###
@@ -190,6 +190,16 @@ async def test_moder_send(user_id: int,
                             user_id=user_id,
                             name_send=name_send)
 
+
+@app.get('/send_notification_to_exchange_admin')
+async def test_moder_send(user_id: int,
+                          review_id: int,
+                          marker: str):
+    await send_notification_to_exchange_admin(user_id,
+                                              review_id,
+                                              marker,
+                                              session=session(),
+                                              bot=bot)
 
 # @app.get('/custom_message')
 # async def custom_message(user_id: int,

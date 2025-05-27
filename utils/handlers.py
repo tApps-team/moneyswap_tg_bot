@@ -269,14 +269,6 @@ def try_activate_admin_exchange(user_id: int,
 
     if not _order:
         return
-        # ошибка, заявка и юзер не совпадают
-        # pass
-
-    # Exchange = Base.classes.no_cash_exchange
-
-    # Exchange = Base.classes.cash_exchange
-
-    # Exchange = Base.classes.partners_exchange
 
     for _exchange_marker, _exchange in (('no_cash', Base.classes.no_cash_exchange),
                                       ('cash', Base.classes.cash_exchange),
