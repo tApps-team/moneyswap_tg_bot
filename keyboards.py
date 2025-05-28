@@ -233,7 +233,8 @@ def create_add_review_kb(review_msg_dict: dict,
     marker = review_msg_dict.get('marker')
     exchange_id = review_msg_dict.get('exchange_id')
 
-    url = f'https://t.me/MoneySwap_robot/MoneySwap?startapp={exchange_id}__{marker}'
+    # url = f'https://t.me/MoneySwap_robot/MoneySwap?startapp={exchange_id}__{marker}'
+    url = f'https://app.moneyswap.online?from_site={exchange_id}__{marker}'
     _text = 'Оставить отзыв' if selected_language == 'ru' else 'Add review'
     _kb.row(types.InlineKeyboardButton(text=_text,
                                         url=url))
