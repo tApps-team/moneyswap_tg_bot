@@ -22,7 +22,7 @@ from sqlalchemy import insert, select, update, and_
 
 from config import BEARER_TOKEN, FEEDBACK_REASON_PREFIX
 
-from keyboards import (create_add_review_kb, create_start_keyboard,
+from keyboards import (create_add_review_kb, create_kb_for_exchange_admin_review, create_start_keyboard,
                        create_start_inline_keyboard, create_swift_condition_kb,
                        create_swift_start_kb,
                        add_cancel_btn_to_kb,
@@ -1861,6 +1861,7 @@ async def send(message: types.Message,
 
 #     await message.delete()
 async def send_notification_to_exchange_admin(user_id: int,
+                                              exchange_id: int,
                                               review_id: int,
                                               marker: str,
                                               session: Session,
@@ -1901,10 +1902,14 @@ async def send_notification_to_exchange_admin(user_id: int,
         return
     
     _text = f'Новый отзыв на прикрепленный обменник {exchange.name}'
+    _kb = create_kb_for_exchange_admin_review(exchange_id=exchange_id,
+                                              exchange_marker=marker,
+                                              review_id=review_id)
     try:
         print('send')
         await bot.send_message(chat_id=user_id,
-                            text=_text)
+                            text=_text,
+                            reply_markup=_kb.as_markup())
     except Exception as ex:
         print(ex)
 
