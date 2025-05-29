@@ -22,7 +22,7 @@ from sqlalchemy import insert, select, update, and_
 
 from config import BEARER_TOKEN, FEEDBACK_REASON_PREFIX
 
-from keyboards import (create_add_review_kb, create_kb_for_exchange_admin_review, create_start_keyboard,
+from keyboards import (create_add_comment_kb, create_add_review_kb, create_kb_for_exchange_admin_review, create_start_keyboard,
                        create_start_inline_keyboard, create_swift_condition_kb,
                        create_swift_start_kb,
                        add_cancel_btn_to_kb,
@@ -255,6 +255,7 @@ async def start(message: types.Message | types.CallbackQuery,
     # language_code = message.from_user.language_code
     # print(language_code)
     review_msg_dict = None
+    comment_msg_dict = None
     activate_admin_exchange = None
 
     is_callback = isinstance(message, types.CallbackQuery)
@@ -289,6 +290,29 @@ async def start(message: types.Message | types.CallbackQuery,
                 review_msg_dict = {
                     'marker': params[1],
                     'exchange_id': params[-1],
+                }
+
+                utm_source = 'from_site'
+
+            elif utm_source.startswith('comment'):
+                params = utm_source.split('__')
+
+                if len(params) != 4:
+                    if select_language == 'ru':
+                        _text = 'Не удалось найти обменник на комментарий, некорректные данные в url'
+                    else:
+                        _text = 'Exchange to add comment not found, uncorrect data in url'
+
+                    await bot.send_message(chat_id=message.from_user.id,
+                                           text=_text)
+                    await message.delete()
+                    
+                    return
+                
+                comment_msg_dict = {
+                    'marker': params[1],
+                    'exchange_id': params[2],
+                    'review_id': params[-1],
                 }
 
                 utm_source = 'from_site'
@@ -363,6 +387,33 @@ async def start(message: types.Message | types.CallbackQuery,
         await message.delete()
             
         return
+    
+    if comment_msg_dict and not first_visit:
+        exchange_name = get_exchange_name(comment_msg_dict,
+                                          session)
+        if exchange_name is not None:
+            _kb = create_add_comment_kb(comment_msg_dict,
+                                       select_language)
+            # _text = f'Оставить отзыв на обменник {exchange_name}'
+            if select_language == 'ru':
+                _text = f'Оставить комментарий на обменник {exchange_name}'
+            else:
+                _text = f'Add comment to exchanger {exchange_name}'
+        else:
+            _kb = None
+
+            if select_language == 'ru':
+                _text = 'Не удалось найти обменник для комментария'
+            else:
+                _text = 'Exchanger to add comment not found'
+
+        await bot.send_message(chat_id=message.from_user.id,
+                               text=_text,
+                               reply_markup=_kb.as_markup())
+        await message.delete()
+            
+        return
+
     
     elif activate_admin_exchange and not first_visit:
         has_added = try_activate_admin_exchange(message.from_user.id,
@@ -439,6 +490,33 @@ async def start(message: types.Message | types.CallbackQuery,
             await bot.send_message(chat_id=message.from_user.id,
                                 text=f'Оставить отзыв на обменник {exchange_name}',
                                 reply_markup=_kb.as_markup())
+    if comment_msg_dict:
+        exchange_name = get_exchange_name(comment_msg_dict,
+                                          session)
+        if exchange_name is not None:
+            _kb = create_add_comment_kb(comment_msg_dict,
+                                       select_language)
+            # _text = f'Оставить отзыв на обменник {exchange_name}'
+            if select_language == 'ru':
+                _text = f'Оставить комментарий на обменник {exchange_name}'
+            else:
+                _text = f'Add comment to exchanger {exchange_name}'
+        else:
+            _kb = None
+
+            if select_language == 'ru':
+                _text = 'Не удалось найти обменник для комментария'
+            else:
+                _text = 'Exchanger to add comment not found'
+
+        await bot.send_message(chat_id=message.from_user.id,
+                               text=_text,
+                               reply_markup=_kb.as_markup())
+        try:
+            await message.delete()
+        except Exception:
+            pass
+
     if activate_admin_exchange:
         has_added = try_activate_admin_exchange(message.from_user.id,
                                                 session=session)
