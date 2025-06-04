@@ -193,8 +193,12 @@ async def test_moder_send(user_id: int,
 
 @app.get('/send_notification_to_exchange_admin')
 async def send_notification_to_admin(user_id: int,
+                                     exchange_id: int,
+                                     exchange_marker: str,
                                      review_id: int):
     await send_notification_to_exchange_admin(user_id,
+                                              exchange_id,
+                                              exchange_marker,
                                               review_id,
                                               session=session(),
                                               bot=bot)
@@ -202,20 +206,28 @@ async def send_notification_to_admin(user_id: int,
 
 @app.get('/send_comment_notification_to_exchange_admin')
 async def send_notification_to_admin(user_id: int,
-                                     comment_id: int):
+                                     exchange_id: int,
+                                     exchange_marker: str,
+                                     review_id: int):
     await send_comment_notification_to_exchange_admin(user_id,
-                                              comment_id,
-                                              session=session(),
-                                              bot=bot)
+                                                      exchange_id,
+                                                      exchange_marker,
+                                                      review_id,
+                                                      session=session(),
+                                                      bot=bot)
     
 
 @app.get('/send_comment_notification_to_review_owner')
 async def send_notification_to_r_owner(user_id: int,
-                                     comment_id: int):
+                                       exchange_id: int,
+                                       exchange_marker: str,
+                                       review_id: int):
     await send_comment_notification_to_review_owner(user_id,
-                                              comment_id,
-                                              session=session(),
-                                              bot=bot)
+                                                    exchange_id,
+                                                    exchange_marker,
+                                                    review_id,
+                                                    session=session(),
+                                                    bot=bot)
 
 # @app.get('/custom_message')
 # async def custom_message(user_id: int,

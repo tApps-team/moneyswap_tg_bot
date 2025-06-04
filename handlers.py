@@ -1949,6 +1949,8 @@ async def send(message: types.Message,
 
 #     await message.delete()
 async def send_notification_to_exchange_admin(user_id: int,
+                                              exchange_id: int,
+                                              exchange_marker: str,
                                               review_id: int,
                                               session: Session,
                                               bot: Bot):
@@ -2000,7 +2002,8 @@ async def send_notification_to_exchange_admin(user_id: int,
 
     _text += '\n\nПерейти к отзыву можно по кнопке ниже👇'
 
-    _kb = create_kb_for_exchange_admin_review(exchange_name=review.exchange_name,
+    _kb = create_kb_for_exchange_admin_review(exchange_id=exchange_id,
+                                              exchange_marker=exchange_marker,
                                               review_id=review_id)
     try:
         print('send')
@@ -2012,28 +2015,30 @@ async def send_notification_to_exchange_admin(user_id: int,
 
 
 async def send_comment_notification_to_exchange_admin(user_id: int,
-                                                      comment_id: int,
+                                                      exchange_id: int,
+                                                      exchange_marker: str,
+                                                      review_id: int,
                                                       session: Session,
                                                       bot: Bot):
     Review = Base.classes.general_models_newbasereview
-    Comment = Base.classes.general_models_newbasecomment
+    # Comment = Base.classes.general_models_newbasecomment
 
     query = (
         select(
-            Comment,
+            # Comment,
             Review
         )\
-        .join(Review,
-              Comment.review_id == Review.id)\
-        .where(Comment.id == comment_id)
+        # .join(Review,
+        #       Comment.review_id == Review.id)\
+        .where(Review.id == review_id)
     )
 
     res = session.execute(query)
 
-    res = res.fetchall()
+    review = res.scalar_one_or_none()
 
-    if res:
-        comment, review = res[0]
+    if review:
+        # comment, review = res[0]
 
         # if comment.grade == '1':
         #     _grade = 'Положительный'
@@ -2048,8 +2053,9 @@ async def send_comment_notification_to_exchange_admin(user_id: int,
         _text += '\n\nПерейти к комментарию можно по кнопке ниже👇'
 
         # if comment.tran
-        _kb = create_kb_for_exchange_admin_comment(exchange_name=review.exchange_name,
-                                                review_id=review.id)
+        _kb = create_kb_for_exchange_admin_comment(exchange_id=exchange_id,
+                                                   exchange_marker=exchange_marker,
+                                                   review_id=review.id)
         try:
             print('send')
             await bot.send_message(chat_id=user_id,
@@ -2062,34 +2068,37 @@ async def send_comment_notification_to_exchange_admin(user_id: int,
 
 
 async def send_comment_notification_to_review_owner(user_id: int,
-                                                      comment_id: int,
-                                                      session: Session,
-                                                      bot: Bot):
+                                                    exchange_id: int,
+                                                    exchange_marker: str,
+                                                    review_id: int,
+                                                    session: Session,
+                                                    bot: Bot):
     Review = Base.classes.general_models_newbasereview
     Comment = Base.classes.general_models_newbasecomment
 
     query = (
         select(
-            Comment,
+            # Comment,
             Review
         )\
-        .join(Review,
-              Comment.review_id == Review.id)\
-        .where(Comment.id == comment_id)
+        # .join(Review,
+        #       Comment.review_id == Review.id)\
+        .where(Review.id == review_id)
     )
 
     res = session.execute(query)
 
-    res = res.fetchall()
+    review = res.scalar_one_or_none()
 
-    if res:
-        comment, review = res[0]
+    if review:
+        # comment, review = res[0]
 
         _text = f'💬 Новый комментарий на Ваш отзыв обменника {review.exchange_name}'
 
         _text += '\n\nПерейти к отзыву можно по кнопке ниже👇'
         
-        _kb = create_kb_for_exchange_admin_comment(exchange_name=review.exchange_name,
+        _kb = create_kb_for_exchange_admin_comment(exchange_id=exchange_id,
+                                                   exchange_marker=exchange_marker,
                                                    review_id=review.id)
         try:
             print('send')
