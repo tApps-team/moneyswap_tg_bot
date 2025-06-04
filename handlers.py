@@ -275,7 +275,7 @@ async def start(message: types.Message | types.CallbackQuery,
             if utm_source.startswith('review'):
                 params = utm_source.split('__')
 
-                if len(params) != 3:
+                if len(params) != 2:
                     if select_language == 'ru':
                         _text = 'Не удалось найти обменник на отзыв, некорректные данные в url'
                     else:
@@ -297,7 +297,7 @@ async def start(message: types.Message | types.CallbackQuery,
             elif utm_source.startswith('comment'):
                 params = utm_source.split('__')
 
-                if len(params) != 4:
+                if len(params) != 3:
                     if select_language == 'ru':
                         _text = 'Не удалось найти обменник на комментарий, некорректные данные в url'
                     else:
