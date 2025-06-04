@@ -372,9 +372,9 @@ async def start(message: types.Message | types.CallbackQuery,
                                        select_language)
             # _text = f'Оставить отзыв на обменник {exchange_name}'
             if select_language == 'ru':
-                _text = f'Оставить отзыв на обменник {review_msg_dict.get('exchange_name')}'
+                _text = f'Оставить отзыв на обменник {review_msg_dict.get("exchange_name")}'
             else:
-                _text = f'Add review to exchanger {review_msg_dict.get('exchange_name')}'
+                _text = f'Add review to exchanger {review_msg_dict.get("exchange_name")}'
         else:
             _kb = None
 
@@ -401,9 +401,9 @@ async def start(message: types.Message | types.CallbackQuery,
                                        select_language)
             # _text = f'Оставить отзыв на обменник {exchange_name}'
             if select_language == 'ru':
-                _text = f'Оставить комментарий на обменник {comment_msg_dict.get('exchange_name')}'
+                _text = f'Оставить комментарий на обменник {comment_msg_dict.get("exchange_name")}'
             else:
-                _text = f'Add comment to exchanger {comment_msg_dict.get('exchange_name')}'
+                _text = f'Add comment to exchanger {comment_msg_dict.get("exchange_name")}'
         else:
             _kb = None
 
@@ -495,7 +495,7 @@ async def start(message: types.Message | types.CallbackQuery,
                                        marker,
                                        select_language)
             await bot.send_message(chat_id=message.from_user.id,
-                                text=f'Оставить отзыв на обменник {review_msg_dict.get('exchange_name')}',
+                                text=f'Оставить отзыв на обменник {review_msg_dict.get("exchange_name")}',
                                 reply_markup=_kb.as_markup())
     if comment_msg_dict:
         exchange_data = get_exchange_name(comment_msg_dict,
@@ -508,9 +508,9 @@ async def start(message: types.Message | types.CallbackQuery,
                                        select_language)
             # _text = f'Оставить отзыв на обменник {exchange_name}'
             if select_language == 'ru':
-                _text = f'Оставить комментарий на обменник {comment_msg_dict.get('exchange_name')}'
+                _text = f'Оставить комментарий на обменник {comment_msg_dict.get("exchange_name")}'
             else:
-                _text = f'Add comment to exchanger {comment_msg_dict.get('exchange_name')}'
+                _text = f'Add comment to exchanger {comment_msg_dict.get("exchange_name")}'
         else:
             _kb = None
 
