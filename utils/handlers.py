@@ -219,34 +219,28 @@ def validate_amount(amount_text: str):
 
 def get_exchange_name(review_msg_dict: dict,
                       session: Session):
-    marker = review_msg_dict.get('marker')
-    exchange_id = review_msg_dict.get('exchange_id')
+    # marker = review_msg_dict.get('marker')
+    exchange_name = review_msg_dict.get('exchange_name')
 
-    if marker and exchange_id:
-        match marker:
-            case 'no_cash':
-                Exchange = Base.classes.no_cash_exchange
-                # MassSendFile = Base.classes.general_models_masssendfile
-            case 'both':
-                Exchange = Base.classes.no_cash_exchange
-            case 'cash':
-                Exchange = Base.classes.cash_exchange
-            case 'partner':
-                Exchange = Base.classes.partners_exchange
-        
-        query = (
-            select(
-                Exchange.name,
-            )\
-            .where(
-                Exchange.id == exchange_id,
-                )
-        )
-        res = session.execute(query)
+    if exchange_name:
+        # match marker:
+        for exchange_model in (Base.classes.no_cash_exchange,
+                               Base.classes.cash_exchange,
+                               Base.classes.partners_exchange):
+            query = (
+                select(
+                    exchange_model.id,
+                )\
+                .where(
+                    exchange_model.name == exchange_name,
+                    )
+            )
+            res = session.execute(query)
 
-        exchange_name = res.scalar_one_or_none()
-
-        return exchange_name
+            exchange_name = res.scalar_one_or_none()
+            
+            if exchange_name:
+                return exchange_name
     
 
 def try_activate_admin_exchange(user_id: int,

@@ -33,7 +33,7 @@ from config import (TOKEN,
                     API_HASH,
                     REDIS_HOST,
                     REDIS_PASSWORD)
-from handlers import main_router, send_mass_message, send_mass_message_test, send_notification_to_exchange_admin, try_send_order
+from handlers import main_router, send_comment_notification_to_exchange_admin, send_comment_notification_to_review_owner, send_mass_message, send_mass_message_test, send_notification_to_exchange_admin, try_send_order
 
 
 ###DEV###
@@ -193,13 +193,27 @@ async def test_moder_send(user_id: int,
 
 @app.get('/send_notification_to_exchange_admin')
 async def send_notification_to_admin(user_id: int,
-                                     exchange_id: int,
-                                     review_id: int,
-                                     marker: str):
+                                     review_id: int):
     await send_notification_to_exchange_admin(user_id,
-                                              exchange_id,
                                               review_id,
-                                              marker,
+                                              session=session(),
+                                              bot=bot)
+    
+
+@app.get('/send_comment_notification_to_exchange_admin')
+async def send_notification_to_admin(user_id: int,
+                                     comment_id: int):
+    await send_comment_notification_to_exchange_admin(user_id,
+                                              comment_id,
+                                              session=session(),
+                                              bot=bot)
+    
+
+@app.get('/send_comment_notification_to_review_owner')
+async def send_notification_to_r_owner(user_id: int,
+                                     comment_id: int):
+    await send_comment_notification_to_review_owner(user_id,
+                                              comment_id,
                                               session=session(),
                                               bot=bot)
 

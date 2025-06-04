@@ -230,11 +230,11 @@ def create_add_review_kb(review_msg_dict: dict,
                          selected_language: str):
     _kb = InlineKeyboardBuilder()
 
-    marker = review_msg_dict.get('marker')
-    exchange_id = review_msg_dict.get('exchange_id')
+    # marker = review_msg_dict.get('marker')
+    exchange_name = review_msg_dict.get('exchange_name')
 
     # url = f'https://t.me/MoneySwap_robot/MoneySwap?startapp={exchange_id}__{marker}'
-    url = f'https://app.moneyswap.online?from_site={exchange_id}__{marker}'
+    url = f'https://app.moneyswap.online?from_site={exchange_name}'
     _text = 'Оставить отзыв' if selected_language == 'ru' else 'Add review'
     _kb.row(types.InlineKeyboardButton(text=_text,
                                        web_app=WebAppInfo(url=url)))
@@ -242,13 +242,23 @@ def create_add_review_kb(review_msg_dict: dict,
     return _kb
 
 
-def create_kb_for_exchange_admin_review(exchange_id: int,
-                                        exchange_marker: str,
+def create_kb_for_exchange_admin_review(exchange_name: str,
                                         review_id: int):
     _kb = InlineKeyboardBuilder()
 
     _kb.row(types.InlineKeyboardButton(text='Перейти к отзыву',
-                                       web_app=WebAppInfo(url=f'https://app.moneyswap.online?from_site={exchange_id}__{exchange_marker}__{review_id}')))
+                                       web_app=WebAppInfo(url=f'https://app.moneyswap.online?from_site={exchange_name}__{review_id}')))
+    
+    return _kb
+
+
+
+def create_kb_for_exchange_admin_comment(exchange_name: str,
+                                        review_id: int):
+    _kb = InlineKeyboardBuilder()
+
+    _kb.row(types.InlineKeyboardButton(text='Перейти к комментарию',
+                                       web_app=WebAppInfo(url=f'https://app.moneyswap.online?from_site={exchange_name}__{review_id}')))
     
     return _kb
 
@@ -257,12 +267,12 @@ def create_add_comment_kb(comment_msg_dict: dict,
                           selected_language: str):
     _kb = InlineKeyboardBuilder()
 
-    marker = comment_msg_dict.get('marker')
-    exchange_id = comment_msg_dict.get('exchange_id')
+    # marker = comment_msg_dict.get('marker')
+    exchange_name = comment_msg_dict.get('exchange_name')
     review_id = comment_msg_dict.get('review_id')
 
     # url = f'https://t.me/MoneySwap_robot/MoneySwap?startapp={exchange_id}__{marker}'
-    url = f'https://app.moneyswap.online?from_site={exchange_id}__{marker}__{review_id}'
+    url = f'https://app.moneyswap.online?from_site={exchange_name}__{review_id}'
     _text = 'Оставить комментарий' if selected_language == 'ru' else 'Add comment'
     _kb.row(types.InlineKeyboardButton(text=_text,
                                        web_app=WebAppInfo(url=url)))

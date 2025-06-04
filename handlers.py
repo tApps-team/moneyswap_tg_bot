@@ -22,7 +22,7 @@ from sqlalchemy import insert, select, update, and_
 
 from config import BEARER_TOKEN, FEEDBACK_REASON_PREFIX
 
-from keyboards import (create_add_comment_kb, create_add_review_kb, create_kb_for_exchange_admin_review, create_start_keyboard,
+from keyboards import (create_add_comment_kb, create_add_review_kb, create_kb_for_exchange_admin_comment, create_kb_for_exchange_admin_review, create_start_keyboard,
                        create_start_inline_keyboard, create_swift_condition_kb,
                        create_swift_start_kb,
                        add_cancel_btn_to_kb,
@@ -288,8 +288,8 @@ async def start(message: types.Message | types.CallbackQuery,
                     return
                 
                 review_msg_dict = {
-                    'marker': params[1],
-                    'exchange_id': params[-1],
+                    # 'marker': params[1],
+                    'exchange_name': params[-1],
                 }
 
                 utm_source = 'from_site'
@@ -310,8 +310,8 @@ async def start(message: types.Message | types.CallbackQuery,
                     return
                 
                 comment_msg_dict = {
-                    'marker': params[1],
-                    'exchange_id': params[2],
+                    # 'marker': params[1],
+                    'exchange_name': params[1],
                     'review_id': params[-1],
                 }
 
@@ -1939,49 +1939,58 @@ async def send(message: types.Message,
 
 #     await message.delete()
 async def send_notification_to_exchange_admin(user_id: int,
-                                              exchange_id: int,
                                               review_id: int,
-                                              marker: str,
                                               session: Session,
                                               bot: Bot):
-    match marker:
-        case 'no_cash':
-            Review = Base.classes.no_cash_review
-            Exchange = Base.classes.no_cash_exchange
-        case 'cash':
-            Review = Base.classes.cash_review
-            Exchange = Base.classes.cash_exchange
-        case 'partner':
-            Review = Base.classes.partners_review
-            Exchange = Base.classes.partners_exchange
+    Review = Base.classes.general_models_newbasereview
+
+    # match marker:
+    #     case 'no_cash':
+    #         Review = Base.classes.no_cash_review
+    #         Exchange = Base.classes.no_cash_exchange
+    #     case 'cash':
+    #         Review = Base.classes.cash_review
+    #         Exchange = Base.classes.cash_exchange
+    #     case 'partner':
+    #         Review = Base.classes.partners_review
+    #         Exchange = Base.classes.partners_exchange
 
     query = (
         select(
             Review,
-            Exchange
         )\
-        .join(Exchange,
-              Review.exchange_id == Exchange.id)
         .where(Review.id == review_id)
     )
 
     res = session.execute(query)
 
-    res = res.fetchall()
+    review = res.scalar_one_or_none()
 
-    try:
-        review, exchange = res[0]
-    except Exception as ex:
-        print('error, empty res',ex)
-        return
+    # try:
+    #     review, exchange = res[0]
+    # except Exception as ex:
+    #     print('error, empty res',ex)
+    #     return
 
     if not review:
         print('error, review not found')
         return
     
-    _text = f'Новый отзыв на прикрепленный обменник {exchange.name}'
-    _kb = create_kb_for_exchange_admin_review(exchange_id=exchange_id,
-                                              exchange_marker=marker,
+    if review.grade == '1':
+        _grade = 'Положительный'
+    elif review.grade == '0':
+        _grade = 'Нейтральный'
+    elif review.grade == '-1':
+        _grade = 'Отрицательный'
+
+    _text = f'💬 Новый отзыв на прикрепленный обменник {review.exchange_name}\n\n<b>Оценка:</b> {_grade}'
+
+    if review.transaction_id:
+        _text += f'\n<b>Номер транзакции:</b> {review.transaction_id}\n\n📌 Просим вас оперативно отреагировать — ситуация находится на контроле администрации <b>MoneySwap</b>.'
+
+    _text += '\n\nПерейти к отзыву можно по кнопке ниже👇'
+
+    _kb = create_kb_for_exchange_admin_review(exchange_name=review.exchange_name,
                                               review_id=review_id)
     try:
         print('send')
@@ -1990,6 +1999,97 @@ async def send_notification_to_exchange_admin(user_id: int,
                             reply_markup=_kb.as_markup())
     except Exception as ex:
         print(ex)
+
+
+async def send_comment_notification_to_exchange_admin(user_id: int,
+                                                      comment_id: int,
+                                                      session: Session,
+                                                      bot: Bot):
+    Review = Base.classes.general_models_newbasereview
+    Comment = Base.classes.general_models_newbasecomment
+
+    query = (
+        select(
+            Comment,
+            Review
+        )\
+        .join(Review,
+              Comment.review_id == Review.id)\
+        .where(Comment.id == comment_id)
+    )
+
+    res = session.execute(query)
+
+    res = res.fetchall()
+
+    if res:
+        comment, review = res[0]
+
+        # if comment.grade == '1':
+        #     _grade = 'Положительный'
+        # elif comment.grade == '0':
+        #     _grade = 'Нейтральный'
+        # elif comment.grade == '-1':
+        #     _grade = 'Отрицательный'
+
+
+        _text = f'💬 Новый комментарий на отзыв прикрепленного обменника {review.exchange_name}'
+
+        _text += '\n\nПерейти к комментарию можно по кнопке ниже👇'
+
+        # if comment.tran
+        _kb = create_kb_for_exchange_admin_comment(exchange_name=review.exchange_name,
+                                                review_id=review.id)
+        try:
+            print('send')
+            await bot.send_message(chat_id=user_id,
+                                text=_text,
+                                reply_markup=_kb.as_markup())
+        except Exception as ex:
+            print(ex)
+
+    pass
+
+
+async def send_comment_notification_to_review_owner(user_id: int,
+                                                      comment_id: int,
+                                                      session: Session,
+                                                      bot: Bot):
+    Review = Base.classes.general_models_newbasereview
+    Comment = Base.classes.general_models_newbasecomment
+
+    query = (
+        select(
+            Comment,
+            Review
+        )\
+        .join(Review,
+              Comment.review_id == Review.id)\
+        .where(Comment.id == comment_id)
+    )
+
+    res = session.execute(query)
+
+    res = res.fetchall()
+
+    if res:
+        comment, review = res[0]
+
+        _text = f'💬 Новый комментарий на Ваш отзыв обменника {review.exchange_name}'
+
+        _text += '\n\nПерейти к отзыву можно по кнопке ниже👇'
+        
+        _kb = create_kb_for_exchange_admin_comment(exchange_name=review.exchange_name,
+                                                   review_id=review.id)
+        try:
+            print('send')
+            await bot.send_message(chat_id=user_id,
+                                text=_text,
+                                reply_markup=_kb.as_markup())
+        except Exception as ex:
+            print(ex)
+
+    pass
 
 
 async def send_mass_message_test(bot: Bot,
