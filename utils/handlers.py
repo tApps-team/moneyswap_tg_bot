@@ -222,11 +222,21 @@ def get_exchange_name(review_msg_dict: dict,
     # marker = review_msg_dict.get('marker')
     exchange_name = review_msg_dict.get('exchange_name')
 
+    # if marker and exchange_id:
+    #     match marker:
+    #         case 'no_cash':
+    #             Exchange = Base.classes.no_cash_exchange
+    #         case 'both':
+    #             Exchange = Base.classes.no_cash_exchange
+    #         case 'cash':
+    #             Exchange = Base.classes.no_cash_exchange
+    #         case 'partner':
+    #             Exchange = Base.classes.no_cash_exchange
     if exchange_name:
-        # match marker:
-        for exchange_model in (Base.classes.no_cash_exchange,
-                               Base.classes.cash_exchange,
-                               Base.classes.partners_exchange):
+
+        for exchange_model, marker in ((Base.classes.no_cash_exchange, 'no_cash'),
+                                       (Base.classes.cash_exchange, 'cash'),
+                                       (Base.classes.partners_exchange, 'partner')):
             query = (
                 select(
                     exchange_model.id,
@@ -237,10 +247,13 @@ def get_exchange_name(review_msg_dict: dict,
             )
             res = session.execute(query)
 
-            exchange_name = res.scalar_one_or_none()
+            exchange_id = res.scalar_one_or_none()
             
-            if exchange_name:
-                return exchange_name
+            if exchange_id:
+                return (
+                    exchange_id,
+                    marker,
+                )
     
 
 def try_activate_admin_exchange(user_id: int,

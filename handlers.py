@@ -363,16 +363,18 @@ async def start(message: types.Message | types.CallbackQuery,
     # has_pinned_message = message.chat.pinned_message
 
     if review_msg_dict and not first_visit:
-        exchange_name = get_exchange_name(review_msg_dict,
-                                          session)
-        if exchange_name is not None:
-            _kb = create_add_review_kb(review_msg_dict,
+        exchange_data = get_exchange_name(review_msg_dict,
+                                                session)
+        if exchange_data is not None:
+            exchange_id, marker = exchange_data
+            _kb = create_add_review_kb(exchange_id,
+                                       marker,
                                        select_language)
             # _text = f'Оставить отзыв на обменник {exchange_name}'
             if select_language == 'ru':
-                _text = f'Оставить отзыв на обменник {exchange_name}'
+                _text = f'Оставить отзыв на обменник {review_msg_dict.get('exchange_name')}'
             else:
-                _text = f'Add review to exchanger {exchange_name}'
+                _text = f'Add review to exchanger {review_msg_dict.get('exchange_name')}'
         else:
             _kb = None
 
@@ -389,16 +391,19 @@ async def start(message: types.Message | types.CallbackQuery,
         return
     
     if comment_msg_dict and not first_visit:
-        exchange_name = get_exchange_name(comment_msg_dict,
+        exchange_data = get_exchange_name(comment_msg_dict,
                                           session)
-        if exchange_name is not None:
+        if exchange_data is not None:
+            exchange_id, marker = exchange_data
+            comment_msg_dict.update({'exchange_id': exchange_id,
+                                     'marker': marker})
             _kb = create_add_comment_kb(comment_msg_dict,
                                        select_language)
             # _text = f'Оставить отзыв на обменник {exchange_name}'
             if select_language == 'ru':
-                _text = f'Оставить комментарий на обменник {exchange_name}'
+                _text = f'Оставить комментарий на обменник {comment_msg_dict.get('exchange_name')}'
             else:
-                _text = f'Add comment to exchanger {exchange_name}'
+                _text = f'Add comment to exchanger {comment_msg_dict.get('exchange_name')}'
         else:
             _kb = None
 
@@ -482,25 +487,30 @@ async def start(message: types.Message | types.CallbackQuery,
         except Exception:
             pass
     if review_msg_dict:
-        exchange_name = get_exchange_name(review_msg_dict,
+        exchange_data = get_exchange_name(review_msg_dict,
                                           session)
-        if exchange_name is not None:
-            _kb = create_add_review_kb(review_msg_dict,
+        if exchange_data is not None:
+            exchange_id, marker = exchange_data
+            _kb = create_add_review_kb(exchange_id,
+                                       marker,
                                        select_language)
             await bot.send_message(chat_id=message.from_user.id,
-                                text=f'Оставить отзыв на обменник {exchange_name}',
+                                text=f'Оставить отзыв на обменник {review_msg_dict.get('exchange_name')}',
                                 reply_markup=_kb.as_markup())
     if comment_msg_dict:
-        exchange_name = get_exchange_name(comment_msg_dict,
+        exchange_data = get_exchange_name(comment_msg_dict,
                                           session)
-        if exchange_name is not None:
+        if exchange_data is not None:
+            exchange_id, marker = exchange_data
+            comment_msg_dict.update({'exchange_id': exchange_id,
+                                     'marker': marker})
             _kb = create_add_comment_kb(comment_msg_dict,
                                        select_language)
             # _text = f'Оставить отзыв на обменник {exchange_name}'
             if select_language == 'ru':
-                _text = f'Оставить комментарий на обменник {exchange_name}'
+                _text = f'Оставить комментарий на обменник {comment_msg_dict.get('exchange_name')}'
             else:
-                _text = f'Add comment to exchanger {exchange_name}'
+                _text = f'Add comment to exchanger {comment_msg_dict.get('exchange_name')}'
         else:
             _kb = None
 

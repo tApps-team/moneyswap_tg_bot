@@ -226,15 +226,16 @@ def add_switch_language_btn(_kb: InlineKeyboardBuilder,
     return _kb
 
 
-def create_add_review_kb(review_msg_dict: dict,
+def create_add_review_kb(exchange_id: int,
+                         marker: str,
                          selected_language: str):
     _kb = InlineKeyboardBuilder()
 
     # marker = review_msg_dict.get('marker')
-    exchange_name = review_msg_dict.get('exchange_name')
+    # exchange_name = review_msg_dict.get('exchange_name')
 
     # url = f'https://t.me/MoneySwap_robot/MoneySwap?startapp={exchange_id}__{marker}'
-    url = f'https://app.moneyswap.online?from_site={exchange_name}'
+    url = f'https://app.moneyswap.online?from_site={exchange_id}__{marker}'
     _text = 'Оставить отзыв' if selected_language == 'ru' else 'Add review'
     _kb.row(types.InlineKeyboardButton(text=_text,
                                        web_app=WebAppInfo(url=url)))
@@ -267,12 +268,12 @@ def create_add_comment_kb(comment_msg_dict: dict,
                           selected_language: str):
     _kb = InlineKeyboardBuilder()
 
-    # marker = comment_msg_dict.get('marker')
-    exchange_name = comment_msg_dict.get('exchange_name')
+    marker = comment_msg_dict.get('marker')
+    exchange_id = comment_msg_dict.get('exchange_id')
     review_id = comment_msg_dict.get('review_id')
 
     # url = f'https://t.me/MoneySwap_robot/MoneySwap?startapp={exchange_id}__{marker}'
-    url = f'https://app.moneyswap.online?from_site={exchange_name}__{review_id}'
+    url = f'https://app.moneyswap.online?from_site={exchange_id}__{marker}__{review_id}'
     _text = 'Оставить комментарий' if selected_language == 'ru' else 'Add comment'
     _kb.row(types.InlineKeyboardButton(text=_text,
                                        web_app=WebAppInfo(url=url)))
