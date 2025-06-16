@@ -285,8 +285,8 @@ def try_activate_admin_exchange(user_id: int,
     if not _order:
         # return
     
-        # with session as _session:
-        res = _session.execute(moderated_order_check_query)
+        with session as _session:
+            res = _session.execute(moderated_order_check_query)
 
         moderated_order = res.scalar_one_or_none()
 
