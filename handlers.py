@@ -363,8 +363,9 @@ async def start(message: types.Message | types.CallbackQuery,
     # has_pinned_message = message.chat.pinned_message
 
     if review_msg_dict and not first_visit:
-        exchange_data = get_exchange_name(review_msg_dict,
-                                          session)
+        with session as _session:
+            exchange_data = get_exchange_name(review_msg_dict,
+                                            _session)
         if exchange_data is not None:
             exchange_id, marker = exchange_data
             _kb = create_add_review_kb(exchange_id,
@@ -391,8 +392,9 @@ async def start(message: types.Message | types.CallbackQuery,
         return
     
     if comment_msg_dict and not first_visit:
-        exchange_data = get_exchange_name(comment_msg_dict,
-                                          session)
+        with session as _session:
+            exchange_data = get_exchange_name(comment_msg_dict,
+                                            _session)
         if exchange_data is not None:
             exchange_id, marker = exchange_data
             comment_msg_dict.update({'exchange_id': exchange_id,
@@ -421,8 +423,9 @@ async def start(message: types.Message | types.CallbackQuery,
 
     
     elif activate_admin_exchange and not first_visit:
-        has_added = try_activate_admin_exchange(message.from_user.id,
-                                                session=session)
+        with session as _session:
+            has_added = try_activate_admin_exchange(message.from_user.id,
+                                                    session=_session)
         
         match has_added:
             case 'empty':
@@ -501,8 +504,9 @@ async def start(message: types.Message | types.CallbackQuery,
         except Exception:
             pass
     if review_msg_dict:
-        exchange_data = get_exchange_name(review_msg_dict,
-                                          session)
+        with session as _session:
+            exchange_data = get_exchange_name(review_msg_dict,
+                                            _session)
         if exchange_data is not None:
             exchange_id, marker = exchange_data
             _kb = create_add_review_kb(exchange_id,
@@ -512,8 +516,9 @@ async def start(message: types.Message | types.CallbackQuery,
                                 text=f'Оставить отзыв на обменник {review_msg_dict.get("exchange_name")}',
                                 reply_markup=_kb.as_markup())
     if comment_msg_dict:
-        exchange_data = get_exchange_name(comment_msg_dict,
-                                          session)
+        with session as _session:
+            exchange_data = get_exchange_name(comment_msg_dict,
+                                            _session)
         if exchange_data is not None:
             exchange_id, marker = exchange_data
             comment_msg_dict.update({'exchange_id': exchange_id,
@@ -542,8 +547,9 @@ async def start(message: types.Message | types.CallbackQuery,
             pass
 
     if activate_admin_exchange:
-        has_added = try_activate_admin_exchange(message.from_user.id,
-                                                session=session)
+        with session as _session:
+            has_added = try_activate_admin_exchange(message.from_user.id,
+                                                    session=_session)
         
         match has_added:
             case 'empty':
@@ -1457,13 +1463,13 @@ async def send_order(callback: types.CallbackQuery,
     # session.execute(insert(Order).values(order))
     # session.commit()
 
-    with session as session:
+    with session as _session:
 
         new_order = Order(**order)  # предполагая, что order — это словарь
-        session.add(new_order)
-        session.commit()
+        _session.add(new_order)
+        _session.commit()
 
-        session.refresh(new_order)
+        _session.refresh(new_order)
 
     print(new_order.__dict__)
 
@@ -1489,8 +1495,8 @@ async def send_order(callback: types.CallbackQuery,
 
     _url = f'https://api.moneyswap.online/send_to_tg_group?user_id={user_id}&order_id={order_id}&marker={marker}'
     timeout = aiohttp.ClientTimeout(total=5)
-    async with aiohttp.ClientSession() as session:
-        async with session.get(_url,
+    async with aiohttp.ClientSession() as aiosession:
+        async with aiosession.get(_url,
                                timeout=timeout) as response:
             pass
 
