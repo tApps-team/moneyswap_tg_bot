@@ -321,11 +321,11 @@ async def start(message: types.Message | types.CallbackQuery,
                 activate_admin_exchange = True
                 utm_source = 'from_admin_activate'
             
-    with session as session:
+    with session as _session:
         Guest = Base.classes.general_models_guest
 
         tg_id = message.from_user.id
-        guest = session.query(Guest)\
+        guest = _session.query(Guest)\
                         .where(Guest.tg_id == tg_id)\
                         .first()
     
@@ -353,8 +353,8 @@ async def start(message: types.Message | types.CallbackQuery,
                         'utm_source': utm_source,
                     }
                 )
-            session.execute(insert(Guest).values(**value_dict))
-            session.commit()
+            _session.execute(insert(Guest).values(**value_dict))
+            _session.commit()
             first_visit = True
         else:
             chat_link  = guest.chat_link
