@@ -275,12 +275,15 @@ def try_activate_admin_exchange(user_id: int,
             AdminExchangeOrder
         )\
         .where(AdminExchangeOrder.user_id == user_id,
-               AdminExchangeOrder.moderation == True)
+               AdminExchangeOrder.moderation == True)\
+               .order_by(
+                   AdminExchangeOrder.time_create.desc(),
+               )
     )
     # with session as _session:
     res = session.execute(order_check_query)
 
-    _order = res.scalar_one_or_none()
+    _order = res.fetchall()
 
     if not _order:
             # return
@@ -288,12 +291,14 @@ def try_activate_admin_exchange(user_id: int,
             # with session as _session:
         res = session.execute(moderated_order_check_query)
 
-        moderated_order = res.scalar_one_or_none()
+        moderated_order = res.fetchall()
 
         if not moderated_order:
             return 'empty'
         else:
             return 'exists'
+    else:
+        _order = _order[0]
 
     for _exchange_marker, _exchange in (('no_cash', Base.classes.no_cash_exchange),
                                       ('cash', Base.classes.cash_exchange),
