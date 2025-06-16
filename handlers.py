@@ -426,11 +426,14 @@ async def start(message: types.Message | types.CallbackQuery,
         
         match has_added:
             case 'empty':
-                await message.answer(text=f'❗️К сожалению, не смогли найти подходящую заявку на подключения, связитесь с <a href="https://t.me/MoneySwap_support">тех.поддержкой</a> для решения проблемы')
+                await message.answer(text=f'❗️К сожалению, не смогли найти подходящую заявку на подключения, связитесь с <a href="https://t.me/MoneySwap_support">тех.поддержкой</a> для решения проблемы',
+                                     disable_web_page_preview=False)
             case 'error':
-                await message.answer(text=f'❗️Возникли сложности, обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>')
+                await message.answer(text=f'❗️Возникли сложности, обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
+                                     disable_web_page_preview=False)
             case 'exists':
-                await message.answer(text=f'✔️Заявка уже была обработана\nЕсли Вы всё равно столкнулись с проблемами обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>')
+                await message.answer(text=f'✔️Заявка уже была обработана\nЕсли Вы всё равно столкнулись с проблемами обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
+                                     disable_web_page_preview=False)
             case _:
                 await message.answer(text=f'✅Обменник {has_added} успешно привязан к вашему профилю')
 
