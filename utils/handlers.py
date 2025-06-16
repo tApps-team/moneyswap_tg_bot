@@ -245,7 +245,8 @@ def get_exchange_name(review_msg_dict: dict,
                     exchange_model.name == exchange_name,
                     )
             )
-            res = session.execute(query)
+            with session as _session:
+                res = _session.execute(query)
 
             exchange_id = res.scalar_one_or_none()
             
@@ -269,8 +270,8 @@ def try_activate_admin_exchange(user_id: int,
         .where(AdminExchangeOrder.user_id == user_id,
                AdminExchangeOrder.moderation == False)
     )
-
-    res = session.execute(query)
+    with session as _session:
+        res = _session.execute(query)
 
     _order = res.scalar_one_or_none()
 
@@ -288,33 +289,33 @@ def try_activate_admin_exchange(user_id: int,
                 _exchange.name == _order.exchange_name,
             )
         )
+        with session as _session:
+            res = _session.execute(query)
 
-        res = session.execute(query)
+            res_exchange = res.scalar_one_or_none()
 
-        res_exchange = res.scalar_one_or_none()
-
-        if res_exchange:
-            insert_data = {
-                'user_id': user_id,
-                'exchange_name': res_exchange.name,
-                'exchange_id': res_exchange.id,
-                'exchange_marker': _exchange_marker,
-            }
-            insert_query = (
-                insert(
-                    AdminExchange
-                )\
-                .values(**insert_data)
-            )
-            session.execute(insert_query)
-            record_added = True
+            if res_exchange:
+                insert_data = {
+                    'user_id': user_id,
+                    'exchange_name': res_exchange.name,
+                    'exchange_id': res_exchange.id,
+                    'exchange_marker': _exchange_marker,
+                }
+                insert_query = (
+                    insert(
+                        AdminExchange
+                    )\
+                    .values(**insert_data)
+                )
+                _session.execute(insert_query)
+                record_added = True
     
-    if record_added:
-        _order.moderation = True
-        try:
-            session.commit()
-        except Exception as ex:
-            print('ERROR WITH ADMIN ADD EXCHANGE', ex)
-            session.rollback()
-        else:
-            return _order.exchange_name
+            if record_added:
+                _order.moderation = True
+                try:
+                    _session.commit()
+                except Exception as ex:
+                    print('ERROR WITH ADMIN ADD EXCHANGE', ex)
+                    _session.rollback()
+                else:
+                    return _order.exchange_name

@@ -364,7 +364,7 @@ async def start(message: types.Message | types.CallbackQuery,
 
     if review_msg_dict and not first_visit:
         exchange_data = get_exchange_name(review_msg_dict,
-                                                session)
+                                          session)
         if exchange_data is not None:
             exchange_id, marker = exchange_data
             _kb = create_add_review_kb(exchange_id,
