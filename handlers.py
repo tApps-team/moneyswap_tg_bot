@@ -530,11 +530,21 @@ async def start(message: types.Message | types.CallbackQuery,
     if activate_admin_exchange:
         has_added = try_activate_admin_exchange(message.from_user.id,
                                                 session=session)
+        
+        match has_added:
+            case 'empty':
+                await message.answer(text=f'❗️К сожалению, не смогли найти подходящую заявку на подключения, связитесь с <a href="https://t.me/MoneySwap_support">тех.поддержкой</a> для решения проблемы')
+            case 'error':
+                await message.answer(text=f'❗️Возникли сложности, обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>')
+            case 'exists':
+                await message.answer(text=f'✔️Заявка уже была обработана\nЕсли Вы всё равно столкнулись с проблемами обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>')
+            case _:
+                await message.answer(text=f'✅Обменник {has_added} успешно привязан к вашему профилю')
 
-        if has_added:
-            await message.answer(text=f'Обменник {has_added} успешно привязан к вашему профилю✅')
-        else:
-            await message.answer(text=f'К сожалению, не смогли найти подходящую заявку на подключения, связитесь с тех.поддержкой для решения проблемы')
+        # if has_added:
+        #     await message.answer(text=f'Обменник {has_added} успешно привязан к вашему профилю✅')
+        # else:
+        #     await message.answer(text=f'К сожалению, не смогли найти подходящую заявку на подключения, связитесь с тех.поддержкой для решения проблемы')
         try:
             await message.delete()
         except Exception:

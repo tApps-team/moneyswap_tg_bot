@@ -263,20 +263,37 @@ def try_activate_admin_exchange(user_id: int,
     AdminExchange = Base.classes.general_models_exchangeadmin
     record_added = False
 
-    query = (
+    order_check_query = (
         select(
             AdminExchangeOrder
         )\
         .where(AdminExchangeOrder.user_id == user_id,
                AdminExchangeOrder.moderation == False)
     )
+    moderated_order_check_query = (
+        select(
+            AdminExchangeOrder
+        )\
+        .where(AdminExchangeOrder.user_id == user_id,
+               AdminExchangeOrder.moderation == True)
+    )
     with session as _session:
-        res = _session.execute(query)
+        res = _session.execute(order_check_query)
 
     _order = res.scalar_one_or_none()
 
     if not _order:
-        return
+        # return
+    
+        with session as _session:
+            res = _session.execute(moderated_order_check_query)
+
+        moderated_order = res.scalar_one_or_none()
+
+        if not moderated_order:
+            return 'empty'
+        else:
+            return 'exists'
 
     for _exchange_marker, _exchange in (('no_cash', Base.classes.no_cash_exchange),
                                       ('cash', Base.classes.cash_exchange),
@@ -317,5 +334,8 @@ def try_activate_admin_exchange(user_id: int,
                 except Exception as ex:
                     print('ERROR WITH ADMIN ADD EXCHANGE', ex)
                     _session.rollback()
+                    return 'error'
                 else:
                     return _order.exchange_name
+            else:
+                return 'error'
