@@ -298,7 +298,7 @@ def try_activate_admin_exchange(user_id: int,
         else:
             return 'exists'
     else:
-        _order = _order[0]
+        _order = _order[0][0]
 
     for _exchange_marker, _exchange in (('no_cash', Base.classes.no_cash_exchange),
                                       ('cash', Base.classes.cash_exchange),
