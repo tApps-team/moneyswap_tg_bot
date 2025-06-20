@@ -1314,6 +1314,14 @@ async def country_state(message: types.Message,
                         session: Session,
                         state: FSMContext,
                         bot: Bot):
+    if message.text.find('start') != -1:
+        await state.clear()
+        await start(message,
+                    session,
+                    state,
+                    bot,
+                    text_msg='Главное меню')
+        
     data = await state.get_data()
 
     select_language = data.get('select_language')
