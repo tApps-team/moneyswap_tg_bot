@@ -1321,6 +1321,7 @@ async def country_state(message: types.Message,
                     state,
                     bot,
                     text_msg='Главное меню')
+        return
         
     data = await state.get_data()
 
