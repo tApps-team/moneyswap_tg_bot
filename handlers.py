@@ -1640,58 +1640,58 @@ async def request_type_state(callback: types.CallbackQuery,
     # await callback.message.delete()
 
 
-@main_router.message(SwiftSepaStates.country)
-async def country_state(message: types.Message,
-                        session: Session,
-                        state: FSMContext,
-                        bot: Bot):
-    language_code = message.from_user.language_code
-    data = await state.get_data()
+# @main_router.message(SwiftSepaStates.country)
+# async def country_state(message: types.Message,
+#                         session: Session,
+#                         state: FSMContext,
+#                         bot: Bot):
+#     language_code = message.from_user.language_code
+#     data = await state.get_data()
 
-    # if not data.get('order') or not data.get('proccess_msg'):
-    #     await message.answer(text='Что то пошло не так, попробуйте еще раз.')
-    #     await state.clear()
+#     # if not data.get('order') or not data.get('proccess_msg'):
+#     #     await message.answer(text='Что то пошло не так, попробуйте еще раз.')
+#     #     await state.clear()
 
-    #     await start(message,
-    #                 session,
-    #                 state,
-    #                 bot,
-    #                 text_msg='Главное меню')
-    #     return
-    # state_msg: tuple[str, str] = data.get('state_msg')
-    # chat_id, message_id = state_msg
-    state_msg: tuple[str,str] = data.get('state_msg')
-    chat_id, message_id = state_msg
+#     #     await start(message,
+#     #                 session,
+#     #                 state,
+#     #                 bot,
+#     #                 text_msg='Главное меню')
+#     #     return
+#     # state_msg: tuple[str, str] = data.get('state_msg')
+#     # chat_id, message_id = state_msg
+#     state_msg: tuple[str,str] = data.get('state_msg')
+#     chat_id, message_id = state_msg
 
-    # state_msg: types.Message = data.get('state_msg')
-    await state.update_data(country=message.text)
+#     # state_msg: types.Message = data.get('state_msg')
+#     await state.update_data(country=message.text)
 
-    #
-    order = data.get('order')
-    order['country'] = message.text
-    await state.update_data(order=order)
-    #
+#     #
+#     order = data.get('order')
+#     order['country'] = message.text
+#     await state.update_data(order=order)
+#     #
 
-    state_process = data.get('state_process')
-    state_process += f'\nСтрана: {message.text}'
-    await state.update_data(state_process=state_process)
+#     state_process = data.get('state_process')
+#     state_process += f'\nСтрана: {message.text}'
+#     await state.update_data(state_process=state_process)
 
-    await state.set_state(SwiftSepaStates.amount)
+#     await state.set_state(SwiftSepaStates.amount)
 
-    kb = add_cancel_btn_to_kb(language_code)
+#     kb = add_cancel_btn_to_kb(language_code)
 
-    #
-    await bot.edit_message_text(f'{state_process}\n<b>Введите сумму...</b>',
-                                chat_id=chat_id,
-                                message_id=message_id,
-                                reply_markup=kb.as_markup())
-    #
+#     #
+#     await bot.edit_message_text(f'{state_process}\n<b>Введите сумму...</b>',
+#                                 chat_id=chat_id,
+#                                 message_id=message_id,
+#                                 reply_markup=kb.as_markup())
+#     #
 
-    # await state_msg.edit_text(f'{state_process}\n<b>Введите сумму...</b>',
-    #                           reply_markup=kb.as_markup())
-    # await message.answer('Введите сумму...')
+#     # await state_msg.edit_text(f'{state_process}\n<b>Введите сумму...</b>',
+#     #                           reply_markup=kb.as_markup())
+#     # await message.answer('Введите сумму...')
 
-    await message.delete()
+#     await message.delete()
 
 
 @main_router.message(SwiftSepaStates.amount)
