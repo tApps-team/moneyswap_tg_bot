@@ -1342,18 +1342,28 @@ async def country_state(message: types.Message,
     
     _text = 'Заполнение завершено\nВыберите действие' if select_language == 'ru'\
             else 'Request is done\nChoose an action'
-
-    await bot.edit_message_text(text=_text,
+    try:
+        await bot.edit_message_text(text=_text,
+                                    chat_id=chat_id,
+                                    message_id=message_id,
+                                    reply_markup=feedback_confirm_kb.as_markup())
+    except Exception as ex:
+        print(ex)
+        _msg = await bot.send_message(text=_text,
                                 chat_id=chat_id,
-                                message_id=message_id,
-                                reply_markup=feedback_confirm_kb.as_markup())
+                                    reply_markup=feedback_confirm_kb.as_markup())
+        
+        state_msg = (_msg.chat.id, _msg.message_id)
+
+        await state.update_data(state_msg=state_msg)
 
     # await bot.edit_message_reply_markup(chat_id=chat_id,
     #                                     message_id=message_id,
     #                                     reply_markup=feedback_confirm_kb.as_markup())
-
-    await message.delete()
-
+    try:
+        await message.delete()
+    except Exception:
+        pass
     # feedback_values = {
     #     'reasons': reason_dict.get(feedback_form['reason']),
     #     'username': username,
