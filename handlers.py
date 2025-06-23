@@ -441,10 +441,6 @@ async def start(message: types.Message | types.CallbackQuery,
                 await message.answer(text=f'✅Обменник {has_added} успешно привязан к вашему профилю')
 
 
-        # if has_added:
-        #     await message.answer(text=f'Обменник {has_added} успешно привязан к вашему профилю✅')
-        # else:
-        #     await message.answer(text=f'К сожалению, не смогли найти подходящую заявку на подключения, связитесь с тех.поддержкой для решения проблемы')
         try:
             await message.delete()
         except Exception:    
