@@ -397,11 +397,13 @@ async def start(message: types.Message | types.CallbackQuery,
                                             _session)
         if exchange_data is not None:
             exchange_id, marker = exchange_data
+
             comment_msg_dict.update({'exchange_id': exchange_id,
                                      'marker': marker})
+            
             _kb = create_add_comment_kb(comment_msg_dict,
                                        select_language)
-            # _text = f'Оставить отзыв на обменник {exchange_name}'
+
             if select_language == 'ru':
                 _text = f'Оставить комментарий на обменник {comment_msg_dict.get("exchange_name")}'
             else:
