@@ -344,3 +344,95 @@ def try_activate_admin_exchange(user_id: int,
             return _order.exchange_name
     else:
         return 'error'
+    
+
+# try_activate_partner_admin_exchange
+
+def try_activate_partner_admin_exchange(user_id: int,
+                                        session: Session):
+    AdminExchangeOrder = Base.classes.general_models_exchangeadminorder
+    AdminExchange = Base.classes.general_models_exchangeadmin
+    record_added = False
+
+    order_check_query = (
+        select(
+            AdminExchangeOrder
+        )\
+        .where(AdminExchangeOrder.user_id == user_id,
+               AdminExchangeOrder.moderation == False)
+    )
+    moderated_order_check_query = (
+        select(
+            AdminExchangeOrder
+        )\
+        .where(AdminExchangeOrder.user_id == user_id,
+               AdminExchangeOrder.moderation == True)\
+               .order_by(
+                   AdminExchangeOrder.time_create.desc(),
+               )
+    )
+    # with session as _session:
+    res = session.execute(order_check_query)
+
+    _order = res.fetchall()
+
+    if not _order:
+            # return
+        
+            # with session as _session:
+        res = session.execute(moderated_order_check_query)
+
+        moderated_order = res.fetchall()
+
+        if not moderated_order:
+            return 'empty'
+        else:
+            return 'exists'
+    else:
+        _order = _order[0][0]
+
+    # for _exchange_marker, _exchange in (('no_cash', Base.classes.no_cash_exchange),
+    #                                   ('cash', Base.classes.cash_exchange),
+    #                                   ('partner', Base.classes.partners_exchange)):
+        _exchange_marker, _exchange = ('partner', Base.classes.partners_exchange)
+        query = (
+            select(
+                _exchange
+            )\
+            .where(
+                _exchange.name == _order.exchange_name,
+            )
+        )
+        # with session as _session:
+        res = session.execute(query)
+
+        res_exchange = res.scalar_one_or_none()
+
+        if res_exchange:
+            insert_data = {
+                'user_id': user_id,
+                'exchange_name': res_exchange.name,
+                'exchange_id': res_exchange.id,
+                'exchange_marker': _exchange_marker,
+            }
+            insert_query = (
+                insert(
+                    AdminExchange
+                )\
+                .values(**insert_data)
+            )
+            session.execute(insert_query)
+            record_added = True
+
+        if record_added:
+            _order.moderation = True
+            try:
+                session.commit()
+            except Exception as ex:
+                print('ERROR WITH ADMIN ADD EXCHANGE', ex)
+                session.rollback()
+                return 'error'
+            else:
+                return _order.exchange_name
+        else:
+            return 'error'

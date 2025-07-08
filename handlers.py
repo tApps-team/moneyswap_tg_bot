@@ -37,7 +37,7 @@ from keyboards import (create_add_comment_kb, create_add_review_kb, create_kb_fo
 
 from states import SwiftSepaStates, FeedbackFormStates
 
-from utils.handlers import get_exchange_name, try_activate_admin_exchange, try_add_file_ids_to_db, try_add_file_ids, swift_sepa_data, validate_amount
+from utils.handlers import get_exchange_name, try_activate_admin_exchange, try_activate_partner_admin_exchange, try_add_file_ids_to_db, try_add_file_ids, swift_sepa_data, validate_amount
 from utils.multilanguage import start_text_dict
 
 from db.base import Base
@@ -257,6 +257,7 @@ async def start(message: types.Message | types.CallbackQuery,
     review_msg_dict = None
     comment_msg_dict = None
     activate_admin_exchange = None
+    partner_activate_admin_exchange = None
 
     is_callback = isinstance(message, types.CallbackQuery)
 
@@ -326,6 +327,9 @@ async def start(message: types.Message | types.CallbackQuery,
             elif utm_source.startswith('admin'):
                 activate_admin_exchange = True
                 utm_source = 'from_admin_activate'
+            elif utm_source.startswith('partner_admin'):
+                partner_activate_admin_exchange = True
+                utm_source = 'from_partner_admin_activate'
             
     with session as _session:
         Guest = Base.classes.general_models_guest
@@ -456,6 +460,31 @@ async def start(message: types.Message | types.CallbackQuery,
         
         return
 
+    elif partner_activate_admin_exchange and not first_visit:
+        with session as _session:
+            has_added = try_activate_partner_admin_exchange(message.from_user.id,
+                                                            session=_session)
+        
+        match has_added:
+            case 'empty':
+                await message.answer(text=f'❗️К сожалению, не смогли найти подходящую заявку на подключения, связитесь с <a href="https://t.me/MoneySwap_support">тех.поддержкой</a> для решения проблемы',
+                                     disable_web_page_preview=True)
+            case 'error':
+                await message.answer(text=f'❗️Возникли сложности, обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
+                                     disable_web_page_preview=True)
+            case 'exists':
+                await message.answer(text=f'✔️Заявка уже была обработана\nЕсли Вы всё равно столкнулись с проблемами обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
+                                     disable_web_page_preview=True)
+            case _:
+                await message.answer(text=f'✅Обменник {has_added} успешно привязан к вашему профилю')
+
+        try:
+            await message.delete()
+        except Exception:    
+            pass
+        
+        return
+
     start_kb = create_start_inline_keyboard(tg_id,
                                             select_language)
     start_kb = add_switch_language_btn(start_kb,
@@ -572,6 +601,31 @@ async def start(message: types.Message | types.CallbackQuery,
         try:
             await message.delete()
         except Exception:
+            pass
+        
+        return
+    
+    if partner_activate_admin_exchange:
+        with session as _session:
+            has_added = try_activate_partner_admin_exchange(message.from_user.id,
+                                                            session=_session)
+        
+        match has_added:
+            case 'empty':
+                await message.answer(text=f'❗️К сожалению, не смогли найти подходящую заявку на подключения, связитесь с <a href="https://t.me/MoneySwap_support">тех.поддержкой</a> для решения проблемы',
+                                     disable_web_page_preview=True)
+            case 'error':
+                await message.answer(text=f'❗️Возникли сложности, обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
+                                     disable_web_page_preview=True)
+            case 'exists':
+                await message.answer(text=f'✔️Заявка уже была обработана\nЕсли Вы всё равно столкнулись с проблемами обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
+                                     disable_web_page_preview=True)
+            case _:
+                await message.answer(text=f'✅Обменник {has_added} успешно привязан к вашему профилю')
+
+        try:
+            await message.delete()
+        except Exception:    
             pass
         
         return
