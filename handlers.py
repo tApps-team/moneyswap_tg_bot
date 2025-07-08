@@ -272,6 +272,12 @@ async def start(message: types.Message | types.CallbackQuery,
         if len(query_param) > 1:
             utm_source = query_param[-1]
 
+            if utm_source == 'get_id':
+                _text = f'ID Вашего профиля: <b>{message.from_user.id}</b>'
+                await message.answer(text=_text)
+                await message.delete()
+                return
+
             if utm_source.startswith('review'):
                 params = utm_source.split('__')
 
