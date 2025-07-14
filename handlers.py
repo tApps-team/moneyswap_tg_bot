@@ -22,7 +22,7 @@ from sqlalchemy import insert, select, update, and_
 
 from config import BEARER_TOKEN, FEEDBACK_REASON_PREFIX
 
-from keyboards import (create_add_comment_kb, create_add_review_kb, create_kb_for_exchange_admin_comment, create_kb_for_exchange_admin_review, create_start_keyboard,
+from keyboards import (create_add_comment_kb, create_add_review_kb, create_kb_for_exchange_admin_comment, create_kb_for_exchange_admin_review, create_partner_site_kb, create_start_keyboard,
                        create_start_inline_keyboard, create_swift_condition_kb,
                        create_swift_start_kb,
                        add_cancel_btn_to_kb,
@@ -2711,6 +2711,18 @@ async def try_send_order(bot: Bot,
 #         await message.delete()
 #     except Exception as ex:
 #         print(ex)
+async def exchange_admin_direction_notification(user_id: int,
+                                                text: str,
+                                                bot: Bot):
+    try:
+        _kb = create_partner_site_kb()
+        await bot.send_message(chat_id=user_id,
+                               text=text,
+                               reply_markup=_kb.as_markup())
+    except Exception as ex:
+        print(ex)
+
+
 
 
 

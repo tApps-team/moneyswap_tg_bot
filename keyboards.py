@@ -281,3 +281,11 @@ def create_add_comment_kb(comment_msg_dict: dict,
                                        web_app=WebAppInfo(url=url)))
     
     return _kb
+
+
+def create_partner_site_kb():
+    _kb = InlineKeyboardBuilder()
+    _kb.row(types.InlineKeyboardButton(text='Партнерский кабинет',
+                                       url='https://partner.moneyswap.online'))
+    
+    return _kb

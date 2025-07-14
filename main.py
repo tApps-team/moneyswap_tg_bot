@@ -33,7 +33,8 @@ from config import (TOKEN,
                     API_HASH,
                     REDIS_HOST,
                     REDIS_PASSWORD)
-from handlers import main_router, send_comment_notification_to_exchange_admin, send_comment_notification_to_review_owner, send_mass_message, send_mass_message_test, send_notification_to_exchange_admin, try_send_order
+from handlers import exchange_admin_direction_notification, main_router, send_comment_notification_to_exchange_admin, send_comment_notification_to_review_owner, send_mass_message, send_mass_message_test, send_notification_to_exchange_admin, try_send_order
+from schemas import ExchangeAdminNotification
 
 
 ###DEV###
@@ -228,6 +229,13 @@ async def send_notification_to_r_owner(user_id: int,
                                                     review_id,
                                                     session=session(),
                                                     bot=bot)
+    
+
+@app.post('/exchange_admin_direction_notification')
+async def exchange_admin_notification(data: ExchangeAdminNotification):
+    await exchange_admin_direction_notification(data.user_id,
+                                                data.text,
+                                                bot=bot)
 
 # @app.get('/custom_message')
 # async def custom_message(user_id: int,
