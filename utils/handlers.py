@@ -414,6 +414,7 @@ def try_activate_partner_admin_exchange(user_id: int,
                 'exchange_name': res_exchange.name,
                 'exchange_id': res_exchange.id,
                 'exchange_marker': _exchange_marker,
+                'notification': True,
             }
             insert_query = (
                 insert(
