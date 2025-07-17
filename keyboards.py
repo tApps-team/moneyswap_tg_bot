@@ -289,3 +289,12 @@ def create_partner_site_kb():
                                        url='https://partner.moneyswap.online'))
     
     return _kb
+
+
+def create_dev_kb():
+    _kb = InlineKeyboardBuilder()
+    _kb.row(types.InlineKeyboardButton(text='Оформить перевод 💱',
+                                       url='https://t.me/MoneySwap_robot?start=business-tg'))
+    
+    return _kb
+

@@ -22,7 +22,7 @@ from sqlalchemy import insert, select, update, and_
 
 from config import BEARER_TOKEN, FEEDBACK_REASON_PREFIX
 
-from keyboards import (create_add_comment_kb, create_add_review_kb, create_kb_for_exchange_admin_comment, create_kb_for_exchange_admin_review, create_partner_site_kb, create_start_keyboard,
+from keyboards import (create_add_comment_kb, create_add_review_kb, create_dev_kb, create_kb_for_exchange_admin_comment, create_kb_for_exchange_admin_review, create_partner_site_kb, create_start_keyboard,
                        create_start_inline_keyboard, create_swift_condition_kb,
                        create_swift_start_kb,
                        add_cancel_btn_to_kb,
@@ -654,6 +654,30 @@ async def request_type_state(callback: types.CallbackQuery,
     await callback.answer()
 
 
+@main_router.message(Command('dev'))
+async def start_swift_sepa(message: types.Message,
+                           state: FSMContext,
+                           bot: Bot):
+    # data = await state.get_data()
+    channel_id = '-1002667644013'
+
+    photo_id = ''
+
+    _text = '<b>Добро пожаловать в MoneySwap</b> 💱\n\nМы помогаем бизнесу проводить обмены и делать переводы по всему миру!\n\n💸 Оплатите недвижимость, машину, учебу, поставки и другие запросы с помощью MoneySwap!\n\nЧтобы подобрать надежный обменник или оформить SWIFT/SEPA-перевод, воспользуйтесь нашим <b>сайтом</b> или <b>Telegram-ботом</b>:\n\n🔺 <a href="https://t.me/MoneySwap_robot?start=business-tg">Telegram-бот MoneySwap</a>\n🔺 <a href="https://www.moneyswap.online/">Сайт MoneySwap</a>📚\n\nТакже читайте <a href="https://www.moneyswap.online/blog">блог MoneySwap</a>, где вы можете узнать больше про криптовалюты, финансы и переводы.\n\n❓ А если есть какие-то вопросы, обращайтесь в <a href="https://t.me/MoneySwap_support"Support</a> или <a href="https://t.me/moneyswap_admin">Admin</a>.\n\nНаши ресурсы:\n\n💬 <a href="https://t.me/MoneySwap_robot?start=business-tg">Telegram-бот</a> |🌐<a href="https://www.moneyswap.online/">Cайт</a> |📚<a href="https://www.moneyswap.online/blog">Блог</a> | 📝 <a href="https://dzen.ru/moneyswap">Дзен-канал</a> |💬 <a href="https://t.me/MoneySwap_support">Поддержка</a>\n\n\n<u>Напоминаем, что наша поддержка и администрация не занимаются обменом, он происходит на стороне партнеров!</u>'
+
+    _kb = create_dev_kb()
+
+    try:
+
+        msg = await bot.send_photo(chat_id=channel_id,
+                            photo=photo_id,
+                            caption=_text,
+                            reply_markup=_kb.as_markup())
+        
+        await bot.pin_chat_message(chat_id=channel_id,
+                                message_id=msg.message_id)
+    except Exception as ex:
+        print(ex)
 # @main_router.message(F.text == 'Swift/Sepa')
 # async def start_swift_sepa(message: types.Message,
 #                            state: FSMContext,
@@ -806,7 +830,12 @@ async def invoice_swift_sepa(callback: types.CallbackQuery,
     await callback.answer()
 
     
-
+@main_router.message(F.content_type == types.ContentType.PHOTO)
+async def photo_test(message: types.Message,
+                    state: FSMContext,
+                    bot: Bot):
+    print(message.photo)
+    print('*' * 10)
 # @main_router.callback_query(F.data == 'start_swift_sepa')
 # async def start_swift_sepa(callback: types.CallbackQuery,
 #                             session: Session,
