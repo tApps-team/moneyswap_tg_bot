@@ -437,7 +437,7 @@ def try_activate_partner_admin_exchange(user_id: int,
             #     .values(**insert_data)
             # )
             session.execute(update_query)
-            # record_added = True
+            record_added = True
 
         if record_added:
             _order.moderation = True
