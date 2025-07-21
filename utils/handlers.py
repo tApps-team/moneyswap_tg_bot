@@ -410,21 +410,34 @@ def try_activate_partner_admin_exchange(user_id: int,
         res_exchange = res.scalar_one_or_none()
 
         if res_exchange:
-            insert_data = {
+            update_data = {
                 'user_id': user_id,
-                'exchange_name': res_exchange.name,
-                'exchange_id': res_exchange.id,
-                'exchange_marker': _exchange_marker,
-                'notification': True,
+                # 'notification': True,
             }
-            insert_query = (
-                insert(
+
+            update_query = (
+                update(
                     AdminExchange
                 )\
-                .values(**insert_data)
+                .where(AdminExchange.exchange_name ==  _exchange.name,
+                       AdminExchange.exchange_marker == 'partner')\
+                .values(**update_data)
             )
-            session.execute(insert_query)
-            record_added = True
+            # insert_data = {
+            #     'user_id': user_id,
+            #     'exchange_name': res_exchange.name,
+            #     'exchange_id': res_exchange.id,
+            #     'exchange_marker': _exchange_marker,
+            #     'notification': True,
+            # }
+            # insert_query = (
+            #     insert(
+            #         AdminExchange
+            #     )\
+            #     .values(**insert_data)
+            # )
+            session.execute(update_query)
+            # record_added = True
 
         if record_added:
             _order.moderation = True
