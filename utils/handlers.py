@@ -1,7 +1,7 @@
 from aiogram import types, Bot
 from aiogram.fsm.context import FSMContext
 
-from sqlalchemy import update, select, insert
+from sqlalchemy import update, select, insert, delete, and_
 from sqlalchemy.orm import Session
 
 from db.base import Base
@@ -410,38 +410,52 @@ def try_activate_partner_admin_exchange(user_id: int,
         res_exchange = res.scalar_one_or_none()
 
         if res_exchange:
-            update_data = {
-                'user_id': user_id,
-                # 'notification': True,
-            }
-
-            update_query = (
-                update(
+            check_delete = (
+                delete(
                     AdminExchange
                 )\
-                .where(AdminExchange.exchange_name ==  _exchange.name,
-                       AdminExchange.exchange_marker == 'partner')\
-                .values(**update_data)
+                .where(
+                    and_(
+                        AdminExchange.exchange_name == _exchange.name,
+                        AdminExchange.exchange_marker == _exchange_marker,
+                    )
+                )
             )
-            # insert_data = {
+
+            
+            # update_data = {
             #     'user_id': user_id,
-            #     'exchange_name': res_exchange.name,
-            #     'exchange_id': res_exchange.id,
-            #     'exchange_marker': _exchange_marker,
-            #     'notification': True,
+            #     # 'notification': True,
             # }
-            # insert_query = (
-            #     insert(
+
+            # update_query = (
+            #     update(
             #         AdminExchange
             #     )\
-            #     .values(**insert_data)
+            #     .where(AdminExchange.exchange_name ==  _exchange.name,
+            #            AdminExchange.exchange_marker == 'partner')\
+            #     .values(**update_data)
             # )
-            session.execute(update_query)
+            insert_data = {
+                'user_id': user_id,
+                'exchange_name': res_exchange.name,
+                'exchange_id': res_exchange.id,
+                'exchange_marker': _exchange_marker,
+                'notification': True,
+            }
+            insert_query = (
+                insert(
+                    AdminExchange
+                )\
+                .values(**insert_data)
+            )
+            session.execute(insert_query)
             record_added = True
 
         if record_added:
             _order.moderation = True
             try:
+                session.execute(check_delete)
                 session.commit()
             except Exception as ex:
                 print('ERROR WITH ADMIN ADD EXCHANGE', ex)
