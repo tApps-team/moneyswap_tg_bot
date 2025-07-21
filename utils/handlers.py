@@ -436,6 +436,8 @@ def try_activate_partner_admin_exchange(user_id: int,
             #            AdminExchange.exchange_marker == 'partner')\
             #     .values(**update_data)
             # )
+            session.execute(check_delete)
+            
             insert_data = {
                 'user_id': user_id,
                 'exchange_name': res_exchange.name,
@@ -455,7 +457,6 @@ def try_activate_partner_admin_exchange(user_id: int,
         if record_added:
             _order.moderation = True
             try:
-                session.execute(check_delete)
                 session.commit()
             except Exception as ex:
                 print('ERROR WITH ADMIN ADD EXCHANGE', ex)
