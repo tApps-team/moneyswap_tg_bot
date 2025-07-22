@@ -659,7 +659,7 @@ async def start_swift_sepa(message: types.Message,
                            state: FSMContext,
                            bot: Bot):
     # data = await state.get_data()
-    channel_id = '-1002667644013'
+    channel_id = '-1002659926226'
 
     photo_id = 'AgACAgIAAxkBAAEBQxpoeNJx4-N9uFiC4k0HvoatifLMugACo_IxG1l-yEuws1i2nNZ3WAEAAwIAA3MAAzYE'
 
