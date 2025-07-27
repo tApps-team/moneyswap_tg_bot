@@ -1571,6 +1571,38 @@ async def send_order(callback: types.CallbackQuery,
 
     with session as _session:
 
+        check_query = (
+            select(
+                Order.id,
+            )\
+            .where(
+                and_(
+                    Order.guest_id == order['guest_id'],
+                    Order.comment == order['comment'],
+                    Order.time_create >= datetime.now() - timedelta(minutes=1),
+                )
+            )
+        )
+
+        check_res = session.execute(check_query)
+
+        if check_res.scalar_one_or_none():
+            
+            if select_language == 'ru':
+                _text = '⏳ Ваша заявка успешно принята. При положительном решении Вам будет отправлена ссылка на вступление в чат с персональным менеджером от нашей партнерской компании, который будет сопровождать ваш перевод'
+            else:
+                _text = '⏳ Your request has been successfully accepted. If the decision is positive, you will be sent a link to join the chat with a personal manager from our partner company, who will accompany your transfer'
+
+            await callback.answer(text=_text,
+                                show_alert=True)
+            
+            await start(callback,
+                        session,
+                        state,
+                        bot,
+                        text_msg='Главное меню')
+            return
+        
         new_order = Order(**order)  # предполагая, что order — это словарь
         _session.add(new_order)
         _session.commit()
