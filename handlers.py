@@ -2419,7 +2419,8 @@ async def send_mass_message(bot: Bot,
 
             mass_message = _session.query(MassSendMessage)\
                                     .options(joinedload(MassSendMessage.general_models_masssendimage_collection),
-                                             joinedload(MassSendMessage.general_models_masssendvideo_collection))\
+                                             joinedload(MassSendMessage.general_models_masssendvideo_collection),
+                                             joinedload(MassSendMessage.general_models_masssendfile_collection))\
                                     .where(MassSendMessage.name == name_send).first()
 
             # try add file_id for each related file passed object
