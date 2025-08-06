@@ -2141,8 +2141,8 @@ async def send_notification_to_exchange_admin(user_id: int,
         )\
         .where(Review.id == review_id)
     )
-
-    res = session.execute(query)
+    with session as _session:
+        res = _session.execute(query)
 
     review = res.scalar_one_or_none()
 
@@ -2200,8 +2200,8 @@ async def send_comment_notification_to_exchange_admin(user_id: int,
         #       Comment.review_id == Review.id)\
         .where(Review.id == review_id)
     )
-
-    res = session.execute(query)
+    with session as _session:
+        res = _session.execute(query)
 
     review = res.scalar_one_or_none()
 
@@ -2253,8 +2253,8 @@ async def send_comment_notification_to_review_owner(user_id: int,
         #       Comment.review_id == Review.id)\
         .where(Review.id == review_id)
     )
-
-    res = session.execute(query)
+    with session as _session:
+        res = _session.execute(query)
 
     review = res.scalar_one_or_none()
 
@@ -2619,7 +2619,7 @@ async def try_send_order(bot: Bot,
                          user_id: int,
                          order_id: int,
                          order_status: str | None):
-    with session as session:
+    with session as _session:
         CustomOrder = Base.classes.general_models_customorder
         Guest = Base.classes.general_models_guest
 
@@ -2636,7 +2636,7 @@ async def try_send_order(bot: Bot,
             )
         )
 
-        res = session.execute(query)
+        res = _session.execute(query)
 
         order = res.fetchall()
         print(order)
@@ -2693,11 +2693,34 @@ async def try_send_order(bot: Bot,
             if chat_link is not None:
                 chat_link = chat_link.get('url')
 
-                session.execute(update(Guest)\
-                                .where(Guest.tg_id == user_id)\
-                                .values(chat_link=chat_link))
-                # guest.chat_link = chat_link
-                session.commit()
+                with session as _session:
+                    try:
+                        _session.execute(update(Guest)\
+                                        .where(Guest.tg_id == user_id)\
+                                        .values(chat_link=chat_link))
+                        # guest.chat_link = chat_link
+                        _session.commit()
+                    except Exception as ex:
+                        print(ex, 'не получилось отправить, проблема на нашей стороне')
+                        try:
+                            result_text = f'❌Сообщение с ссылкой на MoneyPort не получилось отправить пользователю {user_id}, проблема на нашей стороне'
+                            
+                            # if user_id == 686339126:
+                            #     _url = f'https://api.moneyswap.online/test_send_result_chat_link?result_text={result_text}' 
+                            # else:
+                            _url = f'https://api.moneyswap.online/send_result_chat_link?result_text={result_text}'
+                            
+                            timeout = aiohttp.ClientTimeout(total=5)
+                            async with aiohttp.ClientSession() as aiosession:
+                                async with aiosession.get(_url,
+                                                    timeout=timeout) as response:
+                                    pass
+                        except Exception as ex:
+                            print(ex)
+                            pass
+
+                        return {'status': 'error'}
+
             else:
                 print('не получилось отправить, проблема на стороне MoneyPort')
                 try:
@@ -2709,8 +2732,8 @@ async def try_send_order(bot: Bot,
                     _url = f'https://api.moneyswap.online/send_result_chat_link?result_text={result_text}'
                     
                     timeout = aiohttp.ClientTimeout(total=5)
-                    async with aiohttp.ClientSession() as session:
-                        async with session.get(_url,
+                    async with aiohttp.ClientSession() as aiosession:
+                        async with aiosession.get(_url,
                                             timeout=timeout) as response:
                             pass
                 except Exception as ex:
@@ -2741,8 +2764,8 @@ async def try_send_order(bot: Bot,
                 _url = f'https://api.moneyswap.online/send_result_chat_link?result_text={result_text}'
                 
                 timeout = aiohttp.ClientTimeout(total=5)
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(_url,
+                async with aiohttp.ClientSession() as aiosession:
+                    async with aiosession.get(_url,
                                         timeout=timeout) as response:
                         pass
             except Exception as ex:
@@ -2764,8 +2787,8 @@ async def try_send_order(bot: Bot,
                 _url = f'https://api.moneyswap.online/send_result_chat_link?result_text={result_text}'
                 
                 timeout = aiohttp.ClientTimeout(total=5)
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(_url,
+                async with aiohttp.ClientSession() as aiosession:
+                    async with aiosession.get(_url,
                                         timeout=timeout) as response:
                         pass
             except Exception as ex:
@@ -2785,8 +2808,8 @@ async def try_send_order(bot: Bot,
                 _url = f'https://api.moneyswap.online/send_result_chat_link?result_text={result_text}'
 
                 timeout = aiohttp.ClientTimeout(total=5)
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(_url,
+                async with aiohttp.ClientSession() as aiosession:
+                    async with aiosession.get(_url,
                                         timeout=timeout) as response:
                         pass
             except Exception as ex:
