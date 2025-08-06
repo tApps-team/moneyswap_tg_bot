@@ -2545,8 +2545,10 @@ async def send_mass_message(bot: Bot,
             
             with session as _session:
                 try:
-                    _session.execute(active_update_query)
-                    _session.execute(unactive_update_query)
+                    if active_update_query:
+                        _session.execute(active_update_query)
+                    if unactive_update_query:
+                        _session.execute(unactive_update_query)
                     _session.commit()
                     _text = ''
                 except Exception as ex:
@@ -2556,7 +2558,14 @@ async def send_mass_message(bot: Bot,
                 finally:
                     execute_time = end_send_time - start_send_time
 
-                    valid_time = f'{round(execute_time / 60 / 60, 2)} (время в часах)'
+                    _valid_time = round(execute_time / 60 / 60, 2)
+
+                    if valid_time == 0:
+                        valid_time = f'{round(execute_time)} (время в секундах)'
+                    else:
+                        valid_time = f'{_valid_time} (время в часах)'
+
+
 
                     # query = (
                     #     select(
