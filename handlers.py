@@ -2283,7 +2283,7 @@ async def send_mass_message_test(bot: Bot,
                             session: Session,
                             user_id: int,
                             name_send: str):
-        with session as session:
+        with session as _session:
             Guest = Base.classes.general_models_guest
             # session: Session
 
@@ -2293,15 +2293,16 @@ async def send_mass_message_test(bot: Bot,
             #                         .options(joinedload(MassSendMessage.general_models_masssendimage_collection),
             #                                  joinedload(MassSendMessage.general_models_masssendvideo_collection))\
             #                         .first()
-            mass_message = session.query(MassSendMessage)\
+            mass_message = _session.query(MassSendMessage)\
                                     .options(joinedload(MassSendMessage.general_models_masssendimage_collection),
-                                             joinedload(MassSendMessage.general_models_masssendvideo_collection))\
+                                             joinedload(MassSendMessage.general_models_masssendvideo_collection),
+                                             joinedload(MassSendMessage.general_models_masssendfile_collection))\
                                     .where(MassSendMessage.name == name_send).first()
 
             # try add file_id for each related file passed object
-            await try_add_file_ids(bot, session, mass_message)
+            await try_add_file_ids(bot, _session, mass_message)
             # refresh all DB records
-            session.expire_all()
+            _session.expire_all()
 
             mass_message_text: str = mass_message.content
             print(mass_message_text)
@@ -2369,6 +2370,9 @@ async def send_mass_message_test(bot: Bot,
             if files:
                 file_group = MediaGroupBuilder(files)
 
+            active_tg_id_update_list = []
+            unactive_tg_id_update_list = []
+
             # try:
             for guest in guests:
                 try:
@@ -2385,23 +2389,44 @@ async def send_mass_message_test(bot: Bot,
                         # print('MB2', mb2)
                     # guest = session.query(Guest).where(Guest.tg_id == '350016695').first()
                     if not guest.is_active:
-                        session.execute(update(Guest).where(Guest.tg_id == _tg_id).values(is_active=True))
-                        # session.commit()
+                        active_tg_id_update_list.append(_tg_id)
                 except Exception as ex:
                     print(ex)
                     if guest.is_active:
-                        session.execute(update(Guest).where(Guest.tg_id == _tg_id).values(is_active=False))
-                    # session.commit()
+                        unactive_tg_id_update_list.append(_tg_id)
                 finally:
                     await sleep(0.3)
             
+            active_update_query = (
+                update(
+                    Guest
+                )\
+                .values(is_active=True)\
+                .where(
+                    Guest.tg_id.in_(active_tg_id_update_list)
+                )
+            )
+            unactive_update_query = (
+                update(
+                    Guest
+                )\
+                .values(is_active=False)\
+                .where(
+                    Guest.tg_id.in_(unactive_tg_id_update_list)
+                )
+            )
+            
             try:
-                session.commit()
+                if active_tg_id_update_list:
+                    _session.execute(active_update_query)
+                if unactive_tg_id_update_list:
+                    _session.execute(unactive_update_query)
+                _session.commit()
             except Exception as ex:
-                session.rollback()
+                _session.rollback()
                 print('send error', ex)
             
-            session.close()
+            # session.close()
 
 
 
@@ -2545,9 +2570,9 @@ async def send_mass_message(bot: Bot,
             
             with session as _session:
                 try:
-                    if active_update_query:
+                    if active_tg_id_update_list:
                         _session.execute(active_update_query)
-                    if unactive_update_query:
+                    if unactive_tg_id_update_list:
                         _session.execute(unactive_update_query)
                     _session.commit()
                     _text = ''
