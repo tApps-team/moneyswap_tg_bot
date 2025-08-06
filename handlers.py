@@ -2411,28 +2411,24 @@ async def send_mass_message(bot: Bot,
                             name_send: str):
         start_send_time = time.time()
 
-        with session as session:
+        with session as _session:
             Guest = Base.classes.general_models_guest
-            # session: Session
 
             # get MassSendMessage model from DB
             MassSendMessage = Base.classes.general_models_masssendmessage
-            # mass_message = session.query(MassSendMessage)\
-            #                         .options(joinedload(MassSendMessage.general_models_masssendimage_collection),
-            #                                  joinedload(MassSendMessage.general_models_masssendvideo_collection))\
-            #                         .first()
-            mass_message = session.query(MassSendMessage)\
+
+            mass_message = _session.query(MassSendMessage)\
                                     .options(joinedload(MassSendMessage.general_models_masssendimage_collection),
                                              joinedload(MassSendMessage.general_models_masssendvideo_collection))\
                                     .where(MassSendMessage.name == name_send).first()
 
             # try add file_id for each related file passed object
-            await try_add_file_ids(bot, session, mass_message)
+            await try_add_file_ids(bot, _session, mass_message)
             # refresh all DB records
-            session.expire_all()
+            _session.expire_all()
 
             mass_message_text: str = mass_message.content
-            # print(mass_message_text)
+
             # validate content text
             mass_message_text: str = mass_message_text.replace('<p>','')\
                                                         .replace('</p>', '\n')\
@@ -2442,9 +2438,6 @@ async def send_mass_message(bot: Bot,
                                                         .replace('<span>', '')\
                                                         .replace('</span>', '')   
 
-                                                        # .replace('<span', '<span class="tg-spoiler"')
-
-            # print(mass_message_text)
 
             images = [types.InputMediaPhoto(media=image.file_id) for image in mass_message.general_models_masssendimage_collection]
             videos = [types.InputMediaVideo(media=video.file_id) for video in mass_message.general_models_masssendvideo_collection]
@@ -2467,13 +2460,13 @@ async def send_mass_message(bot: Bot,
             # )
             
             #test for me only
-            # query = (
-            #     select(Guest)\
-            #     .where(Guest.tg_id.in_([686339126]))
-            # )
+            query = (
+                select(Guest)\
+                .where(Guest.tg_id.in_([686339126]))
+            )
 
             # mass_send for all guests
-            query = (select(Guest))
+            # query = (select(Guest))
 
 
 # [60644557,
@@ -2484,81 +2477,106 @@ async def send_mass_message(bot: Bot,
 #                                         283163508,
 #                                         311364517]
 
-            res = session.execute(query)
+            res = _session.execute(query)
 
             guests = res.fetchall()
 
-            start_users_count = len([guest for guest in guests if guest[0].is_active == True])
+        start_users_count = len([guest for guest in guests if guest[0].is_active == True])
 
-            # print(guests)
+        image_video_group = None
 
-            image_video_group = None
-            if list(images+videos):
-                image_video_group = MediaGroupBuilder(images+videos, caption=mass_message_text)
-            
-            files = [types.InputMediaDocument(media=file.file_id) for file in mass_message.general_models_masssendfile_collection]
-            file_group = None
-            if files:
-                file_group = MediaGroupBuilder(files)
+        if list(images+videos):
+            image_video_group = MediaGroupBuilder(images+videos, caption=mass_message_text)
+        
+        files = [types.InputMediaDocument(media=file.file_id) for file in mass_message.general_models_masssendfile_collection]
+        file_group = None
+        if files:
+            file_group = MediaGroupBuilder(files)
 
-            # try:
-            for guest in guests:
-                try:
-                    guest = guest[0]
-                    _tg_id = guest.tg_id
-                    if image_video_group is not None:
-                        mb1 = await bot.send_media_group(_tg_id, media=image_video_group.build())
-                        # print('MB1', mb1)
-                    else:
-                        await bot.send_message(_tg_id,
-                                            text=mass_message_text)
-                    if file_group is not None:
-                        mb2 = await bot.send_media_group(_tg_id, media=file_group.build())    
-                        # print('MB2', mb2)
-                    # guest = session.query(Guest).where(Guest.tg_id == '350016695').first()
-                    if not guest.is_active:
-                        session.execute(update(Guest).where(Guest.tg_id == _tg_id).values(is_active=True))
-                        # session.commit()
-                except Exception as ex:
-                    print(ex)
-                    if guest.is_active:
-                        session.execute(update(Guest).where(Guest.tg_id == _tg_id).values(is_active=False))
-                    # session.commit()
-                finally:
-                    await sleep(0.3)
-            
-            end_send_time = time.time()
-            
+        # try:
+        active_tg_id_update_list = []
+        unactive_tg_id_update_list = []
+
+        for guest in guests:
             try:
-                session.commit()
-                _text = ''
+                guest = guest[0]
+                _tg_id = guest.tg_id
+                if image_video_group is not None:
+                    mb1 = await bot.send_media_group(_tg_id, media=image_video_group.build())
+                    # print('MB1', mb1)
+                else:
+                    await bot.send_message(_tg_id,
+                                        text=mass_message_text)
+                if file_group is not None:
+                    mb2 = await bot.send_media_group(_tg_id, media=file_group.build())    
+
+                if not guest.is_active:
+                    active_tg_id_update_list.append(_tg_id)
+                    # session.execute(update(Guest).where(Guest.tg_id == _tg_id).values(is_active=True))
             except Exception as ex:
-                session.rollback()
-                _text = ''
-                print('send error', ex)
+                print(ex)
+                if guest.is_active:
+                    unactive_tg_id_update_list.append(_tg_id)
+                    # session.execute(update(Guest).where(Guest.tg_id == _tg_id).values(is_active=False))
             finally:
-                execute_time = end_send_time - start_send_time
+                await sleep(0.3)
+        
+            end_send_time = time.time()
 
-                # query = (
-                #     select(
-                #         Guest.id
-                #     )\
-                #     .where(Guest.is_active == False)
-                # )
-
-                end_active_users_count = session.query(Guest.tg_id).where(Guest.is_active == True).count()
-
+            active_update_query = (
+                update(
+                    Guest
+                )\
+                .values(is_active=True)\
+                .where(
+                    Guest.tg_id.in_(active_tg_id_update_list)
+                )
+            )
+            unactive_update_query = (
+                update(
+                    Guest
+                )\
+                .values(is_active=False)\
+                .where(
+                    Guest.tg_id.in_(unactive_tg_id_update_list)
+                )
+            )
+            
+            with session as _session:
                 try:
-                    _url = f'https://api.moneyswap.online/send_mass_message_info?execute_time={execute_time}&start_users_count={start_users_count}&end_users_count={end_active_users_count}'
-                    timeout = aiohttp.ClientTimeout(total=5)
-                    async with aiohttp.ClientSession() as session:
-                        async with session.get(_url,
-                                            timeout=timeout) as response:
-                            pass
+                    _session.execute(active_update_query)
+                    _session.execute(unactive_update_query)
+                    _session.commit()
+                    _text = ''
                 except Exception as ex:
-                    print(ex)
-                    pass
-            session.close()
+                    _session.rollback()
+                    _text = ''
+                    print('send error', ex)
+                finally:
+                    execute_time = end_send_time - start_send_time
+
+                    valid_time = f'{round(execute_time / 60 / 60, 2)} (время в часах)'
+
+                    # query = (
+                    #     select(
+                    #         Guest.id
+                    #     )\
+                    #     .where(Guest.is_active == False)
+                    # )
+
+                    end_active_users_count = session.query(Guest.tg_id).where(Guest.is_active == True).count()
+
+                    try:
+                        _url = f'https://api.moneyswap.online/send_mass_message_info?execute_time={valid_time}&start_users_count={start_users_count}&end_users_count={end_active_users_count}'
+                        timeout = aiohttp.ClientTimeout(total=5)
+                        async with aiohttp.ClientSession() as session:
+                            async with session.get(_url,
+                                                timeout=timeout) as response:
+                                pass
+                    except Exception as ex:
+                        print(ex)
+                        pass
+                # session.close()
 
 
 async def try_send_order(bot: Bot,
