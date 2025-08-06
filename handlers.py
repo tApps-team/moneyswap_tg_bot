@@ -2560,7 +2560,7 @@ async def send_mass_message(bot: Bot,
 
                     _valid_time = round(execute_time / 60 / 60, 2)
 
-                    if valid_time == 0:
+                    if _valid_time == 0:
                         valid_time = f'{round(execute_time)} (время в секундах)'
                     else:
                         valid_time = f'{_valid_time} (время в часах)'
