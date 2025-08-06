@@ -2144,7 +2144,7 @@ async def send_notification_to_exchange_admin(user_id: int,
     with session as _session:
         res = _session.execute(query)
 
-    review = res.scalar_one_or_none()
+        review = res.scalar_one_or_none()
 
     # try:
     #     review, exchange = res[0]
@@ -2203,7 +2203,7 @@ async def send_comment_notification_to_exchange_admin(user_id: int,
     with session as _session:
         res = _session.execute(query)
 
-    review = res.scalar_one_or_none()
+        review = res.scalar_one_or_none()
 
     if review:
         # comment, review = res[0]
@@ -2256,7 +2256,7 @@ async def send_comment_notification_to_review_owner(user_id: int,
     with session as _session:
         res = _session.execute(query)
 
-    review = res.scalar_one_or_none()
+        review = res.scalar_one_or_none()
 
     if review:
         # comment, review = res[0]
