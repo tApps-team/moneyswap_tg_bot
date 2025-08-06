@@ -2415,7 +2415,7 @@ async def send_mass_message_test(bot: Bot,
                     Guest.tg_id.in_(unactive_tg_id_update_list)
                 )
             )
-            
+
             try:
                 if active_tg_id_update_list:
                     _session.execute(active_update_query)
@@ -2486,13 +2486,13 @@ async def send_mass_message(bot: Bot,
             # )
             
             #test for me only
-            # query = (
-            #     select(Guest)\
-            #     .where(Guest.tg_id.in_([686339126]))
-            # )
+            query = (
+                select(Guest)\
+                .where(Guest.tg_id.in_([686339126]))
+            )
 
             # mass_send for all guests
-            query = (select(Guest))
+            # query = (select(Guest))
 
 
 # [60644557,
