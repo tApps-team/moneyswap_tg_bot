@@ -416,7 +416,7 @@ def try_activate_partner_admin_exchange(user_id: int,
                 )\
                 .where(
                     and_(
-                        AdminExchange.exchange_name == _exchange.name,
+                        AdminExchange.exchange_name == res_exchange.name,
                         AdminExchange.exchange_marker == _exchange_marker,
                     )
                 )

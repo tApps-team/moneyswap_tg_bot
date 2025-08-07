@@ -1584,7 +1584,7 @@ async def send_order(callback: types.CallbackQuery,
             )
         )
 
-        check_res = session.execute(check_query)
+        check_res = _session.execute(check_query)
 
         if check_res.scalar_one_or_none():
             
