@@ -2469,21 +2469,21 @@ async def send_mass_message(bot: Bot,
             videos = [types.InputMediaVideo(media=video.file_id) for video in mass_message.general_models_masssendvideo_collection]
             
             #test for moneyswap team
-            query = (
-                select(Guest)\
-                .where(Guest.tg_id.in_([60644557,
-                                        350016695,
-                                        471715294,
-                                        311364517,
-                                        283163508,
-                                        5047108619,
-                                        561803366,
-                                        686339126,
-                                        620839543,
-                                        375236081,
+            # query = (
+            #     select(Guest)\
+            #     .where(Guest.tg_id.in_([60644557,
+            #                             350016695,
+            #                             471715294,
+            #                             311364517,
+            #                             283163508,
+            #                             5047108619,
+            #                             561803366,
+            #                             686339126,
+            #                             620839543,
+            #                             375236081,
 
-                ]))
-            )
+            #     ]))
+            # )
             
             #test for me only
             # query = (
@@ -2492,7 +2492,7 @@ async def send_mass_message(bot: Bot,
             # )
 
             # mass_send for all guests
-            # query = (select(Guest))
+            query = (select(Guest))
 
 
 # [60644557,
