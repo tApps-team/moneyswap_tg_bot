@@ -2530,18 +2530,20 @@ async def send_mass_message(bot: Bot,
                 if image_video_group is not None:
                     mb1 = await bot.send_media_group(_tg_id, media=image_video_group.build())
                     # print('MB1', mb1)
-                    print(f'отправлено юзеру {_tg_id}✅')
+                    print(f'отправлено юзеру ( с медиа файлами ) {_tg_id}✅')
                 else:
                     await bot.send_message(_tg_id,
                                         text=mass_message_text)
+                    print(f'отправлено юзеру {_tg_id}✅')
                 if file_group is not None:
-                    mb2 = await bot.send_media_group(_tg_id, media=file_group.build())    
+                    mb2 = await bot.send_media_group(_tg_id, media=file_group.build())
+                    print(f'отправлено юзеру ( с док файлами ) {_tg_id}✅')
 
                 if not guest.is_active:
                     active_tg_id_update_list.append(_tg_id)
                     # session.execute(update(Guest).where(Guest.tg_id == _tg_id).values(is_active=True))
             except Exception as ex:
-                print(ex)
+                print(f'{ex} ❌')
                 if guest.is_active:
                     unactive_tg_id_update_list.append(_tg_id)
                     # session.execute(update(Guest).where(Guest.tg_id == _tg_id).values(is_active=False))
