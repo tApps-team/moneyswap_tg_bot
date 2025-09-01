@@ -2432,11 +2432,11 @@ async def send_mass_message_test(bot: Bot,
 
 
 async def send_mass_message(bot: Bot,
-                            session: Session,
+                            db_session: Session,
                             name_send: str):
         start_send_time = time.time()
 
-        with session as _session:
+        with db_session as _session:
             Guest = Base.classes.general_models_guest
 
             # get MassSendMessage model from DB
@@ -2548,70 +2548,70 @@ async def send_mass_message(bot: Bot,
             finally:
                 await sleep(0.3)
         
-            end_send_time = time.time()
+        end_send_time = time.time()
 
-            active_update_query = (
-                update(
-                    Guest
-                )\
-                .values(is_active=True)\
-                .where(
-                    Guest.tg_id.in_(active_tg_id_update_list)
-                )
+        active_update_query = (
+            update(
+                Guest
+            )\
+            .values(is_active=True)\
+            .where(
+                Guest.tg_id.in_(active_tg_id_update_list)
             )
-            unactive_update_query = (
-                update(
-                    Guest
-                )\
-                .values(is_active=False)\
-                .where(
-                    Guest.tg_id.in_(unactive_tg_id_update_list)
-                )
+        )
+        unactive_update_query = (
+            update(
+                Guest
+            )\
+            .values(is_active=False)\
+            .where(
+                Guest.tg_id.in_(unactive_tg_id_update_list)
             )
-            
-            with session as _session:
+        )
+        
+        with db_session as _session:
+            try:
+                if active_tg_id_update_list:
+                    _session.execute(active_update_query)
+                if unactive_tg_id_update_list:
+                    _session.execute(unactive_update_query)
+                _session.commit()
+                _text = ''
+            except Exception as ex:
+                _session.rollback()
+                _text = ''
+                print('send error', ex)
+            finally:
+                execute_time = end_send_time - start_send_time
+
+                _valid_time = round(execute_time / 60 / 60, 2)
+
+                if _valid_time == 0:
+                    valid_time = f'{round(execute_time)} (время в секундах)'
+                else:
+                    valid_time = f'{_valid_time} (время в часах)'
+
+
+
+                # query = (
+                #     select(
+                #         Guest.id
+                #     )\
+                #     .where(Guest.is_active == False)
+                # )
+                with db_session as _session:
+                    end_active_users_count = _session.query(Guest.tg_id).where(Guest.is_active == True).count()
+
                 try:
-                    if active_tg_id_update_list:
-                        _session.execute(active_update_query)
-                    if unactive_tg_id_update_list:
-                        _session.execute(unactive_update_query)
-                    _session.commit()
-                    _text = ''
+                    _url = f'https://api.moneyswap.online/send_mass_message_info?execute_time={valid_time}&start_users_count={start_users_count}&end_users_count={end_active_users_count}'
+                    timeout = aiohttp.ClientTimeout(total=5)
+                    async with aiohttp.ClientSession() as aiosession:
+                        async with aiosession.get(_url,
+                                            timeout=timeout) as response:
+                            pass
                 except Exception as ex:
-                    _session.rollback()
-                    _text = ''
-                    print('send error', ex)
-                finally:
-                    execute_time = end_send_time - start_send_time
-
-                    _valid_time = round(execute_time / 60 / 60, 2)
-
-                    if _valid_time == 0:
-                        valid_time = f'{round(execute_time)} (время в секундах)'
-                    else:
-                        valid_time = f'{_valid_time} (время в часах)'
-
-
-
-                    # query = (
-                    #     select(
-                    #         Guest.id
-                    #     )\
-                    #     .where(Guest.is_active == False)
-                    # )
-
-                    end_active_users_count = session.query(Guest.tg_id).where(Guest.is_active == True).count()
-
-                    try:
-                        _url = f'https://api.moneyswap.online/send_mass_message_info?execute_time={valid_time}&start_users_count={start_users_count}&end_users_count={end_active_users_count}'
-                        timeout = aiohttp.ClientTimeout(total=5)
-                        async with aiohttp.ClientSession() as session:
-                            async with session.get(_url,
-                                                timeout=timeout) as response:
-                                pass
-                    except Exception as ex:
-                        print(ex)
-                        pass
+                    print(ex)
+                    pass
                 # session.close()
 
 
