@@ -168,7 +168,7 @@ async def bot_webhook(update: dict):
 @app.get('/send_mass_message')
 async def send_mass_message_for_all_users(name_send: str):
     await send_mass_message(bot=bot,
-                            session=session(),
+                            db_session=session(),
                             name_send=name_send)
     
 
