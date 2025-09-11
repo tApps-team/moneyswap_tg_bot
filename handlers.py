@@ -388,12 +388,14 @@ async def start(message: types.Message | types.CallbackQuery,
             exchange_id, marker = exchange_data
             _kb = create_add_review_kb(exchange_id,
                                        marker,
-                                       select_language)
+                                       select_language).as_markup()
             # _text = f'Оставить отзыв на обменник {exchange_name}'
             if select_language == 'ru':
                 _text = f'Оставить отзыв на обменник {review_msg_dict.get("exchange_name")}'
             else:
                 _text = f'Add review to exchanger {review_msg_dict.get("exchange_name")}'
+            # for blocked review
+            blocked_add_review = (_text, exchange_id, marker)
         else:
             _kb = None
 
@@ -401,13 +403,17 @@ async def start(message: types.Message | types.CallbackQuery,
                 _text = 'Не удалось найти обменник для отзыва'
             else:
                 _text = 'Exchanger to add review not found'
+            # for blocked review
+            blocked_add_review = (_text, )
         try:
             await bot.send_message(chat_id=message.from_user.id,
                                 text=_text,
-                                reply_markup=_kb.as_markup())
+                                reply_markup=_kb)
             await message.delete()
         except Exception as ex:
             print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+            # for blocked review
+            await state.update_data(blocked_add_review=blocked_add_review)
             return
         return
     
@@ -422,12 +428,14 @@ async def start(message: types.Message | types.CallbackQuery,
                                      'marker': marker})
             
             _kb = create_add_comment_kb(comment_msg_dict,
-                                       select_language)
+                                       select_language).as_markup()
 
             if select_language == 'ru':
                 _text = f'Оставить комментарий на обменник {comment_msg_dict.get("exchange_name")}'
             else:
                 _text = f'Add comment to exchanger {comment_msg_dict.get("exchange_name")}'
+            # for blocked comment
+            blocked_add_comment = (_text, exchange_id, marker, comment_msg_dict.get('review_id'))
         else:
             _kb = None
 
@@ -435,13 +443,17 @@ async def start(message: types.Message | types.CallbackQuery,
                 _text = 'Не удалось найти обменник для комментария'
             else:
                 _text = 'Exchanger to add comment not found'
+            # for blocked comment
+            blocked_add_comment = (_text, )
         try:
             await bot.send_message(chat_id=message.from_user.id,
                                 text=_text,
-                                reply_markup=_kb.as_markup())
+                                reply_markup=_kb)
             await message.delete()
         except Exception as ex:
             print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+            # for blocked comment
+            await state.update_data(blocked_add_comment=blocked_add_comment)
             return
         return
 
@@ -521,8 +533,55 @@ async def start(message: types.Message | types.CallbackQuery,
                                 reply_markup=start_kb.as_markup(),
                                 disable_web_page_preview=True,
                                 disable_notification=True)
+            
+            blocked_add_review: tuple = data.get('blocked_add_review')
+            blocked_add_comment: tuple = data.get('blocked_add_comment')
+
+            if blocked_add_review:
+                if len(blocked_add_review) == 1:
+                    _text = blocked_add_review[0]
+                    _kb = None
+                else:
+                    _text = blocked_add_review[0]
+                    _exchange_id, _marker = blocked_add_review[1:]
+                    _kb = create_add_review_kb(_exchange_id,
+                                               _marker,
+                                               select_language).as_markup()
+                await bot.send_message(chat_id=message.from_user.id,
+                                       text=_text,
+                                       reply_markup=_kb)
+                blocked_add_review = True
+
+            elif blocked_add_comment:
+                if len(blocked_add_comment) == 1:
+                    _text = blocked_add_comment[0]
+                    _kb = None
+                else:
+                    _text = blocked_add_comment[0]
+                    _exchange_id, _marker, _review_id = blocked_add_comment[1:]
+                    _comment_msg_dict = {
+                        'exchange_id': _exchange_id,
+                        'marker': _marker,
+                        'review_id': _review_id,
+                    }
+                    _kb = create_add_comment_kb(_comment_msg_dict,
+                                               select_language).as_markup()
+                await bot.send_message(chat_id=message.from_user.id,
+                                       text=_text,
+                                       reply_markup=_kb)
+                blocked_add_comment = True
+
         except TelegramForbiddenError:
             return
+        else:
+            if isinstance(blocked_add_review, bool):
+                # if data.get('blocked_add_review'):
+                #     data.pop('blocked_add_review')
+                await state.update_data(blocked_add_review=None)
+            elif isinstance(blocked_add_comment, bool):
+                # if data.get('blocked_add_comment'):
+                #     data.pop('blocked_add_comment')
+                await state.update_data(blocked_add_comment=None)
 
         try:
             await bot.unpin_all_chat_messages(chat_id=message.chat.id)
@@ -561,14 +620,28 @@ async def start(message: types.Message | types.CallbackQuery,
             exchange_id, marker = exchange_data
             _kb = create_add_review_kb(exchange_id,
                                        marker,
-                                       select_language)
-            try:
-                await bot.send_message(chat_id=message.from_user.id,
-                                    text=f'Оставить отзыв на обменник {review_msg_dict.get("exchange_name")}',
-                                    reply_markup=_kb.as_markup())
-            except Exception as ex:
-                print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
-                return
+                                       select_language).as_markup()
+            if select_language == 'ru':
+                _text = f'Оставить отзыв на обменник {review_msg_dict.get("exchange_name")}'
+            else:
+                _text = f'Add review to exchanger {review_msg_dict.get("exchange_name")}'
+        else:
+            _kb = None
+
+            if select_language == 'ru':
+                _text = 'Не удалось найти обменник для отзыва'
+            else:
+                _text = 'Exchanger to add review not found'
+            # for blocked review
+            blocked_add_review = (_text, )
+        try:
+            await bot.send_message(chat_id=message.from_user.id,
+                                text=_text,
+                                reply_markup=_kb)
+        except Exception as ex:
+            print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+            await state.update_data(blocked_add_review=blocked_add_review)
+            return
             
     if comment_msg_dict:
         with session as _session:
@@ -579,12 +652,14 @@ async def start(message: types.Message | types.CallbackQuery,
             comment_msg_dict.update({'exchange_id': exchange_id,
                                      'marker': marker})
             _kb = create_add_comment_kb(comment_msg_dict,
-                                       select_language)
+                                       select_language).as_markup()
             # _text = f'Оставить отзыв на обменник {exchange_name}'
             if select_language == 'ru':
                 _text = f'Оставить комментарий на обменник {comment_msg_dict.get("exchange_name")}'
             else:
                 _text = f'Add comment to exchanger {comment_msg_dict.get("exchange_name")}'
+            # for blocked comment
+            blocked_add_comment = (_text, exchange_id, marker, comment_msg_dict.get('review_id'))
         else:
             _kb = None
 
@@ -592,12 +667,16 @@ async def start(message: types.Message | types.CallbackQuery,
                 _text = 'Не удалось найти обменник для комментария'
             else:
                 _text = 'Exchanger to add comment not found'
+            # for blocked comment
+            blocked_add_comment = (_text, )
         try:
             await bot.send_message(chat_id=message.from_user.id,
                                 text=_text,
-                                reply_markup=_kb.as_markup())
+                                reply_markup=_kb)
         except Exception as ex:
             print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+            # for blocked comment
+            await state.update_data(blocked_add_comment=blocked_add_comment)
             return
         try:
             await message.delete()
