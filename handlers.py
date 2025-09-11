@@ -275,8 +275,12 @@ async def start(message: types.Message | types.CallbackQuery,
 
             if utm_source == 'get_id':
                 _text = f'ID Вашего профиля: <b>{message.from_user.id}</b>'
-                await message.answer(text=_text)
-                await message.delete()
+                try:
+                    await message.answer(text=_text)
+                    await message.delete()
+                except Exception as ex:
+                    print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+                    return
                 return
 
             if utm_source.startswith('review'):
@@ -287,11 +291,13 @@ async def start(message: types.Message | types.CallbackQuery,
                         _text = 'Не удалось найти обменник на отзыв, некорректные данные в url'
                     else:
                         _text = 'Exchange to add review not found, uncorrect data in url'
-
-                    await bot.send_message(chat_id=message.from_user.id,
-                                           text=_text)
-                    await message.delete()
-                    
+                    try:
+                        await bot.send_message(chat_id=message.from_user.id,
+                                            text=_text)
+                        await message.delete()
+                    except Exception as ex:
+                        print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+                        return
                     return
                 
                 review_msg_dict = {
@@ -309,11 +315,13 @@ async def start(message: types.Message | types.CallbackQuery,
                         _text = 'Не удалось найти обменник на комментарий, некорректные данные в url'
                     else:
                         _text = 'Exchange to add comment not found, uncorrect data in url'
-
-                    await bot.send_message(chat_id=message.from_user.id,
-                                           text=_text)
-                    await message.delete()
-                    
+                    try:
+                        await bot.send_message(chat_id=message.from_user.id,
+                                            text=_text)
+                        await message.delete()
+                    except Exception as ex:
+                        print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+                        return
                     return
                 
                 comment_msg_dict = {
@@ -393,12 +401,14 @@ async def start(message: types.Message | types.CallbackQuery,
                 _text = 'Не удалось найти обменник для отзыва'
             else:
                 _text = 'Exchanger to add review not found'
-
-        await bot.send_message(chat_id=message.from_user.id,
-                               text=_text,
-                               reply_markup=_kb.as_markup())
-        await message.delete()
-            
+        try:
+            await bot.send_message(chat_id=message.from_user.id,
+                                text=_text,
+                                reply_markup=_kb.as_markup())
+            await message.delete()
+        except Exception as ex:
+            print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+            return
         return
     
     if comment_msg_dict and not first_visit:
@@ -425,12 +435,14 @@ async def start(message: types.Message | types.CallbackQuery,
                 _text = 'Не удалось найти обменник для комментария'
             else:
                 _text = 'Exchanger to add comment not found'
-
-        await bot.send_message(chat_id=message.from_user.id,
-                               text=_text,
-                               reply_markup=_kb.as_markup())
-        await message.delete()
-            
+        try:
+            await bot.send_message(chat_id=message.from_user.id,
+                                text=_text,
+                                reply_markup=_kb.as_markup())
+            await message.delete()
+        except Exception as ex:
+            print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+            return
         return
 
     
@@ -439,19 +451,22 @@ async def start(message: types.Message | types.CallbackQuery,
             has_added = try_activate_admin_exchange(message.from_user.id,
                                                     session=_session)
         
-        match has_added:
-            case 'empty':
-                await message.answer(text=f'❗️К сожалению, не смогли найти подходящую заявку на подключения, связитесь с <a href="https://t.me/MoneySwap_support">тех.поддержкой</a> для решения проблемы',
-                                     disable_web_page_preview=True)
-            case 'error':
-                await message.answer(text=f'❗️Возникли сложности, обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
-                                     disable_web_page_preview=True)
-            case 'exists':
-                await message.answer(text=f'✔️Заявка уже была обработана\nЕсли Вы всё равно столкнулись с проблемами обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
-                                     disable_web_page_preview=True)
-            case _:
-                await message.answer(text=f'✅Обменник {has_added} успешно привязан к вашему профилю')
-
+        try:
+            match has_added:
+                    case 'empty':
+                        await message.answer(text=f'❗️К сожалению, не смогли найти подходящую заявку на подключения, связитесь с <a href="https://t.me/MoneySwap_support">тех.поддержкой</a> для решения проблемы',
+                                            disable_web_page_preview=True)
+                    case 'error':
+                        await message.answer(text=f'❗️Возникли сложности, обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
+                                            disable_web_page_preview=True)
+                    case 'exists':
+                        await message.answer(text=f'✔️Заявка уже была обработана\nЕсли Вы всё равно столкнулись с проблемами обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
+                                            disable_web_page_preview=True)
+                    case _:
+                        await message.answer(text=f'✅Обменник {has_added} успешно привязан к вашему профилю')
+        except Exception as ex:
+            print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+            return
 
         try:
             await message.delete()
@@ -464,20 +479,22 @@ async def start(message: types.Message | types.CallbackQuery,
         with session as _session:
             has_added = try_activate_partner_admin_exchange(message.from_user.id,
                                                             session=_session)
-        
-        match has_added:
-            case 'empty':
-                await message.answer(text=f'❗️К сожалению, не смогли найти подходящую заявку на подключения, связитесь с <a href="https://t.me/MoneySwap_support">тех.поддержкой</a> для решения проблемы',
-                                     disable_web_page_preview=True)
-            case 'error':
-                await message.answer(text=f'❗️Возникли сложности, обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
-                                     disable_web_page_preview=True)
-            case 'exists':
-                await message.answer(text=f'✔️Заявка уже была обработана\nЕсли Вы всё равно столкнулись с проблемами обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
-                                     disable_web_page_preview=True)
-            case _:
-                await message.answer(text=f'✅Обменник {has_added} успешно привязан к вашему профилю')
-
+        try:
+            match has_added:
+                case 'empty':
+                    await message.answer(text=f'❗️К сожалению, не смогли найти подходящую заявку на подключения, связитесь с <a href="https://t.me/MoneySwap_support">тех.поддержкой</a> для решения проблемы',
+                                        disable_web_page_preview=True)
+                case 'error':
+                    await message.answer(text=f'❗️Возникли сложности, обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
+                                        disable_web_page_preview=True)
+                case 'exists':
+                    await message.answer(text=f'✔️Заявка уже была обработана\nЕсли Вы всё равно столкнулись с проблемами обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
+                                        disable_web_page_preview=True)
+                case _:
+                    await message.answer(text=f'✅Обменник {has_added} успешно привязан к вашему профилю')
+        except Exception as ex:
+            print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+            return
         try:
             await message.delete()
         except Exception:    
@@ -545,9 +562,14 @@ async def start(message: types.Message | types.CallbackQuery,
             _kb = create_add_review_kb(exchange_id,
                                        marker,
                                        select_language)
-            await bot.send_message(chat_id=message.from_user.id,
-                                text=f'Оставить отзыв на обменник {review_msg_dict.get("exchange_name")}',
-                                reply_markup=_kb.as_markup())
+            try:
+                await bot.send_message(chat_id=message.from_user.id,
+                                    text=f'Оставить отзыв на обменник {review_msg_dict.get("exchange_name")}',
+                                    reply_markup=_kb.as_markup())
+            except Exception as ex:
+                print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+                return
+            
     if comment_msg_dict:
         with session as _session:
             exchange_data = get_exchange_name(comment_msg_dict,
@@ -570,10 +592,13 @@ async def start(message: types.Message | types.CallbackQuery,
                 _text = 'Не удалось найти обменник для комментария'
             else:
                 _text = 'Exchanger to add comment not found'
-
-        await bot.send_message(chat_id=message.from_user.id,
-                               text=_text,
-                               reply_markup=_kb.as_markup())
+        try:
+            await bot.send_message(chat_id=message.from_user.id,
+                                text=_text,
+                                reply_markup=_kb.as_markup())
+        except Exception as ex:
+            print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+            return
         try:
             await message.delete()
         except Exception:
@@ -583,17 +608,19 @@ async def start(message: types.Message | types.CallbackQuery,
         with session as _session:
             has_added = try_activate_admin_exchange(message.from_user.id,
                                                     session=_session)
-        
-        match has_added:
-            case 'empty':
-                await message.answer(text=f'❗️К сожалению, не смогли найти подходящую заявку на подключения, связитесь с <a href="https://t.me/MoneySwap_support">тех.поддержкой</a> для решения проблемы')
-            case 'error':
-                await message.answer(text=f'❗️Возникли сложности, обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>')
-            case 'exists':
-                await message.answer(text=f'✔️Заявка уже была обработана\nЕсли Вы всё равно столкнулись с проблемами обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>')
-            case _:
-                await message.answer(text=f'✅Обменник {has_added} успешно привязан к вашему профилю')
-
+        try:
+            match has_added:
+                case 'empty':
+                    await message.answer(text=f'❗️К сожалению, не смогли найти подходящую заявку на подключения, связитесь с <a href="https://t.me/MoneySwap_support">тех.поддержкой</a> для решения проблемы')
+                case 'error':
+                    await message.answer(text=f'❗️Возникли сложности, обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>')
+                case 'exists':
+                    await message.answer(text=f'✔️Заявка уже была обработана\nЕсли Вы всё равно столкнулись с проблемами обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>')
+                case _:
+                    await message.answer(text=f'✅Обменник {has_added} успешно привязан к вашему профилю')
+        except Exception as ex:
+            print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+            return
         # if has_added:
         #     await message.answer(text=f'Обменник {has_added} успешно привязан к вашему профилю✅')
         # else:
@@ -609,19 +636,22 @@ async def start(message: types.Message | types.CallbackQuery,
         with session as _session:
             has_added = try_activate_partner_admin_exchange(message.from_user.id,
                                                             session=_session)
-        
-        match has_added:
-            case 'empty':
-                await message.answer(text=f'❗️К сожалению, не смогли найти подходящую заявку на подключения, связитесь с <a href="https://t.me/MoneySwap_support">тех.поддержкой</a> для решения проблемы',
-                                     disable_web_page_preview=True)
-            case 'error':
-                await message.answer(text=f'❗️Возникли сложности, обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
-                                     disable_web_page_preview=True)
-            case 'exists':
-                await message.answer(text=f'✔️Заявка уже была обработана\nЕсли Вы всё равно столкнулись с проблемами обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
-                                     disable_web_page_preview=True)
-            case _:
-                await message.answer(text=f'✅Обменник {has_added} успешно привязан к вашему профилю')
+        try:
+            match has_added:
+                case 'empty':
+                    await message.answer(text=f'❗️К сожалению, не смогли найти подходящую заявку на подключения, связитесь с <a href="https://t.me/MoneySwap_support">тех.поддержкой</a> для решения проблемы',
+                                        disable_web_page_preview=True)
+                case 'error':
+                    await message.answer(text=f'❗️Возникли сложности, обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
+                                        disable_web_page_preview=True)
+                case 'exists':
+                    await message.answer(text=f'✔️Заявка уже была обработана\nЕсли Вы всё равно столкнулись с проблемами обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
+                                        disable_web_page_preview=True)
+                case _:
+                    await message.answer(text=f'✅Обменник {has_added} успешно привязан к вашему профилю')
+        except Exception as ex:
+            print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+            return
 
         try:
             await message.delete()
