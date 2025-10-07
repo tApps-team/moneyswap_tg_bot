@@ -33,7 +33,16 @@ from config import (TOKEN,
                     API_HASH,
                     REDIS_HOST,
                     REDIS_PASSWORD)
-from handlers import exchange_admin_direction_notification, main_router, send_comment_notification_to_exchange_admin, send_comment_notification_to_review_owner, send_mass_message, send_mass_message_test, send_notification_to_exchange_admin, try_send_order
+from handlers import (exchange_admin_direction_notification,
+                      main_router,
+                      new_send_comment_notification_to_review_owner,
+                      new_send_notification_to_exchange_admin,
+                      send_comment_notification_to_exchange_admin,
+                      send_comment_notification_to_review_owner,
+                      send_mass_message,
+                      send_mass_message_test,
+                      send_notification_to_exchange_admin,
+                      try_send_order)
 from schemas import ExchangeAdminNotification
 
 
@@ -205,6 +214,17 @@ async def send_notification_to_admin(user_id: int,
                                               bot=bot)
     
 
+@app.get('/new_send_notification_to_exchange_admin')
+async def new_send_notification_to_admin(user_id: int,
+                                     exchange_id: int,
+                                     review_id: int):
+    await new_send_notification_to_exchange_admin(user_id,
+                                              exchange_id,
+                                              review_id,
+                                              session=session(),
+                                              bot=bot)
+    
+
 @app.get('/send_comment_notification_to_exchange_admin')
 async def send_notification_to_admin(user_id: int,
                                      exchange_id: int,
@@ -226,6 +246,17 @@ async def send_notification_to_r_owner(user_id: int,
     await send_comment_notification_to_review_owner(user_id,
                                                     exchange_id,
                                                     exchange_marker,
+                                                    review_id,
+                                                    session=session(),
+                                                    bot=bot)
+    
+
+@app.get('/new_send_comment_notification_to_review_owner')
+async def new_send_notification_to_r_owner(user_id: int,
+                                       exchange_id: int,
+                                       review_id: int):
+    await new_send_comment_notification_to_review_owner(user_id,
+                                                    exchange_id,
                                                     review_id,
                                                     session=session(),
                                                     bot=bot)

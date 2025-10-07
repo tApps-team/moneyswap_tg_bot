@@ -254,6 +254,16 @@ def create_kb_for_exchange_admin_review(exchange_id: int,
     return _kb
 
 
+def new_create_kb_for_exchange_admin_review(exchange_id: int,
+                                            review_id: int):
+    _kb = InlineKeyboardBuilder()
+
+    _kb.row(types.InlineKeyboardButton(text='Перейти к отзыву',
+                                       web_app=WebAppInfo(url=f'https://app.moneyswap.online?from_site={exchange_id}__{review_id}')))
+    
+    return _kb
+
+
 
 def create_kb_for_exchange_admin_comment(exchange_id: int,
                                          exchange_marker: str,
@@ -262,6 +272,16 @@ def create_kb_for_exchange_admin_comment(exchange_id: int,
 
     _kb.row(types.InlineKeyboardButton(text='Перейти к комментарию',
                                        web_app=WebAppInfo(url=f'https://app.moneyswap.online?from_site={exchange_id}__{exchange_marker}__{review_id}')))
+    
+    return _kb
+
+
+def new_create_kb_for_exchange_admin_comment(exchange_id: int,
+                                             review_id: int):
+    _kb = InlineKeyboardBuilder()
+
+    _kb.row(types.InlineKeyboardButton(text='Перейти к комментарию',
+                                       web_app=WebAppInfo(url=f'https://app.moneyswap.online?from_site={exchange_id}__{review_id}')))
     
     return _kb
 
