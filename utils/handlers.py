@@ -255,6 +255,36 @@ def get_exchange_name(review_msg_dict: dict,
                     exchange_id,
                     marker,
                 )
+            
+
+def new_get_exchange_data(new_review_msg_dict: dict,
+                          session: Session):
+    exchange_id = new_review_msg_dict.get('exchange_id')
+
+    if exchange_id:
+        Exchanger = Base.classes.general_models_exchanger
+
+        # for exchange_model, marker in ((Base.classes.no_cash_exchange, 'no_cash'),
+        #                                (Base.classes.cash_exchange, 'cash'),
+        #                                (Base.classes.partners_exchange, 'partner')):
+        query = (
+            select(
+                Exchanger.name,
+            )\
+            .where(
+                Exchanger.id == exchange_id,
+                )
+        )
+        # with session as _session:
+        res = session.execute(query)
+
+        exchange_name = res.scalar_one_or_none()
+        
+        if exchange_id:
+            return (
+                exchange_id,
+                exchange_name,
+            )
     
 
 def try_activate_admin_exchange(user_id: int,
@@ -343,6 +373,98 @@ def try_activate_admin_exchange(user_id: int,
             return 'error'
         else:
             return _order.exchange_name
+    else:
+        return 'error'
+    
+
+def new_try_activate_admin_exchange(user_id: int,
+                                session: Session):
+    AdminExchangeOrder = Base.classes.general_models_newexchangeadminorder
+    AdminExchange = Base.classes.general_models_newexchangeadmin
+    record_added = False
+
+    order_check_query = (
+        select(
+            AdminExchangeOrder
+        )\
+        .where(AdminExchangeOrder.user_id == user_id,
+               AdminExchangeOrder.moderation == False)
+    )
+    moderated_order_check_query = (
+        select(
+            AdminExchangeOrder
+        )\
+        .where(AdminExchangeOrder.user_id == user_id,
+               AdminExchangeOrder.moderation == True)\
+               .order_by(
+                   AdminExchangeOrder.time_create.desc(),
+               )
+    )
+    # with session as _session:
+    res = session.execute(order_check_query)
+
+    _order = res.fetchall()
+
+    if not _order:
+            # return
+        
+            # with session as _session:
+        res = session.execute(moderated_order_check_query)
+
+        moderated_order = res.fetchall()
+
+        if not moderated_order:
+            return 'empty'
+        else:
+            return 'exists'
+    else:
+        _order = _order[0][0]
+
+    # for _exchange_marker, _exchange in (('no_cash', Base.classes.no_cash_exchange),
+    #                                   ('cash', Base.classes.cash_exchange),
+    #                                   ('partner', Base.classes.partners_exchange)):
+    Exchanger = Base.classes.general_models_exchanger
+    
+    query = (
+        select(
+            Exchanger
+        )\
+        .where(
+            Exchanger.id == _order.exchange_id,
+        )
+    )
+    # with session as _session:
+    res = session.execute(query)
+
+    res_exchange = res.scalar_one_or_none()
+
+    if res_exchange:
+        insert_data = {
+            'user_id': user_id,
+            # 'exchange_name': res_exchange.name,
+            'exchange_id': res_exchange.id,
+            # 'exchange_marker': _exchange_marker,
+            'notification': True,
+        }
+        insert_query = (
+            insert(
+                AdminExchange
+            )\
+            .values(**insert_data)
+        )
+        session.execute(insert_query)
+        record_added = True
+
+    if record_added:
+        _order.moderation = True
+        try:
+            session.commit()
+        except Exception as ex:
+            print('ERROR WITH ADMIN ADD EXCHANGE', ex)
+            session.rollback()
+            return 'error'
+        else:
+            return res_exchange.name
     else:
         return 'error'
     
@@ -464,5 +586,124 @@ def try_activate_partner_admin_exchange(user_id: int,
                 return 'error'
             else:
                 return _order.exchange_name
+        else:
+            return 'error'
+
+
+def new_try_activate_partner_admin_exchange(user_id: int,
+                                            session: Session):
+    AdminExchangeOrder = Base.classes.general_models_newexchangeadminorder
+    AdminExchange = Base.classes.general_models_newexchangeadmin
+    record_added = False
+
+    order_check_query = (
+        select(
+            AdminExchangeOrder
+        )\
+        .where(AdminExchangeOrder.user_id == user_id,
+               AdminExchangeOrder.moderation == False)
+    )
+    moderated_order_check_query = (
+        select(
+            AdminExchangeOrder
+        )\
+        .where(AdminExchangeOrder.user_id == user_id,
+               AdminExchangeOrder.moderation == True)\
+               .order_by(
+                   AdminExchangeOrder.time_create.desc(),
+               )
+    )
+    # with session as _session:
+    res = session.execute(order_check_query)
+
+    _order = res.fetchall()
+
+    if not _order:
+            # return
+        
+            # with session as _session:
+        res = session.execute(moderated_order_check_query)
+
+        moderated_order = res.fetchall()
+
+        if not moderated_order:
+            return 'empty'
+        else:
+            return 'exists'
+    else:
+        _order = _order[0][0]
+
+    # for _exchange_marker, _exchange in (('no_cash', Base.classes.no_cash_exchange),
+    #                                   ('cash', Base.classes.cash_exchange),
+    #                                   ('partner', Base.classes.partners_exchange)):
+        # _exchange_marker, _exchange = ('partner', Base.classes.partners_exchange)
+        Exchanger = Base.classes.general_models_exchanger
+        query = (
+            select(
+                Exchanger
+            )\
+            .where(
+                Exchanger.id == _order.exchange_id,
+            )
+        )
+        # with session as _session:
+        res = session.execute(query)
+
+        res_exchange = res.scalar_one_or_none()
+
+        if res_exchange:
+            check_delete = (
+                delete(
+                    AdminExchange
+                )\
+                .where(
+                    and_(
+                        AdminExchange.exchange_id == res_exchange.id,
+                    )
+                )
+            )
+
+            
+            # update_data = {
+            #     'user_id': user_id,
+            #     # 'notification': True,
+            # }
+
+            # update_query = (
+            #     update(
+            #         AdminExchange
+            #     )\
+            #     .where(AdminExchange.exchange_name ==  _exchange.name,
+            #            AdminExchange.exchange_marker == 'partner')\
+            #     .values(**update_data)
+            # )
+            session.execute(check_delete)
+            
+            insert_data = {
+                'user_id': user_id,
+                # 'exchange_name': res_exchange.name,
+                'exchange_id': res_exchange.id,
+                # 'exchange_marker': _exchange_marker,
+                'notification': True,
+            }
+            insert_query = (
+                insert(
+                    AdminExchange
+                )\
+                .values(**insert_data)
+            )
+            session.execute(insert_query)
+            record_added = True
+
+        if record_added:
+            _order.moderation = True
+            try:
+                session.commit()
+            except Exception as ex:
+                print('ERROR WITH ADMIN ADD EXCHANGE', ex)
+                session.rollback()
+                return 'error'
+            else:
+                return res_exchange.name
         else:
             return 'error'

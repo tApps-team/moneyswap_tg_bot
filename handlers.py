@@ -29,7 +29,7 @@ from keyboards import (create_add_comment_kb, create_add_review_kb, create_dev_k
                        create_kb_to_main,
                        create_swift_sepa_kb,
                        create_support_kb,
-                       create_feedback_form_reasons_kb,
+                       create_feedback_form_reasons_kb, new_create_add_comment_kb, new_create_add_review_kb,
                        new_create_kb_for_exchange_admin_comment,
                        new_create_kb_for_exchange_admin_review,
                        reason_dict,
@@ -39,7 +39,7 @@ from keyboards import (create_add_comment_kb, create_add_review_kb, create_dev_k
 
 from states import SwiftSepaStates, FeedbackFormStates
 
-from utils.handlers import get_exchange_name, try_activate_admin_exchange, try_activate_partner_admin_exchange, try_add_file_ids_to_db, try_add_file_ids, swift_sepa_data, validate_amount
+from utils.handlers import get_exchange_name, new_get_exchange_data, new_try_activate_admin_exchange, new_try_activate_partner_admin_exchange, try_activate_admin_exchange, try_activate_partner_admin_exchange, try_add_file_ids_to_db, try_add_file_ids, swift_sepa_data, validate_amount
 from utils.multilanguage import start_text_dict
 
 from db.base import Base
@@ -261,6 +261,11 @@ async def start(message: types.Message | types.CallbackQuery,
     activate_admin_exchange = None
     partner_activate_admin_exchange = None
 
+    new_review_msg_dict = None
+    new_comment_msg_dict = None
+    new_activate_admin_exchange = None
+    new_partner_activate_admin_exchange = None
+
     is_callback = isinstance(message, types.CallbackQuery)
 
     # _start_text = start_text
@@ -309,6 +314,30 @@ async def start(message: types.Message | types.CallbackQuery,
 
                 utm_source = 'from_site'
 
+            elif utm_source.startswith('new_review'):
+                params = utm_source.split('__')
+
+                if len(params) != 1:
+                    if select_language == 'ru':
+                        _text = 'Не удалось найти обменник на отзыв, некорректные данные в url'
+                    else:
+                        _text = 'Exchange to add review not found, uncorrect data in url'
+                    try:
+                        await bot.send_message(chat_id=message.from_user.id,
+                                            text=_text)
+                        await message.delete()
+                    except Exception as ex:
+                        print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+                        return
+                    return
+                
+                new_review_msg_dict = {
+                    # 'marker': params[1],
+                    'exchange_id': params[-1],
+                }
+
+                utm_source = 'from_site'
+
             elif utm_source.startswith('comment'):
                 params = utm_source.split('__')
 
@@ -333,10 +362,44 @@ async def start(message: types.Message | types.CallbackQuery,
                 }
 
                 utm_source = 'from_site'
+
+            elif utm_source.startswith('new_comment'):
+                params = utm_source.split('__')
+
+                if len(params) != 2:
+                    if select_language == 'ru':
+                        _text = 'Не удалось найти обменник на комментарий, некорректные данные в url'
+                    else:
+                        _text = 'Exchange to add comment not found, uncorrect data in url'
+                    try:
+                        await bot.send_message(chat_id=message.from_user.id,
+                                            text=_text)
+                        await message.delete()
+                    except Exception as ex:
+                        print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+                        return
+                    return
+                
+                new_comment_msg_dict = {
+                    # 'marker': params[1],
+                    'exchange_id': params[1],
+                    'review_id': params[-1],
+                }
+
+                utm_source = 'from_site'
             
             elif utm_source.startswith('admin'):
                 activate_admin_exchange = True
                 utm_source = 'from_admin_activate'
+
+            elif utm_source.startswith('new_admin'):
+                new_activate_admin_exchange = True
+                utm_source = 'from_admin_activate'
+
+            elif utm_source.startswith('new_partner_admin'):
+                new_partner_activate_admin_exchange = True
+                utm_source = 'from_partner_admin_activate'
+
             elif utm_source.startswith('partner_admin'):
                 partner_activate_admin_exchange = True
                 utm_source = 'from_partner_admin_activate'
@@ -419,6 +482,42 @@ async def start(message: types.Message | types.CallbackQuery,
             return
         return
     
+    if new_review_msg_dict and not first_visit:
+        with session as _session:
+            exchange_data = new_get_exchange_data(new_review_msg_dict,
+                                                  _session)
+        if exchange_data is not None:
+            exchange_id, exchange_name = exchange_data
+            _kb = new_create_add_review_kb(exchange_id,
+                                           select_language).as_markup()
+            # _text = f'Оставить отзыв на обменник {exchange_name}'
+            if select_language == 'ru':
+                _text = f'Оставить отзыв на обменник {exchange_name}'
+            else:
+                _text = f'Add review to exchanger {exchange_name}'
+            # for blocked review
+            blocked_add_review = (_text, exchange_id, marker)
+        else:
+            _kb = None
+
+            if select_language == 'ru':
+                _text = 'Не удалось найти обменник для отзыва'
+            else:
+                _text = 'Exchanger to add review not found'
+            # for blocked review
+            blocked_add_review = (_text, )
+        try:
+            await bot.send_message(chat_id=message.from_user.id,
+                                text=_text,
+                                reply_markup=_kb)
+            await message.delete()
+        except Exception as ex:
+            print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+            # for blocked review
+            await state.update_data(blocked_add_review=blocked_add_review)
+            return
+        return
+    
     if comment_msg_dict and not first_visit:
         with session as _session:
             exchange_data = get_exchange_name(comment_msg_dict,
@@ -436,6 +535,46 @@ async def start(message: types.Message | types.CallbackQuery,
                 _text = f'Оставить комментарий на обменник {comment_msg_dict.get("exchange_name")}'
             else:
                 _text = f'Add comment to exchanger {comment_msg_dict.get("exchange_name")}'
+            # for blocked comment
+            blocked_add_comment = (_text, exchange_id, marker, comment_msg_dict.get('review_id'))
+        else:
+            _kb = None
+
+            if select_language == 'ru':
+                _text = 'Не удалось найти обменник для комментария'
+            else:
+                _text = 'Exchanger to add comment not found'
+            # for blocked comment
+            blocked_add_comment = (_text, )
+        try:
+            await bot.send_message(chat_id=message.from_user.id,
+                                text=_text,
+                                reply_markup=_kb)
+            await message.delete()
+        except Exception as ex:
+            print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+            # for blocked comment
+            await state.update_data(blocked_add_comment=blocked_add_comment)
+            return
+        return
+    
+    if new_comment_msg_dict and not first_visit:
+        with session as _session:
+            exchange_data = new_get_exchange_data(new_comment_msg_dict,
+                                                  _session)
+        if exchange_data is not None:
+            exchange_id, exchange_name = exchange_data
+
+            # new_comment_msg_dict.update({'exchange_id': exchange_id,
+            #                          'marker': marker})
+            
+            _kb = new_create_add_comment_kb(comment_msg_dict,
+                                            select_language).as_markup()
+
+            if select_language == 'ru':
+                _text = f'Оставить комментарий на обменник {exchange_name}'
+            else:
+                _text = f'Add comment to exchanger {exchange_name}'
             # for blocked comment
             blocked_add_comment = (_text, exchange_id, marker, comment_msg_dict.get('review_id'))
         else:
@@ -488,11 +627,67 @@ async def start(message: types.Message | types.CallbackQuery,
             pass
         
         return
+    
+    elif new_activate_admin_exchange and not first_visit:
+        with session as _session:
+            has_added = new_try_activate_admin_exchange(message.from_user.id,
+                                                        session=_session)
+        
+        try:
+            match has_added:
+                    case 'empty':
+                        await message.answer(text=f'❗️К сожалению, не смогли найти подходящую заявку на подключения, связитесь с <a href="https://t.me/MoneySwap_support">тех.поддержкой</a> для решения проблемы',
+                                            disable_web_page_preview=True)
+                    case 'error':
+                        await message.answer(text=f'❗️Возникли сложности, обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
+                                            disable_web_page_preview=True)
+                    case 'exists':
+                        await message.answer(text=f'✔️Заявка уже была обработана\nЕсли Вы всё равно столкнулись с проблемами обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
+                                            disable_web_page_preview=True)
+                    case _:
+                        await message.answer(text=f'✅Обменник {has_added} успешно привязан к вашему профилю')
+        except Exception as ex:
+            print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+            return
+
+        try:
+            await message.delete()
+        except Exception:    
+            pass
+        
+        return
 
     elif partner_activate_admin_exchange and not first_visit:
         with session as _session:
             has_added = try_activate_partner_admin_exchange(message.from_user.id,
                                                             session=_session)
+        try:
+            match has_added:
+                case 'empty':
+                    await message.answer(text=f'❗️К сожалению, не смогли найти подходящую заявку на подключения, связитесь с <a href="https://t.me/MoneySwap_support">тех.поддержкой</a> для решения проблемы',
+                                        disable_web_page_preview=True)
+                case 'error':
+                    await message.answer(text=f'❗️Возникли сложности, обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
+                                        disable_web_page_preview=True)
+                case 'exists':
+                    await message.answer(text=f'✔️Заявка уже была обработана\nЕсли Вы всё равно столкнулись с проблемами обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
+                                        disable_web_page_preview=True)
+                case _:
+                    await message.answer(text=f'✅Обменник {has_added} успешно привязан к вашему профилю')
+        except Exception as ex:
+            print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+            return
+        try:
+            await message.delete()
+        except Exception:    
+            pass
+        
+        return
+    
+    elif new_partner_activate_admin_exchange and not first_visit:
+        with session as _session:
+            has_added = new_try_activate_partner_admin_exchange(message.from_user.id,
+                                                                session=_session)
         try:
             match has_added:
                 case 'empty':
@@ -614,6 +809,7 @@ async def start(message: types.Message | types.CallbackQuery,
             await message.delete()
         except Exception:
             pass
+
     if review_msg_dict:
         with session as _session:
             exchange_data = get_exchange_name(review_msg_dict,
@@ -644,6 +840,42 @@ async def start(message: types.Message | types.CallbackQuery,
             print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
             await state.update_data(blocked_add_review=blocked_add_review)
             return
+        
+    if new_review_msg_dict:
+        with session as _session:
+            exchange_data = new_get_exchange_data(new_review_msg_dict,
+                                                  _session)
+        if exchange_data is not None:
+            exchange_id, exchange_name = exchange_data
+            _kb = new_create_add_review_kb(exchange_id,
+                                           select_language).as_markup()
+            # _text = f'Оставить отзыв на обменник {exchange_name}'
+            if select_language == 'ru':
+                _text = f'Оставить отзыв на обменник {exchange_name}'
+            else:
+                _text = f'Add review to exchanger {exchange_name}'
+            # for blocked review
+            blocked_add_review = (_text, exchange_id, marker)
+        else:
+            _kb = None
+
+            if select_language == 'ru':
+                _text = 'Не удалось найти обменник для отзыва'
+            else:
+                _text = 'Exchanger to add review not found'
+            # for blocked review
+            blocked_add_review = (_text, )
+        try:
+            await bot.send_message(chat_id=message.from_user.id,
+                                text=_text,
+                                reply_markup=_kb)
+            await message.delete()
+        except Exception as ex:
+            print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+            # for blocked review
+            await state.update_data(blocked_add_review=blocked_add_review)
+            return
+        # return
             
     if comment_msg_dict:
         with session as _session:
@@ -685,6 +917,46 @@ async def start(message: types.Message | types.CallbackQuery,
         except Exception:
             pass
 
+    if new_comment_msg_dict:
+        with session as _session:
+            exchange_data = new_get_exchange_data(new_comment_msg_dict,
+                                                  _session)
+        if exchange_data is not None:
+            exchange_id, exchange_name = exchange_data
+
+            # new_comment_msg_dict.update({'exchange_id': exchange_id,
+            #                          'marker': marker})
+            
+            _kb = new_create_add_comment_kb(comment_msg_dict,
+                                            select_language).as_markup()
+
+            if select_language == 'ru':
+                _text = f'Оставить комментарий на обменник {exchange_name}'
+            else:
+                _text = f'Add comment to exchanger {exchange_name}'
+            # for blocked comment
+            blocked_add_comment = (_text, exchange_id, marker, comment_msg_dict.get('review_id'))
+        else:
+            _kb = None
+
+            if select_language == 'ru':
+                _text = 'Не удалось найти обменник для комментария'
+            else:
+                _text = 'Exchanger to add comment not found'
+            # for blocked comment
+            blocked_add_comment = (_text, )
+        try:
+            await bot.send_message(chat_id=message.from_user.id,
+                                text=_text,
+                                reply_markup=_kb)
+            await message.delete()
+        except Exception as ex:
+            print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+            # for blocked comment
+            await state.update_data(blocked_add_comment=blocked_add_comment)
+            return
+        return
+
     if activate_admin_exchange:
         with session as _session:
             has_added = try_activate_admin_exchange(message.from_user.id,
@@ -711,6 +983,35 @@ async def start(message: types.Message | types.CallbackQuery,
         except Exception:
             pass
         
+        return
+    
+    if new_activate_admin_exchange:
+        with session as _session:
+            has_added = new_try_activate_admin_exchange(message.from_user.id,
+                                                        session=_session)
+        
+        try:
+            match has_added:
+                    case 'empty':
+                        await message.answer(text=f'❗️К сожалению, не смогли найти подходящую заявку на подключения, связитесь с <a href="https://t.me/MoneySwap_support">тех.поддержкой</a> для решения проблемы',
+                                            disable_web_page_preview=True)
+                    case 'error':
+                        await message.answer(text=f'❗️Возникли сложности, обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
+                                            disable_web_page_preview=True)
+                    case 'exists':
+                        await message.answer(text=f'✔️Заявка уже была обработана\nЕсли Вы всё равно столкнулись с проблемами обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
+                                            disable_web_page_preview=True)
+                    case _:
+                        await message.answer(text=f'✅Обменник {has_added} успешно привязан к вашему профилю')
+        except Exception as ex:
+            print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+            return
+
+        try:
+            await message.delete()
+        except Exception:    
+            pass
+
         return
     
     if partner_activate_admin_exchange:
@@ -740,6 +1041,34 @@ async def start(message: types.Message | types.CallbackQuery,
             pass
         
         return
+    
+    if new_partner_activate_admin_exchange:
+        with session as _session:
+            has_added = new_try_activate_partner_admin_exchange(message.from_user.id,
+                                                                session=_session)
+        try:
+            match has_added:
+                case 'empty':
+                    await message.answer(text=f'❗️К сожалению, не смогли найти подходящую заявку на подключения, связитесь с <a href="https://t.me/MoneySwap_support">тех.поддержкой</a> для решения проблемы',
+                                        disable_web_page_preview=True)
+                case 'error':
+                    await message.answer(text=f'❗️Возникли сложности, обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
+                                        disable_web_page_preview=True)
+                case 'exists':
+                    await message.answer(text=f'✔️Заявка уже была обработана\nЕсли Вы всё равно столкнулись с проблемами обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
+                                        disable_web_page_preview=True)
+                case _:
+                    await message.answer(text=f'✅Обменник {has_added} успешно привязан к вашему профилю')
+        except Exception as ex:
+            print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
+            return
+        try:
+            await message.delete()
+        except Exception:    
+            pass
+        
+        return
+
 
 
 @main_router.callback_query(F.data.startswith('lang'))
