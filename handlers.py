@@ -496,7 +496,7 @@ async def start(message: types.Message | types.CallbackQuery,
             else:
                 _text = f'Add review to exchanger {exchange_name}'
             # for blocked review
-            blocked_add_review = (_text, exchange_id, marker)
+            blocked_add_review = (_text, exchange_id)
         else:
             _kb = None
 
@@ -576,7 +576,7 @@ async def start(message: types.Message | types.CallbackQuery,
             else:
                 _text = f'Add comment to exchanger {exchange_name}'
             # for blocked comment
-            blocked_add_comment = (_text, exchange_id, marker, comment_msg_dict.get('review_id'))
+            blocked_add_comment = (_text, exchange_id, comment_msg_dict.get('review_id'))
         else:
             _kb = None
 
@@ -855,7 +855,7 @@ async def start(message: types.Message | types.CallbackQuery,
             else:
                 _text = f'Add review to exchanger {exchange_name}'
             # for blocked review
-            blocked_add_review = (_text, exchange_id, marker)
+            blocked_add_review = (_text, exchange_id)
         else:
             _kb = None
 
@@ -935,7 +935,7 @@ async def start(message: types.Message | types.CallbackQuery,
             else:
                 _text = f'Add comment to exchanger {exchange_name}'
             # for blocked comment
-            blocked_add_comment = (_text, exchange_id, marker, comment_msg_dict.get('review_id'))
+            blocked_add_comment = (_text, exchange_id, comment_msg_dict.get('review_id'))
         else:
             _kb = None
 
