@@ -272,7 +272,7 @@ def new_get_exchange_data(new_review_msg_dict: dict,
                 Exchanger.name,
             )\
             .where(
-                Exchanger.id == exchange_id,
+                Exchanger.id == int(exchange_id),
                 )
         )
         # with session as _session:
