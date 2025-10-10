@@ -19,11 +19,19 @@ from pyrogram import Client
 
 from sqlalchemy.orm import Session, joinedload, sessionmaker, selectinload
 from sqlalchemy import insert, select, update, and_
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import BEARER_TOKEN, FEEDBACK_REASON_PREFIX
 
-from keyboards import (create_add_comment_kb, create_add_review_kb, create_dev_kb, create_kb_for_exchange_admin_comment, create_kb_for_exchange_admin_review, create_partner_site_kb, create_start_keyboard,
-                       create_start_inline_keyboard, create_swift_condition_kb,
+from keyboards import (create_add_comment_kb,
+                       create_add_review_kb,
+                       create_dev_kb,
+                       create_kb_for_exchange_admin_comment,
+                       create_kb_for_exchange_admin_review,
+                       create_partner_site_kb,
+                       create_start_keyboard,
+                       create_start_inline_keyboard,
+                       create_swift_condition_kb,
                        create_swift_start_kb,
                        add_cancel_btn_to_kb,
                        create_kb_to_main,
@@ -39,7 +47,18 @@ from keyboards import (create_add_comment_kb, create_add_review_kb, create_dev_k
 
 from states import SwiftSepaStates, FeedbackFormStates
 
-from utils.handlers import get_exchange_name, try_activate_admin_exchange, try_activate_partner_admin_exchange, try_add_file_ids_to_db, try_add_file_ids, swift_sepa_data, validate_amount
+from utils.handlers import (construct_activate_exchange_admin_message,
+                            construct_activate_partner_exchange_admin_message,
+                            construct_add_comment_message,
+                            construct_add_review_message,
+                            get_exchange_data,
+                            try_activate_admin_exchange,
+                            try_activate_partner_admin_exchange,
+                            try_add_file_ids_to_db,
+                            try_add_file_ids,
+                            swift_sepa_data,
+                            validate_amount,
+                            consctruct_start_massage)
 from utils.multilanguage import start_text_dict
 
 from db.base import Base
@@ -47,7 +66,7 @@ from db.base import Base
 
 main_router = Router()
 
-start_text = '💱<b>Добро пожаловать в MoneySwap!</b>\n\nНаш бот поможет найти лучшую сделку под вашу задачу 💸\n\n👉🏻 <b>Чтобы начать поиск</b>, выберите категорию “безналичные”, “наличные” или “Swift/Sepa” и нажмите на нужную кнопку ниже.\n\nЕсли есть какие-то вопросы, обращайтесь <a href="https://t.me/MoneySwap_support">Support</a> или <a href="https://t.me/moneyswap_admin">Admin</a>. Мы всегда готовы вам помочь!'
+# start_text = '💱<b>Добро пожаловать в MoneySwap!</b>\n\nНаш бот поможет найти лучшую сделку под вашу задачу 💸\n\n👉🏻 <b>Чтобы начать поиск</b>, выберите категорию “безналичные”, “наличные” или “Swift/Sepa” и нажмите на нужную кнопку ниже.\n\nЕсли есть какие-то вопросы, обращайтесь <a href="https://t.me/MoneySwap_support">Support</a> или <a href="https://t.me/moneyswap_admin">Admin</a>. Мы всегда готовы вам помочь!'
 
 about_text = '''
 <b>MoneySwap — ваш проводник в мире обмена , переводов и платежных решений</b>\n
@@ -117,145 +136,21 @@ MoneySwap не проводит обмены или переводы напря�
 Оставьте заявку, и мы найдем для вас оптимальное решение!
 '''
 
-# @main_router.message(Command('start'))
-# async def start(message: types.Message | types.CallbackQuery,
-#                 session: Session,
-#                 state: FSMContext,
-#                 bot: Bot,
-#                 text_msg: str = None):
-#     is_callback = isinstance(message, types.CallbackQuery)
-
-#     data = await state.get_data()
-#     main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
-
-#     # if main_menu_msg:
-#     #     chat_id, message_id = main_menu_msg
-
-#     _start_text = start_text
-#     utm_source = None
-
-#     if isinstance(message, types.Message):
-#         query_param = message.text.split()
-
-#         if len(query_param) > 1:
-#             utm_source = query_param[-1]
-
-#     with session as session:
-#         Guest = Base.classes.general_models_guest
-
-#         tg_id = message.from_user.id
-#         guest = session.query(Guest)\
-#                         .where(Guest.tg_id == tg_id)\
-#                         .first()
-    
-#         if isinstance(message, types.CallbackQuery):
-#             message = message.message
-
-#         chat_link = None
-
-#         if not guest:
-#             value_dict = {
-#                 'username': message.from_user.username,
-#                 'tg_id': tg_id,
-#                 'first_name': message.from_user.first_name,
-#                 'last_name': message.from_user.last_name,
-#                 'language_code': message.from_user.language_code,
-#                 'is_premium': bool(message.from_user.is_premium),
-#                 'is_active': True,
-#             }
-
-#             if utm_source:
-#                 value_dict.update(
-#                     {
-#                         'utm_source': utm_source,
-#                     }
-#                 )
-#             session.execute(insert(Guest).values(**value_dict))
-#             session.commit()
-#         else:
-#             chat_link  = guest.chat_link
-
-#     start_kb = create_start_inline_keyboard(tg_id)
-
-#     if chat_link:
-#         chat_link_text = f'Cсылка на чата по Вашим обращениям -> {chat_link}'
-#         _start_text += f'\n\n{chat_link_text}'
-
-#     if not is_callback:
-#         main_menu_msg: types.Message = await message.answer(text=_start_text,
-#                                                             reply_markup=start_kb.as_markup(),
-#                                                             disable_web_page_preview=True,
-#                                                             disable_notification=True)
-#         try:
-#             chat_id, message_id = main_menu_msg
-#             await bot.delete_message(chat_id=chat_id,
-#                                      message_id=message_id)
-#         except Exception:
-#             pass
-#     else:
-#         try:
-#             chat_id, message_id = main_menu_msg
-
-#             main_menu_msg: types.Message = await bot.edit_message_text(text=_start_text,
-#                                                                         chat_id=chat_id,
-#                                                                         message_id=message_id,
-#                                                                         reply_markup=start_kb.as_markup(),
-#                                                                         disable_web_page_preview=True)
-#         except Exception as ex:
-#             print(ex)
-#             main_menu_msg: types.Message = await bot.send_message(chat_id=message.chat.id,
-#                                                                   text=_start_text,
-#                                                                   reply_markup=start_kb.as_markup(),
-#                                                                   disable_web_page_preview=True,
-#                                                                   disable_notification=True)
-
-
-#     # if not is_callback:
-#     #     try:
-#     #         await bot.delete_message(chat_id=chat_id,
-#     #                                  message_id=message_id)
-#     #     except Exception:
-#     #         pass
-
-#     msg_data = (main_menu_msg.chat.id, main_menu_msg.message_id)
-
-#     await state.update_data(main_menu_msg=msg_data)
-    
-#     # if main_menu_msg:
-#     #     try:
-#     #         await main_menu_msg.delete()
-#     #     except Exception:
-#     #         pass
-#     # await state.update_data(start_msg=start_msg.message_id)
-#     # await state.update_data(username=message.from_user.username)
-#     # try:
-#     #     await bot.delete_message(message.chat.id,
-#     #                             prev_start_msg)
-#     # except Exception:
-#     #     pass
-#     try:
-#         await message.delete()
-#     except Exception:
-#         pass
-
 
 @main_router.message(Command('start'))
 async def start(message: types.Message | types.CallbackQuery,
-                session: Session,
+                session: AsyncSession,
                 state: FSMContext,
-                bot: Bot,
-                text_msg: str = None):
+                bot: Bot):
+
     data = await state.get_data()
 
     select_language = data.get('select_language')
 
     if not select_language:
-        # print('TEST LANGUAGE', type(select_language), select_language)
         select_language = 'ru'
         await state.update_data(select_language=select_language)
 
-    # language_code = message.from_user.language_code
-    # print(language_code)
     review_msg_dict = None
     comment_msg_dict = None
     activate_admin_exchange = None
@@ -263,7 +158,6 @@ async def start(message: types.Message | types.CallbackQuery,
 
     is_callback = isinstance(message, types.CallbackQuery)
 
-    # _start_text = start_text
     _start_text = start_text_dict.get('ru') if select_language == 'ru'\
           else start_text_dict.get('en')
     
@@ -287,6 +181,7 @@ async def start(message: types.Message | types.CallbackQuery,
 
             if utm_source.startswith('review'):
                 params = utm_source.split('__')
+                print('ADD REVIEW PARAMS', params)
 
                 if len(params) != 2:
                     if select_language == 'ru':
@@ -311,6 +206,7 @@ async def start(message: types.Message | types.CallbackQuery,
 
             elif utm_source.startswith('comment'):
                 params = utm_source.split('__')
+                print('ADD REVIEW PARAMS', params)
 
                 if len(params) != 3:
                     if select_language == 'ru':
@@ -337,80 +233,73 @@ async def start(message: types.Message | types.CallbackQuery,
             elif utm_source.startswith('admin'):
                 activate_admin_exchange = True
                 utm_source = 'from_admin_activate'
+
             elif utm_source.startswith('partner_admin'):
                 partner_activate_admin_exchange = True
                 utm_source = 'from_partner_admin_activate'
             
-    with session as _session:
+    async with session as _session:
         Guest = Base.classes.general_models_guest
 
         tg_id = message.from_user.id
-        guest = _session.query(Guest)\
-                        .where(Guest.tg_id == tg_id)\
-                        .first()
+
+        guest_query = (
+            select(Guest)\
+            .where(Guest.tg_id == tg_id)
+        )
+
+        guest_res = await session.execute(guest_query)
+
+        guest = guest_res.scalar_one_or_none()
     
-        if isinstance(message, types.CallbackQuery):
-            message = message.message
+    if isinstance(message, types.CallbackQuery):
+        message = message.message
 
-        chat_link = None
+    chat_link = None
 
-        if not guest:
-            value_dict = {
-                'username': message.from_user.username,
-                'tg_id': tg_id,
-                'first_name': message.from_user.first_name,
-                'last_name': message.from_user.last_name,
-                'language_code': message.from_user.language_code,
-                'select_language': 'ru',
-                'is_premium': bool(message.from_user.is_premium),
-                'time_create': datetime.now(),
-                'is_active': True,
-            }
+    if not guest:
+        value_dict = {
+            'username': message.from_user.username,
+            'tg_id': tg_id,
+            'first_name': message.from_user.first_name,
+            'last_name': message.from_user.last_name,
+            'language_code': message.from_user.language_code,
+            'select_language': 'ru',
+            'is_premium': bool(message.from_user.is_premium),
+            'time_create': datetime.now(),
+            'is_active': True,
+        }
 
-            if utm_source:
-                value_dict.update(
-                    {
-                        'utm_source': utm_source,
-                    }
-                )
-            _session.execute(insert(Guest).values(**value_dict))
-            _session.commit()
-            first_visit = True
-        else:
-            chat_link  = guest.chat_link
-            first_visit = False
+        if utm_source:
+            value_dict.update(
+                {
+                    'utm_source': utm_source,
+                }
+            )
 
-    # has_pinned_message = message.chat.pinned_message
+        insert_guest_query = (
+            insert(
+                Guest
+            )\
+            .values(**value_dict)
+        )
+        async with session as _session:
+            await _session.execute(insert_guest_query)
+            await _session.commit()
+        first_visit = True
+    else:
+        chat_link  = guest.chat_link
+        first_visit = False
 
     if review_msg_dict and not first_visit:
-        with session as _session:
-            exchange_data = get_exchange_name(review_msg_dict,
-                                            _session)
-        if exchange_data is not None:
-            exchange_id, marker = exchange_data
-            _kb = create_add_review_kb(exchange_id,
-                                       marker,
-                                       select_language).as_markup()
-            # _text = f'Оставить отзыв на обменник {exchange_name}'
-            if select_language == 'ru':
-                _text = f'Оставить отзыв на обменник {review_msg_dict.get("exchange_name")}'
-            else:
-                _text = f'Add review to exchanger {review_msg_dict.get("exchange_name")}'
-            # for blocked review
-            blocked_add_review = (_text, exchange_id, marker)
-        else:
-            _kb = None
+        _text, _kb, blocked_add_review = await construct_add_review_message(review_msg_dict=review_msg_dict,
+                                                                            session=session,
+                                                                            select_language=select_language)
 
-            if select_language == 'ru':
-                _text = 'Не удалось найти обменник для отзыва'
-            else:
-                _text = 'Exchanger to add review not found'
-            # for blocked review
-            blocked_add_review = (_text, )
         try:
             await bot.send_message(chat_id=message.from_user.id,
-                                text=_text,
-                                reply_markup=_kb)
+                                   text=_text,
+                                   reply_markup=_kb)
             await message.delete()
         except Exception as ex:
             print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
@@ -420,37 +309,13 @@ async def start(message: types.Message | types.CallbackQuery,
         return
     
     if comment_msg_dict and not first_visit:
-        with session as _session:
-            exchange_data = get_exchange_name(comment_msg_dict,
-                                            _session)
-        if exchange_data is not None:
-            exchange_id, marker = exchange_data
-
-            comment_msg_dict.update({'exchange_id': exchange_id,
-                                     'marker': marker})
-            
-            _kb = create_add_comment_kb(comment_msg_dict,
-                                       select_language).as_markup()
-
-            if select_language == 'ru':
-                _text = f'Оставить комментарий на обменник {comment_msg_dict.get("exchange_name")}'
-            else:
-                _text = f'Add comment to exchanger {comment_msg_dict.get("exchange_name")}'
-            # for blocked comment
-            blocked_add_comment = (_text, exchange_id, marker, comment_msg_dict.get('review_id'))
-        else:
-            _kb = None
-
-            if select_language == 'ru':
-                _text = 'Не удалось найти обменник для комментария'
-            else:
-                _text = 'Exchanger to add comment not found'
-            # for blocked comment
-            blocked_add_comment = (_text, )
+        _text, _kb, blocked_add_comment = await construct_add_comment_message(comment_msg_dict=comment_msg_dict,
+                                                                            session=session,
+                                                                            select_language=select_language)
         try:
             await bot.send_message(chat_id=message.from_user.id,
-                                text=_text,
-                                reply_markup=_kb)
+                                   text=_text,
+                                   reply_markup=_kb)
             await message.delete()
         except Exception as ex:
             print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
@@ -458,26 +323,14 @@ async def start(message: types.Message | types.CallbackQuery,
             await state.update_data(blocked_add_comment=blocked_add_comment)
             return
         return
-
     
     elif activate_admin_exchange and not first_visit:
-        with session as _session:
-            has_added = try_activate_admin_exchange(message.from_user.id,
-                                                    session=_session)
-        
+        _text = await construct_activate_exchange_admin_message(message.from_user.id,
+                                                                session=session)
         try:
-            match has_added:
-                    case 'empty':
-                        await message.answer(text=f'❗️К сожалению, не смогли найти подходящую заявку на подключения, связитесь с <a href="https://t.me/MoneySwap_support">тех.поддержкой</a> для решения проблемы',
-                                            disable_web_page_preview=True)
-                    case 'error':
-                        await message.answer(text=f'❗️Возникли сложности, обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
-                                            disable_web_page_preview=True)
-                    case 'exists':
-                        await message.answer(text=f'✔️Заявка уже была обработана\nЕсли Вы всё равно столкнулись с проблемами обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
-                                            disable_web_page_preview=True)
-                    case _:
-                        await message.answer(text=f'✅Обменник {has_added} успешно привязан к вашему профилю')
+            await message.answer(text=_text,
+                                 disable_web_page_preview=True)
+
         except Exception as ex:
             print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
             return
@@ -490,22 +343,13 @@ async def start(message: types.Message | types.CallbackQuery,
         return
 
     elif partner_activate_admin_exchange and not first_visit:
-        with session as _session:
-            has_added = try_activate_partner_admin_exchange(message.from_user.id,
-                                                            session=_session)
+        _text = await construct_activate_partner_exchange_admin_message(message.from_user.id,
+                                                                        session=session)
+        
         try:
-            match has_added:
-                case 'empty':
-                    await message.answer(text=f'❗️К сожалению, не смогли найти подходящую заявку на подключения, связитесь с <a href="https://t.me/MoneySwap_support">тех.поддержкой</a> для решения проблемы',
-                                        disable_web_page_preview=True)
-                case 'error':
-                    await message.answer(text=f'❗️Возникли сложности, обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
-                                        disable_web_page_preview=True)
-                case 'exists':
-                    await message.answer(text=f'✔️Заявка уже была обработана\nЕсли Вы всё равно столкнулись с проблемами обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
-                                        disable_web_page_preview=True)
-                case _:
-                    await message.answer(text=f'✅Обменник {has_added} успешно привязан к вашему профилю')
+            await message.answer(text=_text,
+                                 disable_web_page_preview=True)
+
         except Exception as ex:
             print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
             return
@@ -515,11 +359,6 @@ async def start(message: types.Message | types.CallbackQuery,
             pass
         
         return
-
-    start_kb = create_start_inline_keyboard(tg_id,
-                                            select_language)
-    start_kb = add_switch_language_btn(start_kb,
-                                       select_language)
 
     if chat_link:
         if select_language == 'ru':
@@ -531,10 +370,14 @@ async def start(message: types.Message | types.CallbackQuery,
 
     if not is_callback:
         try:
+            _start_text, start_kb = await consctruct_start_massage(user_id=message.from_user.id,
+                                                                   select_language=select_language,
+                                                                   session=session,
+                                                                   chat_link=chat_link)
             _msg = await message.answer(text=_start_text,
-                                reply_markup=start_kb.as_markup(),
-                                disable_web_page_preview=True,
-                                disable_notification=True)
+                                        reply_markup=start_kb.as_markup(),
+                                        disable_web_page_preview=True,
+                                        disable_notification=True)
             
             blocked_add_review: tuple = data.get('blocked_add_review')
             blocked_add_comment: tuple = data.get('blocked_add_comment')
@@ -577,12 +420,9 @@ async def start(message: types.Message | types.CallbackQuery,
             return
         else:
             if isinstance(blocked_add_review, bool):
-                # if data.get('blocked_add_review'):
-                #     data.pop('blocked_add_review')
                 await state.update_data(blocked_add_review=None)
+
             elif isinstance(blocked_add_comment, bool):
-                # if data.get('blocked_add_comment'):
-                #     data.pop('blocked_add_comment')
                 await state.update_data(blocked_add_comment=None)
 
         try:
@@ -597,9 +437,10 @@ async def start(message: types.Message | types.CallbackQuery,
             pass
     else:
         try:
+            # авпв
             _msg = await bot.send_message(chat_id=message.chat.id,
                                 text=_start_text,
-                                reply_markup=start_kb.as_markup(),
+                                reply_markup=start_kb.as_markup(),  # ? нужна ли обработка callback`а
                                 disable_web_page_preview=True,
                                 disable_notification=True)
         except TelegramForbiddenError:
@@ -615,27 +456,9 @@ async def start(message: types.Message | types.CallbackQuery,
         except Exception:
             pass
     if review_msg_dict:
-        with session as _session:
-            exchange_data = get_exchange_name(review_msg_dict,
-                                            _session)
-        if exchange_data is not None:
-            exchange_id, marker = exchange_data
-            _kb = create_add_review_kb(exchange_id,
-                                       marker,
-                                       select_language).as_markup()
-            if select_language == 'ru':
-                _text = f'Оставить отзыв на обменник {review_msg_dict.get("exchange_name")}'
-            else:
-                _text = f'Add review to exchanger {review_msg_dict.get("exchange_name")}'
-        else:
-            _kb = None
-
-            if select_language == 'ru':
-                _text = 'Не удалось найти обменник для отзыва'
-            else:
-                _text = 'Exchanger to add review not found'
-            # for blocked review
-            blocked_add_review = (_text, )
+        _text, _kb, blocked_add_review = await construct_add_review_message(review_msg_dict=review_msg_dict,
+                                                                            session=session,
+                                                                            select_language=select_language)
         try:
             await bot.send_message(chat_id=message.from_user.id,
                                 text=_text,
@@ -646,31 +469,9 @@ async def start(message: types.Message | types.CallbackQuery,
             return
             
     if comment_msg_dict:
-        with session as _session:
-            exchange_data = get_exchange_name(comment_msg_dict,
-                                            _session)
-        if exchange_data is not None:
-            exchange_id, marker = exchange_data
-            comment_msg_dict.update({'exchange_id': exchange_id,
-                                     'marker': marker})
-            _kb = create_add_comment_kb(comment_msg_dict,
-                                       select_language).as_markup()
-            # _text = f'Оставить отзыв на обменник {exchange_name}'
-            if select_language == 'ru':
-                _text = f'Оставить комментарий на обменник {comment_msg_dict.get("exchange_name")}'
-            else:
-                _text = f'Add comment to exchanger {comment_msg_dict.get("exchange_name")}'
-            # for blocked comment
-            blocked_add_comment = (_text, exchange_id, marker, comment_msg_dict.get('review_id'))
-        else:
-            _kb = None
-
-            if select_language == 'ru':
-                _text = 'Не удалось найти обменник для комментария'
-            else:
-                _text = 'Exchanger to add comment not found'
-            # for blocked comment
-            blocked_add_comment = (_text, )
+        _text, _kb, blocked_add_comment = await construct_add_comment_message(comment_msg_dict=comment_msg_dict,
+                                                                            session=session,
+                                                                            select_language=select_language)
         try:
             await bot.send_message(chat_id=message.from_user.id,
                                 text=_text,
@@ -686,26 +487,15 @@ async def start(message: types.Message | types.CallbackQuery,
             pass
 
     if activate_admin_exchange:
-        with session as _session:
-            has_added = try_activate_admin_exchange(message.from_user.id,
-                                                    session=_session)
+        _text = await construct_activate_exchange_admin_message(message.from_user.id,
+                                                                session=session)
         try:
-            match has_added:
-                case 'empty':
-                    await message.answer(text=f'❗️К сожалению, не смогли найти подходящую заявку на подключения, связитесь с <a href="https://t.me/MoneySwap_support">тех.поддержкой</a> для решения проблемы')
-                case 'error':
-                    await message.answer(text=f'❗️Возникли сложности, обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>')
-                case 'exists':
-                    await message.answer(text=f'✔️Заявка уже была обработана\nЕсли Вы всё равно столкнулись с проблемами обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>')
-                case _:
-                    await message.answer(text=f'✅Обменник {has_added} успешно привязан к вашему профилю')
+            await message.answer(text=_text,
+                                 disable_web_page_preview=True)
+
         except Exception as ex:
             print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
             return
-        # if has_added:
-        #     await message.answer(text=f'Обменник {has_added} успешно привязан к вашему профилю✅')
-        # else:
-        #     await message.answer(text=f'К сожалению, не смогли найти подходящую заявку на подключения, связитесь с тех.поддержкой для решения проблемы')
         try:
             await message.delete()
         except Exception:
@@ -714,22 +504,12 @@ async def start(message: types.Message | types.CallbackQuery,
         return
     
     if partner_activate_admin_exchange:
-        with session as _session:
-            has_added = try_activate_partner_admin_exchange(message.from_user.id,
-                                                            session=_session)
+        _text = await construct_activate_partner_exchange_admin_message(message.from_user.id,
+                                                                        session=session)
+        
         try:
-            match has_added:
-                case 'empty':
-                    await message.answer(text=f'❗️К сожалению, не смогли найти подходящую заявку на подключения, связитесь с <a href="https://t.me/MoneySwap_support">тех.поддержкой</a> для решения проблемы',
-                                        disable_web_page_preview=True)
-                case 'error':
-                    await message.answer(text=f'❗️Возникли сложности, обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
-                                        disable_web_page_preview=True)
-                case 'exists':
-                    await message.answer(text=f'✔️Заявка уже была обработана\nЕсли Вы всё равно столкнулись с проблемами обратитесь в <a href="https://t.me/MoneySwap_support">тех.поддержку</a>',
-                                        disable_web_page_preview=True)
-                case _:
-                    await message.answer(text=f'✅Обменник {has_added} успешно привязан к вашему профилю')
+            await message.answer(text=_text,
+                                 disable_web_page_preview=True)
         except Exception as ex:
             print(f'ERROR WITH TRY SEND MESSAGE ON /START tg_id {message.from_user.id} {ex}')
             return
@@ -743,10 +523,10 @@ async def start(message: types.Message | types.CallbackQuery,
 
 
 @main_router.callback_query(F.data.startswith('lang'))
-async def request_type_state(callback: types.CallbackQuery,
-                             session: Session,
-                             state: FSMContext,
-                             bot: Bot):
+async def switch_language_main_message(callback: types.CallbackQuery,
+                                       session: AsyncSession,
+                                       state: FSMContext,
+                                       bot: Bot):
     callback_data = callback.data.split('_')[-1]
 
     if callback_data == 'ru':
@@ -756,13 +536,32 @@ async def request_type_state(callback: types.CallbackQuery,
     
     await state.update_data(select_language=select_language)
 
-    await start(callback,
-                session,
-                state,
-                bot,
-                text_msg='Главное меню')
-    
-    await callback.answer()
+    _start_text, start_kb = await consctruct_start_massage(user_id=callback.from_user.id,
+                                                           select_language=select_language,
+                                                           session=session)
+    try:
+        await bot.edit_message_text(text=_start_text,
+                                    chat_id=callback.from_user.id,
+                                    message_id=callback.message.message_id,
+                                    disable_web_page_preview=True,
+                                    reply_markup=start_kb.as_markup())
+
+        await callback.answer()
+    except Exception as ex:
+        print(ex)
+
+        try:
+            await bot.send_message(text=_start_text,
+                                   chat_id=callback.from_user.id,
+                                   disable_web_page_preview=True,
+                                   reply_markup=start_kb.as_markup())
+            
+            await bot.delete_message(chat_id=callback.from_user.id,
+                                     message_id=callback.message.message_id)
+        except Exception:
+            pass
+    finally:
+        await callback.answer()
 
 
 @main_router.message(Command('dev'))
@@ -789,36 +588,6 @@ async def start_swift_sepa(message: types.Message,
                                 message_id=msg.message_id)
     except Exception as ex:
         print(ex)
-# @main_router.message(F.text == 'Swift/Sepa')
-# async def start_swift_sepa(message: types.Message,
-#                            state: FSMContext,
-#                            bot: Bot):
-#     data = await state.get_data()
-#     await state.set_state(SwiftSepaStates.request_type)
-#     await state.update_data(order=dict())
-
-#     swift_start_kb = create_swift_start_kb()
-#     kb = add_cancel_btn_to_kb(swift_start_kb)
-
-#     main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
-
-#     # print('has_main_menu_msg?', bool(main_menu_msg))
-
-#     if main_menu_msg:
-#         try:
-#             await bot.delete_message(*main_menu_msg)
-#             # await main_menu_msg.delete()
-#         except Exception:
-#             pass
-
-#     state_msg = await message.answer('<b>Выберите тип заявки</b>',
-#                          reply_markup=kb.as_markup())
-    
-#     state_data_message = (state_msg.chat.id, state_msg.message_id)
-    
-#     await state.update_data(state_msg=state_data_message)
-#     # await state.update_data(username=message.from_user.username)
-#     await message.delete()
 
 
 @main_router.callback_query(F.data.in_(('cancel', 'to_main')))
@@ -858,36 +627,6 @@ async def back_to_main(callback: types.CallbackQuery,
         pass
 
 
-# @main_router.callback_query(F.data == 'invoice_swift/sepa')
-# async def invoice_swift_sepa(callback: types.CallbackQuery,
-#                             session: Session,
-#                             state: FSMContext,
-#                             bot: Bot,
-#                             api_client: Client):
-#     data = await state.get_data()
-
-#     main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
-
-#     chat_id, message_id = main_menu_msg
-#     # chat_id = callback.message.chat.id
-#     # message_id = callback.message.message_id
-
-#     swift_sepa_kb = create_swift_sepa_kb()
-#     swift_sepa_kb = add_cancel_btn_to_kb(swift_sepa_kb)
-
-#     # await state.update_data(action='swift/sepa')
-
-#     await bot.edit_message_text(text='Выберите действие',
-#                                 chat_id=chat_id,
-#                                 message_id=message_id,
-#                                 reply_markup=swift_sepa_kb.as_markup())
-    
-#     # await bot.edit_message_reply_markup(chat_id=chat_id,
-#     #                                     message_id=message_id,
-#     #                                     reply_markup=swift_sepa_kb.as_markup())
-    
-#     await callback.answer()
-
 @main_router.callback_query(F.data == 'invoice_swift/sepa')
 async def invoice_swift_sepa(callback: types.CallbackQuery,
                             session: Session,
@@ -900,33 +639,21 @@ async def invoice_swift_sepa(callback: types.CallbackQuery,
 
     if not select_language:
         select_language = 'ru'
-    # language_code = callback.from_user.language_code
 
     _text = 'Выберите действие' if select_language == 'ru' else 'Choose an action'
-    # _text = '<b>Введите сумму и валюту платежа</b>\n\n⚠️ <u>Внимание: минимальная сумма платежа составляет 3000$.</u>' if select_language == 'ru'\
-    #              else '<b>Input payment and valute amount</b>\n\n⚠️ <u>Please note: the minimum payment amount is 3000$</u>'
-
-    # data = await state.get_data()
-
-    # main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
 
     await state.set_state(SwiftSepaStates.request_type)
-    # await state.set_state(SwiftSepaStates.amount)
 
-
-    # chat_id, message_id = main_menu_msg
     chat_id = callback.message.chat.id
     message_id = callback.message.message_id
 
     await state.update_data(order=dict(),
                             state_msg=(chat_id, message_id))
-    # swift_sepa_kb = create_swift_sepa_kb()
+
     swift_sepa_kb = create_swift_start_kb(select_language)
-    # swift_sepa_kb = create_swift_condition_kb(select_language)
     swift_sepa_kb = add_cancel_btn_to_kb(select_language,
                                          swift_sepa_kb)
 
-    # await state.update_data(action='swift/sepa')
     try:
         await bot.edit_message_text(text=_text,
                                     chat_id=chat_id,
@@ -947,66 +674,7 @@ async def photo_test(message: types.Message,
                     bot: Bot):
     print(message.photo)
     print('*' * 10)
-# @main_router.callback_query(F.data == 'start_swift_sepa')
-# async def start_swift_sepa(callback: types.CallbackQuery,
-#                             session: Session,
-#                             state: FSMContext,
-#                             bot: Bot,
-#                             api_client: Client):
-#     # await callback.answer(text='Находится в разработке',
-#     #                       show_alert=True)
-#     data = await state.get_data()
 
-#     # if not data.get('action'):
-#     #     await callback.answer(text='Что то пошло не так, попробуйте еще раз.')
-#     #     await state.clear()
-
-#     #     await start(callback,
-#     #                 session,
-#     #                 state,
-#     #                 bot,
-#     #                 text_msg='Главное меню')
-#     #     return
-    
-#     await state.set_state(SwiftSepaStates.request_type)
-#     await state.update_data(order=dict())
-
-#     swift_start_kb = create_swift_start_kb()
-#     kb = add_cancel_btn_to_kb(swift_start_kb)
-
-#     main_menu_msg: tuple[str,str] = data.get('main_menu_msg')
-
-#     chat_id, message_id = main_menu_msg
-#     # chat_id = callback.message.chat.id
-#     # message_id = callback.message.message_id
-
-
-#     # print('has_main_menu_msg?', bool(main_menu_msg))
-
-#     # if main_menu_msg:
-#     #     try:
-#     #         await bot.delete_message(*main_menu_msg)
-#     #         # await main_menu_msg.delete()
-#     #     except Exception:
-#     #         pass
-
-#     # state_msg = await message.answer('<b>Выберите тип заявки</b>',
-#     #                      reply_markup=kb.as_markup())
-#     await bot.edit_message_text(text='<b>Выберите тип заявки</b>',
-#                                 chat_id=chat_id,
-#                                 message_id=message_id,
-#                                 reply_markup=kb.as_markup())
-    
-#     try:
-#         await callback.answer()
-#     except Exception:
-#         pass
-    
-#     # state_data_message = (state_msg.chat.id, state_msg.message_id)
-    
-#     # await state.update_data(state_msg=state_data_message)
-#     # # await state.update_data(username=message.from_user.username)
-#     # await message.delete()
 
 @main_router.callback_query(F.data == 'start_swift_sepa')
 async def start_swift_sepa(callback: types.CallbackQuery,
