@@ -568,7 +568,7 @@ async def start(message: types.Message | types.CallbackQuery,
             # new_comment_msg_dict.update({'exchange_id': exchange_id,
             #                          'marker': marker})
             
-            _kb = new_create_add_comment_kb(comment_msg_dict,
+            _kb = new_create_add_comment_kb(new_comment_msg_dict,
                                             select_language).as_markup()
 
             if select_language == 'ru':
@@ -927,7 +927,7 @@ async def start(message: types.Message | types.CallbackQuery,
             # new_comment_msg_dict.update({'exchange_id': exchange_id,
             #                          'marker': marker})
             
-            _kb = new_create_add_comment_kb(comment_msg_dict,
+            _kb = new_create_add_comment_kb(new_comment_msg_dict,
                                             select_language).as_markup()
 
             if select_language == 'ru':
