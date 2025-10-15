@@ -2635,7 +2635,9 @@ async def new_send_notification_to_exchange_admin(user_id: int,
             Review,
             Exchange,
         )\
-        .select_from(Review)
+        .select_from(Review)\
+        .join(Exchange,
+              Review.exchange_id == Exchange.id)\
         .where(Review.id == review_id)
     )
     with session as _session:
@@ -2666,11 +2668,9 @@ async def new_send_notification_to_exchange_admin(user_id: int,
     _kb = new_create_kb_for_exchange_admin_review(exchange_id=exchange_id,
                                                   review_id=review_id)
     try:
-        # await bot.send_message(chat_id=user_id,
-        #                        text=_text,
-        #                        reply_markup=_kb.as_markup())
-        print(review.__dict__)
-        print(exchange.__dict__)
+        await bot.send_message(chat_id=user_id,
+                               text=_text,
+                               reply_markup=_kb.as_markup())
         print(f'SEND TO EXCHANGE ADMIN REVIEW NOTIFICATION {_text}')
     except Exception as ex:
         print(f'ERROR WITH TRY SEND MESSAGE TO EXCHANGE ADMIN REVIEW NOTIFICATION {_text}', ex)
