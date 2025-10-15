@@ -2635,6 +2635,7 @@ async def new_send_notification_to_exchange_admin(user_id: int,
             Review,
             Exchange,
         )\
+        .select_from(Review)
         .where(Review.id == review_id)
     )
     with session as _session:
