@@ -2642,7 +2642,7 @@ async def new_send_notification_to_exchange_admin(user_id: int,
 
         review_data = res.fetchall()
 
-    if not review:
+    if not review_data:
         print(f'ERROR, REVIEW NOT FOUND BY GIVEN "review_id" {review_id}')
         return
     else:
