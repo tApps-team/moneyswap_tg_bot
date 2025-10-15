@@ -96,17 +96,16 @@ async def construct_add_review_message(review_msg_dict: dict,
         exchange_data = await get_exchange_data(review_msg_dict,
                                                 _session)
     if exchange_data is not None:
-        exchange_id, exchange_name, marker = exchange_data
+        exchange_id, exchange_name = exchange_data
         _kb = create_add_review_kb(exchange_id,
-                                    marker,
-                                    select_language).as_markup()
+                                   select_language).as_markup()
 
         if select_language == 'ru':
             _text = f'Оставить отзыв на обменник <b>{exchange_name}</b>'
         else:
             _text = f'Add review to exchanger <b>{exchange_name}</b>'
         # for blocked review
-        blocked_add_review = (_text, exchange_id, marker)
+        blocked_add_review = (_text, exchange_id)
     else:
         _kb = None
 
@@ -142,10 +141,7 @@ async def construct_add_comment_message(comment_msg_dict: dict,
         exchange_data = await get_exchange_data(comment_msg_dict,
                                                 _session)
     if exchange_data is not None:
-        exchange_id, exchange_name, marker = exchange_data
-
-        comment_msg_dict.update({'exchange_id': exchange_id,
-                                    'marker': marker})
+        exchange_id, exchange_name = exchange_data
         
         _kb = create_add_comment_kb(comment_msg_dict,
                                     select_language).as_markup()
@@ -155,7 +151,7 @@ async def construct_add_comment_message(comment_msg_dict: dict,
         else:
             _text = f'Add comment to exchanger <b>{exchange_name}</b>'
         # for blocked comment
-        blocked_add_comment = (_text, exchange_id, marker, comment_msg_dict.get('review_id'))
+        blocked_add_comment = (_text, exchange_id, comment_msg_dict.get('review_id'))
     else:
         _kb = None
 
@@ -336,7 +332,7 @@ async def try_add_file_ids_to_db(message: types.Message,
 
 
 async def try_add_file_ids(bot: Bot,
-                           session: Session,
+                           session: AsyncSession,
                            obj):
     MassSendImage = Base.classes.general_models_masssendimage
     for image in obj.general_models_masssendimage_collection:
@@ -356,7 +352,7 @@ async def try_add_file_ids(bot: Bot,
 
             image_file_id = loaded_image.photo[0].file_id
             print(image.id, image_file_id)
-            session.execute(update(MassSendImage).where(MassSendImage.id==image.id).values(file_id=image_file_id))
+            await session.execute(update(MassSendImage).where(MassSendImage.id==image.id).values(file_id=image_file_id))
 
     MassSendVideo = Base.classes.general_models_masssendvideo
     for video in obj.general_models_masssendvideo_collection:
@@ -374,7 +370,7 @@ async def try_add_file_ids(bot: Bot,
             await bot.delete_message(loaded_video.chat.id, loaded_video.message_id)
 
             video_file_id = loaded_video.video.file_id
-            session.execute(update(MassSendVideo).where(MassSendVideo.id==video.id).values(file_id=video_file_id))
+            await session.execute(update(MassSendVideo).where(MassSendVideo.id==video.id).values(file_id=video_file_id))
 
     MassSendFile = Base.classes.general_models_masssendfile
     for file in obj.general_models_masssendfile_collection:
@@ -390,9 +386,9 @@ async def try_add_file_ids(bot: Bot,
 
             file_file_id = loaded_file.document.file_id
             print(file.id, file_file_id)
-            session.execute(update(MassSendFile).where(MassSendFile.id==file.id).values(file_id=file_file_id))
+            await session.execute(update(MassSendFile).where(MassSendFile.id==file.id).values(file_id=file_file_id))
 
-    session.commit()
+    await session.commit()
 
 
 
@@ -437,41 +433,36 @@ def validate_amount(amount_text: str):
 async def get_exchange_data(review_msg_dict: dict,
                             session: AsyncSession):
 
-    _exchange_name = review_msg_dict.get('exchange_name')
+    exchange_id = review_msg_dict.get('exchange_id')
 
-    if _exchange_name:
+    if exchange_id:
 
-        for exchange_model, marker in ((Base.classes.no_cash_exchange, 'no_cash'),
-                                       (Base.classes.cash_exchange, 'cash'),
-                                       (Base.classes.partners_exchange, 'partner')):
-            query = (
-                select(
-                    exchange_model.id,
-                    exchange_model.name,
-                )\
-                .where(
-                    exchange_model.name.ilike(_exchange_name)
-                    )
-            )
-
-            res = await session.execute(query)
-
-            exchange_data = res.fetchall()
-            
-            if exchange_data:
-                exchange_id, exchange_name = exchange_data[0]
-                
-                return (
-                    exchange_id,
-                    exchange_name,
-                    marker,
+        Exchanger = Base.classes.general_models_exchanger
+        
+        query = (
+            select(
+                Exchanger.name,
+            )\
+            .where(
+                Exchanger.id == exchange_id,
                 )
+        )
+
+        res = await session.execute(query)
+
+        exchange_name = res.scalar_one_or_none()
+        
+        if exchange_name:            
+            return (
+                exchange_id,
+                exchange_name,
+            )
     
 
 async def try_activate_admin_exchange(user_id: int,
                                       session: AsyncSession):
-    AdminExchangeOrder = Base.classes.general_models_exchangeadminorder
-    AdminExchange = Base.classes.general_models_exchangeadmin
+    AdminExchangeOrder = Base.classes.general_models_newexchangeadminorder
+    AdminExchange = Base.classes.general_models_newexchangeadmin
     record_added = False
 
     order_check_query = (
@@ -494,53 +485,48 @@ async def try_activate_admin_exchange(user_id: int,
 
     res = await session.execute(order_check_query)
 
-    _order = res.fetchall()
+    _order = res.scalar_one_or_none()
 
     if not _order:
 
         res = await session.execute(moderated_order_check_query)
 
-        moderated_order = res.fetchall()
+        moderated_order = res.scalar_one_or_none()
 
         if not moderated_order:
             return 'empty'
         else:
             return 'exists'
-    else:
-        _order = _order[0][0]
 
-    for _exchange_marker, _exchange in (('no_cash', Base.classes.no_cash_exchange),
-                                      ('cash', Base.classes.cash_exchange),
-                                      ('partner', Base.classes.partners_exchange)):
-        query = (
-            select(
-                _exchange
-            )\
-            .where(
-                _exchange.name == _order.exchange_name,
-            )
+    Exchanger = Base.classes.general_models_exchanger
+    
+    query = (
+        select(
+            Exchanger
+        )\
+        .where(
+            Exchanger.id == _order.exchange_id,
         )
+    )
 
-        res = await session.execute(query)
+    res = await session.execute(query)
 
-        res_exchange = res.scalar_one_or_none()
+    exchanger = res.scalar_one_or_none()
 
-        if res_exchange:
-            insert_data = {
-                'user_id': user_id,
-                'exchange_name': res_exchange.name,
-                'exchange_id': res_exchange.id,
-                'exchange_marker': _exchange_marker,
-                'notification': True,
-            }
-            insert_query = (
-                insert(
-                    AdminExchange
-                )\
-                .values(**insert_data)
-            )
-            await session.execute(insert_query)
-            record_added = True
+    if exchanger:
+        insert_data = {
+            'user_id': user_id,
+            'exchange_id': exchanger.id,
+            'notification': True,
+        }
+        insert_query = (
+            insert(
+                AdminExchange
+            )\
+            .values(**insert_data)
+        )
+        await session.execute(insert_query)
+        record_added = True
 
     if record_added:
         _order.moderation = True
@@ -551,7 +537,7 @@ async def try_activate_admin_exchange(user_id: int,
             await session.rollback()
             return 'error'
         else:
-            return _order.exchange_name
+            return exchanger.name
     else:
         return 'error'
     
@@ -560,8 +546,8 @@ async def try_activate_admin_exchange(user_id: int,
 
 async def try_activate_partner_admin_exchange(user_id: int,
                                               session: AsyncSession):
-    AdminExchangeOrder = Base.classes.general_models_exchangeadminorder
-    AdminExchange = Base.classes.general_models_exchangeadmin
+    AdminExchangeOrder = Base.classes.general_models_newexchangeadminorder
+    AdminExchange = Base.classes.general_models_newexchangeadmin
     record_added = False
 
     order_check_query = (
@@ -584,75 +570,71 @@ async def try_activate_partner_admin_exchange(user_id: int,
 
     res = await session.execute(order_check_query)
 
-    _order = res.fetchall()
+    _order = res.scalar_one_or_none()
 
     if not _order:
 
         res = await session.execute(moderated_order_check_query)
 
-        moderated_order = res.fetchall()
+        moderated_order = res.scalar_one_or_none()
 
         if not moderated_order:
             return 'empty'
         else:
             return 'exists'
-    else:
-        _order = _order[0][0]
 
-        _exchange_marker, _exchange = ('partner', Base.classes.partners_exchange)
-        query = (
-            select(
-                _exchange
+    Exchanger = Base.classes.general_models_exchanger
+    
+    query = (
+        select(
+            Exchanger
+        )\
+        .where(
+            Exchanger.id == _order.exchange_id,
+        )
+    )
+
+    res = await session.execute(query)
+
+    exchanger = res.scalar_one_or_none()
+
+    if exchanger:
+        check_delete = (
+            delete(
+                AdminExchange
             )\
             .where(
-                _exchange.name == _order.exchange_name,
+                and_(
+                    AdminExchange.exchange_id == exchanger.id,
+                )
             )
         )
 
-        res = await session.execute(query)
+        await session.execute(check_delete)
+        
+        insert_data = {
+            'user_id': user_id,
+            'exchange_id': exchanger.id,
+            'notification': True,
+        }
+        insert_query = (
+            insert(
+                AdminExchange
+            )\
+            .values(**insert_data)
+        )
+        await session.execute(insert_query)
+        record_added = True
 
-        res_exchange = res.scalar_one_or_none()
-
-        if res_exchange:
-            check_delete = (
-                delete(
-                    AdminExchange
-                )\
-                .where(
-                    and_(
-                        AdminExchange.exchange_name == res_exchange.name,
-                        AdminExchange.exchange_marker == _exchange_marker,
-                    )
-                )
-            )
-
-            await session.execute(check_delete)
-            
-            insert_data = {
-                'user_id': user_id,
-                'exchange_name': res_exchange.name,
-                'exchange_id': res_exchange.id,
-                'exchange_marker': _exchange_marker,
-                'notification': True,
-            }
-            insert_query = (
-                insert(
-                    AdminExchange
-                )\
-                .values(**insert_data)
-            )
-            await session.execute(insert_query)
-            record_added = True
-
-        if record_added:
-            _order.moderation = True
-            try:
-                await session.commit()
-            except Exception as ex:
-                print('ERROR WITH ADMIN ADD EXCHANGE', ex)
-                await session.rollback()
-                return 'error'
-            else:
-                return _order.exchange_name
-        else:
+    if record_added:
+        _order.moderation = True
+        try:
+            await session.commit()
+        except Exception as ex:
+            print('ERROR WITH ADMIN ADD EXCHANGE', ex)
+            await session.rollback()
             return 'error'
+        else:
+            return exchanger.name
+    else:
+        return 'error'

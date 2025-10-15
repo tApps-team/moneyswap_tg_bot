@@ -1,34 +1,19 @@
-# from sqlalchemy.ext.automap import automap_base
-# from sqlalchemy.engine import create_engine
-# from sqlalchemy.orm import sessionmaker
-
-# from config import db_url
-
-
-# Base = automap_base()
-
-# engine = create_engine(db_url,
-#                        echo=True)
-
-# # Base.prepare(engine, reflect=True)
-# Base.prepare(autoload_with=engine)
-
-# session = sessionmaker(engine, expire_on_commit=False)
-
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from config import db_url, async_db_url  # пример: 'postgresql+asyncpg://user:password@localhost:5432/dbname'
+from config import db_url, async_db_url
 
 # Создаём базу для автомаппинга
 Base = automap_base()
 
-# Создаём асинхронный движок
+
 engine = create_async_engine(
     async_db_url,
-    echo=True,
-    future=True
+    pool_size=10,          # число постоянных соединений в пуле
+    max_overflow=20,       # доп. соединения при пиках нагрузки
+    pool_timeout=30,       # таймаут ожидания соединения
+    echo=True,            # можно поставить True для логов SQL
 )
 
 # Асинхронная сессия
