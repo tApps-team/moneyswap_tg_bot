@@ -2745,7 +2745,7 @@ async def new_send_comment_notification_to_exchange_admin(user_id: int,
         )\
         .select_from(Review)\
         .join(Exchange,
-              Review.exchange_id == Review.id)\
+              Review.exchange_id == Exchange.id)\
         .where(Review.id == review_id)
     )
     with session as _session:
