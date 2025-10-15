@@ -2740,8 +2740,8 @@ async def new_send_comment_notification_to_exchange_admin(user_id: int,
 
     query = (
         select(
+            Review,
             Exchange,
-            Review
         )\
         .select_from(Review)\
         .join(Exchange,

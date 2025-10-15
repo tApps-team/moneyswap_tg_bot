@@ -241,8 +241,8 @@ async def send_notification_to_admin(user_id: int,
 
 @app.get('/new_send_comment_notification_to_exchange_admin')
 async def new_send_comment_to_exchange_admin(user_id: int,
-                                                          exchange_id: int,
-                                                          review_id: int):
+                                             exchange_id: int,
+                                             review_id: int):
     await new_send_comment_notification_to_exchange_admin(user_id,
                                                       exchange_id,
                                                       review_id,
