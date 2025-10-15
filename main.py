@@ -34,6 +34,7 @@ from config import (TOKEN,
                     REDIS_HOST,
                     REDIS_PASSWORD)
 from handlers import (exchange_admin_direction_notification,
+                      new_send_comment_notification_to_exchange_admin,
                       main_router,
                       new_send_comment_notification_to_review_owner,
                       new_send_notification_to_exchange_admin,
@@ -233,6 +234,17 @@ async def send_notification_to_admin(user_id: int,
     await send_comment_notification_to_exchange_admin(user_id,
                                                       exchange_id,
                                                       exchange_marker,
+                                                      review_id,
+                                                      session=session(),
+                                                      bot=bot)
+    
+
+@app.get('/new_send_comment_notification_to_exchange_admin')
+async def new_send_comment_to_exchange_admin(user_id: int,
+                                                          exchange_id: int,
+                                                          review_id: int):
+    await new_send_comment_notification_to_exchange_admin(user_id,
+                                                      exchange_id,
                                                       review_id,
                                                       session=session(),
                                                       bot=bot)

@@ -2730,6 +2730,47 @@ async def send_comment_notification_to_exchange_admin(user_id: int,
     pass
 
 
+async def new_send_comment_notification_to_exchange_admin(user_id: int,
+                                                      exchange_id: int,
+                                                      review_id: int,
+                                                      session: Session,
+                                                      bot: Bot):
+    Review = Base.classes.general_models_review
+    Exchange = Base.classes.general_models_exchanger
+
+    query = (
+        select(
+            Exchange,
+            Review
+        )\
+        .select_from(Review)\
+        .join(Exchange,
+              Review.exchange_id == Review.id)\
+        .where(Review.id == review_id)
+    )
+    with session as _session:
+        res = _session.execute(query)
+
+        review_data = res.fetchall()
+
+    if review_data:
+        review, exchange = review_data[0]
+
+        _text = f'💬 Новый комментарий на отзыв прикрепленного обменника {exchange.name}'
+
+        _text += '\n\nПерейти к комментарию можно по кнопке ниже👇'
+
+        _kb = new_create_kb_for_exchange_admin_comment(exchange_id=exchange_id,
+                                                       review_id=review.id)
+        try:
+            print(f'SEND TO EXCHANGE ADMIN COMMENT NOTIFICATION {_text}')
+            await bot.send_message(chat_id=user_id,
+                                text=_text,
+                                reply_markup=_kb.as_markup())
+        except Exception as ex:
+            print(ex)
+
+
 async def send_comment_notification_to_review_owner(user_id: int,
                                                     exchange_id: int,
                                                     exchange_marker: str,
