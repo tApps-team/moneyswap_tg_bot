@@ -34,6 +34,7 @@ from config import (TOKEN,
                     REDIS_HOST,
                     REDIS_PASSWORD)
 from handlers import (exchange_admin_direction_notification,
+                      new_send_comment_notification_to_exchange_admin,
                       main_router,
                       new_send_comment_notification_to_review_owner,
                       new_send_notification_to_exchange_admin,
@@ -100,8 +101,8 @@ async def lifespan(app: FastAPI):
 
 
 #Initialize web server
-# app = FastAPI(docs_url='/docs_bot',
-#               lifespan=lifespan)
+app = FastAPI(docs_url='/docs_bot',
+              lifespan=lifespan)
 # app.add_middleware(
 #     CORSMiddleware,
 #     allow_origins=["*"],
@@ -183,11 +184,11 @@ async def main():
 
 
 # @app.get('/send_notification_to_exchange_admin')
-# async def send_notification_to_admin(user_id: int,
+# async def send_review_notification_to_admin(user_id: int,
 #                                      exchange_id: int,
 #                                      exchange_marker: str,
 #                                      review_id: int):
-#     await send_notification_to_exchange_admin(user_id,
+#     await send_review_notification_to_exchange_admin(user_id,
 #                                               exchange_id,
 #                                               exchange_marker,
 #                                               review_id,
@@ -196,10 +197,10 @@ async def main():
     
 
 # @app.get('/new_send_notification_to_exchange_admin')
-# async def new_send_notification_to_admin(user_id: int,
+# async def new_send_review_notification_to_admin(user_id: int,
 #                                      exchange_id: int,
 #                                      review_id: int):
-#     await new_send_notification_to_exchange_admin(user_id,
+#     await new_send_review_notification_to_exchange_admin(user_id,
 #                                               exchange_id,
 #                                               review_id,
 #                                               session=session(),
@@ -207,7 +208,7 @@ async def main():
     
 
 # @app.get('/send_comment_notification_to_exchange_admin')
-# async def send_notification_to_admin(user_id: int,
+# async def send_comment_notification_to_admin(user_id: int,
 #                                      exchange_id: int,
 #                                      exchange_marker: str,
 #                                      review_id: int):
@@ -219,8 +220,21 @@ async def main():
 #                                                       bot=bot)
     
 
+# @app.get('/new_send_comment_notification_to_exchange_admin')
+# async def new_send_comment_notification_to_admin(user_id: int,
+#                                      exchange_id: int,
+#                                      exchange_marker: str,
+#                                      review_id: int):
+#     await new_send_comment_notification_to_exchange_admin(user_id,
+#                                                       exchange_id,
+#                                                       exchange_marker,
+#                                                       review_id,
+#                                                       session=session(),
+#                                                       bot=bot)
+    
+
 # @app.get('/send_comment_notification_to_review_owner')
-# async def send_notification_to_r_owner(user_id: int,
+# async def send_comment_notification_to_r_owner(user_id: int,
 #                                        exchange_id: int,
 #                                        exchange_marker: str,
 #                                        review_id: int):
@@ -233,7 +247,7 @@ async def main():
     
 
 # @app.get('/new_send_comment_notification_to_review_owner')
-# async def new_send_notification_to_r_owner(user_id: int,
+# async def new_send_comment_notification_to_r_owner(user_id: int,
 #                                        exchange_id: int,
 #                                        review_id: int):
 #     await new_send_comment_notification_to_review_owner(user_id,
