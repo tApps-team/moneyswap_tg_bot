@@ -2840,8 +2840,8 @@ async def new_send_comment_notification_to_review_owner(user_id: int,
 
     query = (
         select(
+            Review,
             Exchange,
-            Review
         )\
         .select_from(Review)\
         .join(Exchange,
@@ -2854,7 +2854,7 @@ async def new_send_comment_notification_to_review_owner(user_id: int,
         review_data = res.fetchall()
 
     if review_data:
-        exchange, review = res[0]
+        review, exchange = review_data[0]
 
         _text = f'💬 Новый комментарий на Ваш отзыв обменника {exchange.name}'
 
