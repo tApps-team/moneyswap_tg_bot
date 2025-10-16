@@ -2672,9 +2672,24 @@ async def new_send_notification_to_exchange_admin(user_id: int,
                                text=_text,
                                reply_markup=_kb.as_markup())
         print(f'SEND TO EXCHANGE ADMIN REVIEW NOTIFICATION {_text}')
+        update_query = (
+            update(
+                Review
+            )\
+            .where(
+                Review.id == review_id,
+            )\
+            .values(has_send_to_admin=True)
+        )
+        with session as _session:
+            _session.execute(update_query)
+            try:
+                _session.commit()
+            except Exception as ex:
+                print(ex)
+                _session.rollback()
     except Exception as ex:
         print(f'ERROR WITH TRY SEND MESSAGE TO EXCHANGE ADMIN REVIEW NOTIFICATION {_text}', ex)
-
 
 
 async def send_comment_notification_to_exchange_admin(user_id: int,
