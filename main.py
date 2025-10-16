@@ -37,12 +37,12 @@ from handlers import (exchange_admin_direction_notification,
                       new_send_comment_notification_to_exchange_admin,
                       main_router,
                       new_send_comment_notification_to_review_owner,
-                      new_send_notification_to_exchange_admin,
+                      new_send_review_notification_to_exchange_admin,
                       send_comment_notification_to_exchange_admin,
                       send_comment_notification_to_review_owner,
                       send_mass_message,
                       send_mass_message_test,
-                      send_notification_to_exchange_admin,
+                      send_review_notification_to_exchange_admin,
                       try_send_order)
 from schemas import ExchangeAdminNotification
 
@@ -156,112 +156,112 @@ async def main():
     # dp.update.middleware(DbSessionMiddleware(session_pool=async_session_maker))
     await dp.start_polling(bot)
 #Endpoint for mass send message
-# @app.get('/send_mass_message')
-# async def send_mass_message_for_all_users(name_send: str):
-#     await send_mass_message(bot=bot,
-#                             db_session=session(),
-#                             name_send=name_send)
+@app.get('/send_mass_message')
+async def send_mass_message_for_all_users(name_send: str):
+    await send_mass_message(bot=bot,
+                            db_session=async_session_maker(),
+                            name_send=name_send)
     
 
-    # @app.get('/test_swift_sepa')
-    # async def test_swift_sepa(user_id: int,
-    #                           order_id: int,
-    #                           order_status: str = None):
-    #     return await try_send_order(bot=bot,
-    #                                 session=session(),
-    #                                 user_id=user_id,
-    #                                 order_id=order_id,
-    #                                 order_status=order_status)
+@app.get('/test_swift_sepa')
+async def test_swift_sepa(user_id: int,
+                          order_id: int,
+                          order_status: str = None):
+    return await try_send_order(bot=bot,
+                                session=async_session_maker(),
+                                user_id=user_id,
+                                order_id=order_id,
+                                order_status=order_status)
     
 
-# @app.get('/test_moder_send')
-# async def test_moder_send(user_id: int,
-#                           name_send: str):
-#     await send_mass_message_test(bot=bot,
-#                             session=session(),
-#                             user_id=user_id,
-#                             name_send=name_send)
+@app.get('/test_moder_send')
+async def test_moder_send(user_id: int,
+                          name_send: str):
+    await send_mass_message_test(bot=bot,
+                            session=async_session_maker(),
+                            user_id=user_id,
+                            name_send=name_send)
 
 
-# @app.get('/send_notification_to_exchange_admin')
-# async def send_review_notification_to_admin(user_id: int,
-#                                      exchange_id: int,
-#                                      exchange_marker: str,
-#                                      review_id: int):
-#     await send_review_notification_to_exchange_admin(user_id,
-#                                               exchange_id,
-#                                               exchange_marker,
-#                                               review_id,
-#                                               session=session(),
-#                                               bot=bot)
+@app.get('/send_notification_to_exchange_admin')
+async def send_review_notification_to_admin(user_id: int,
+                                     exchange_id: int,
+                                     exchange_marker: str,
+                                     review_id: int):
+    await send_review_notification_to_exchange_admin(user_id,
+                                              exchange_id,
+                                              exchange_marker,
+                                              review_id,
+                                              session=async_session_maker(),
+                                              bot=bot)
     
 
-# @app.get('/new_send_notification_to_exchange_admin')
-# async def new_send_review_notification_to_admin(user_id: int,
-#                                      exchange_id: int,
-#                                      review_id: int):
-#     await new_send_review_notification_to_exchange_admin(user_id,
-#                                               exchange_id,
-#                                               review_id,
-#                                               session=session(),
-#                                               bot=bot)
+@app.get('/new_send_notification_to_exchange_admin')
+async def new_send_review_notification_to_admin(user_id: int,
+                                     exchange_id: int,
+                                     review_id: int):
+    await new_send_review_notification_to_exchange_admin(user_id,
+                                                         exchange_id,
+                                                         review_id,
+                                                         session=async_session_maker(),
+                                                         bot=bot)
     
 
-# @app.get('/send_comment_notification_to_exchange_admin')
-# async def send_comment_notification_to_admin(user_id: int,
-#                                      exchange_id: int,
-#                                      exchange_marker: str,
-#                                      review_id: int):
-#     await send_comment_notification_to_exchange_admin(user_id,
-#                                                       exchange_id,
-#                                                       exchange_marker,
-#                                                       review_id,
-#                                                       session=session(),
-#                                                       bot=bot)
+@app.get('/send_comment_notification_to_exchange_admin')
+async def send_comment_notification_to_admin(user_id: int,
+                                     exchange_id: int,
+                                     exchange_marker: str,
+                                     review_id: int):
+    await send_comment_notification_to_exchange_admin(user_id,
+                                                      exchange_id,
+                                                      exchange_marker,
+                                                      review_id,
+                                                      session=async_session_maker(),
+                                                      bot=bot)
     
 
-# @app.get('/new_send_comment_notification_to_exchange_admin')
-# async def new_send_comment_notification_to_admin(user_id: int,
-#                                      exchange_id: int,
-#                                      exchange_marker: str,
-#                                      review_id: int):
-#     await new_send_comment_notification_to_exchange_admin(user_id,
-#                                                       exchange_id,
-#                                                       exchange_marker,
-#                                                       review_id,
-#                                                       session=session(),
-#                                                       bot=bot)
+@app.get('/new_send_comment_notification_to_exchange_admin')
+async def new_send_comment_notification_to_admin(user_id: int,
+                                     exchange_id: int,
+                                     exchange_marker: str,
+                                     review_id: int):
+    await new_send_comment_notification_to_exchange_admin(user_id,
+                                                          exchange_id,
+                                                          exchange_marker,
+                                                          review_id,
+                                                          session=async_session_maker(),
+                                                          bot=bot)
     
 
-# @app.get('/send_comment_notification_to_review_owner')
-# async def send_comment_notification_to_r_owner(user_id: int,
-#                                        exchange_id: int,
-#                                        exchange_marker: str,
-#                                        review_id: int):
-#     await send_comment_notification_to_review_owner(user_id,
-#                                                     exchange_id,
-#                                                     exchange_marker,
-#                                                     review_id,
-#                                                     session=session(),
-#                                                     bot=bot)
+@app.get('/send_comment_notification_to_review_owner')
+async def send_comment_notification_to_r_owner(user_id: int,
+                                       exchange_id: int,
+                                       exchange_marker: str,
+                                       review_id: int):
+    await send_comment_notification_to_review_owner(user_id,
+                                                    exchange_id,
+                                                    exchange_marker,
+                                                    review_id,
+                                                    session=async_session_maker(),
+                                                    bot=bot)
     
 
-# @app.get('/new_send_comment_notification_to_review_owner')
-# async def new_send_comment_notification_to_r_owner(user_id: int,
-#                                        exchange_id: int,
-#                                        review_id: int):
-#     await new_send_comment_notification_to_review_owner(user_id,
-#                                                     exchange_id,
-#                                                     review_id,
-#                                                     session=session(),
-#                                                     bot=bot)
+@app.get('/new_send_comment_notification_to_review_owner')
+async def new_send_comment_notification_to_r_owner(user_id: int,
+                                                   exchange_id: int,
+                                                   review_id: int):
+    await new_send_comment_notification_to_review_owner(user_id,
+                                                        exchange_id,
+                                                        review_id,
+                                                        session=async_session_maker(),
+                                                        bot=bot)
     
 
-# @app.post('/exchange_admin_direction_notification')
-# async def exchange_admin_notification(data: ExchangeAdminNotification):
-#     await exchange_admin_direction_notification(data.user_id,
-#                                                 data.text,
-#                                                 bot=bot)
+@app.post('/exchange_admin_direction_notification')
+async def exchange_admin_notification(data: ExchangeAdminNotification):
+    await exchange_admin_direction_notification(data.user_id,
+                                                data.text,
+                                                bot=bot)
 
 
 if __name__ == '__main__':

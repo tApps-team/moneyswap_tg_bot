@@ -1302,7 +1302,7 @@ async def feedback_form_send(callback: types.CallbackQuery,
 #     session.commit()
 
 #     await message.delete()
-async def send_notification_to_exchange_admin(user_id: int,
+async def send_review_notification_to_exchange_admin(user_id: int,
                                               exchange_id: int,
                                               exchange_marker: str,
                                               review_id: int,
@@ -1368,7 +1368,7 @@ async def send_notification_to_exchange_admin(user_id: int,
         print(ex)
 
 
-async def new_send_notification_to_exchange_admin(user_id: int,
+async def new_send_review_notification_to_exchange_admin(user_id: int,
                                                   exchange_id: int,
                                                   review_id: int,
                                                   session: AsyncSession,
