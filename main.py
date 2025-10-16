@@ -264,7 +264,7 @@ async def send_notification_to_r_owner(user_id: int,
     
 
 @app.get('/new_send_comment_notification_to_review_owner')
-async def new_send_notification_to_r_owner(user_id: int,
+async def new_send_comment_notification_to_r_owner(user_id: int,
                                        exchange_id: int,
                                        review_id: int):
     await new_send_comment_notification_to_review_owner(user_id,
@@ -272,7 +272,6 @@ async def new_send_notification_to_r_owner(user_id: int,
                                                     review_id,
                                                     session=session(),
                                                     bot=bot)
-    
 
 @app.post('/exchange_admin_direction_notification')
 async def exchange_admin_notification(data: ExchangeAdminNotification):
