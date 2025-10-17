@@ -1,4 +1,3 @@
-import os
 import json
 import time
 
@@ -9,13 +8,10 @@ from datetime import datetime, timedelta
 import aiohttp
 
 from aiogram import Router, types, Bot, F
-from aiogram.types import BufferedInputFile, URLInputFile
 from aiogram.utils.media_group import MediaGroupBuilder
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.exceptions import TelegramForbiddenError
-
-from pyrogram import Client
 
 from sqlalchemy.orm import Session, joinedload, sessionmaker, selectinload
 from sqlalchemy import insert, select, update, and_, func
@@ -1772,6 +1768,8 @@ async def send_mass_message(bot: Bot,
 
             mass_message = res.scalar_one_or_none()
 
+            if not mass_message_text:
+                return
             # try add file_id for each related file passed object
             await try_add_file_ids(bot, _session, mass_message)
             # refresh all DB records

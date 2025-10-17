@@ -68,19 +68,10 @@ storage = RedisStorage(redis=redis_client)
 bot = Bot(TOKEN,
           default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
-#####
-# api_client = Client('my_account',
-#                     api_id=API_ID,
-#                     api_hash=API_HASH)
-#####
-
 dp = Dispatcher(storage=storage)
 # dp = Dispatcher()
 dp.include_router(main_router)
 
-#Add session and database connection in handlers 
-# dp.update.middleware(DbSessionMiddleware(session_pool=session,
-#                                          api_client=api_client))
 dp.update.middleware(DbSessionMiddleware(session_pool=async_session_maker))
 
 
@@ -103,23 +94,23 @@ async def lifespan(app: FastAPI):
 #Initialize web server
 app = FastAPI(docs_url='/docs_bot',
               lifespan=lifespan)
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["*"],
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
-# # event_loop = asyncio.get_event_loop()
-# event_loop = asyncio.new_event_loop()
-# asyncio.set_event_loop(event_loop)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+# event_loop = asyncio.get_event_loop()
+event_loop = asyncio.new_event_loop()
+asyncio.set_event_loop(event_loop)
 
-# config = Config(app=app,
-#                 loop=event_loop,
-#                 host='0.0.0.0',
-#                 port=8001,
-#                 lifespan='on')
-# server = Server(config)
+config = Config(app=app,
+                loop=event_loop,
+                host='0.0.0.0',
+                port=8001,
+                lifespan='on')
+server = Server(config)
 
 
 # fast_api_router = APIRouter(prefix='/bot_api')
@@ -129,32 +120,32 @@ app = FastAPI(docs_url='/docs_bot',
 WEBHOOK_PATH = f'/webhook'
 
 #Endpoint for checking
-# @app.get(WEBHOOK_PATH)
-# async def any():
-#     return {'status': 'ok'}
+@app.get(WEBHOOK_PATH)
+async def any():
+    return {'status': 'ok'}
 
 
 #Endpoint for incoming updates
-# @app.post(WEBHOOK_PATH)
-# async def bot_webhook(update: dict):
-#     tg_update = types.Update(**update)
-#     await dp.feed_update(bot=bot, update=tg_update)
+@app.post(WEBHOOK_PATH)
+async def bot_webhook(update: dict):
+    tg_update = types.Update(**update)
+    await dp.feed_update(bot=bot, update=tg_update)
 
 
 
-async def main():
-    await init_models()
-    # bot = Bot(TOKEN,
-    #         default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-    # dp = Dispatcher(storage=storage)
-    # # dp = Dispatcher()
-    # dp.include_router(main_router)
+# async def main():
+#     await init_models()
+#     # bot = Bot(TOKEN,
+#     #         default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+#     # dp = Dispatcher(storage=storage)
+#     # # dp = Dispatcher()
+#     # dp.include_router(main_router)
 
-    # #Add session and database connection in handlers 
-    # # dp.update.middleware(DbSessionMiddleware(session_pool=session,
-    # #                                          api_client=api_client))
-    # dp.update.middleware(DbSessionMiddleware(session_pool=async_session_maker))
-    await dp.start_polling(bot)
+#     # #Add session and database connection in handlers 
+#     # # dp.update.middleware(DbSessionMiddleware(session_pool=session,
+#     # #                                          api_client=api_client))
+#     # dp.update.middleware(DbSessionMiddleware(session_pool=async_session_maker))
+#     await dp.start_polling(bot)
 #Endpoint for mass send message
 @app.get('/send_mass_message')
 async def send_mass_message_for_all_users(name_send: str):
@@ -265,5 +256,5 @@ async def exchange_admin_notification(data: ExchangeAdminNotification):
 
 
 if __name__ == '__main__':
-    # event_loop.run_until_complete(server.serve())
-    asyncio.run(main())
+    event_loop.run_until_complete(server.serve())
+    # asyncio.run(main())
