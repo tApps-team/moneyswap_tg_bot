@@ -493,12 +493,28 @@ async def back_to_main(callback: types.CallbackQuery,
                        state: FSMContext,
                        session: AsyncSession,
                        bot: Bot):
+    data = await state.get_data()
+
+    select_language = data.get('select_language')
+    chat_id = callback.from_user.id
+    message_id = callback.message.message_id
+
     await state.set_state()
 
     try:
-        await callback.message.delete()
+        await bot.delete_message(chat_id=chat_id,
+                                 message_id=message_id)
     except Exception:
-        pass
+        _text = 'Сообщение больше недоступно' if select_language == 'ru'\
+                else 'The message is no longer available'
+        try:
+            await bot.edit_message_text(text=_text,
+                                        chat_id=chat_id,
+                                        message_id=message_id,
+                                        reply_markup=None)
+        except Exception as ex:
+            print(ex)
+            pass
     finally:
         await callback.answer()
 
