@@ -39,7 +39,7 @@ async_db_url = URL.create(
     'postgresql+asyncpg',
     username=DB_USER,
     password=DB_PASS,
-    host=PGBOUNCER_HOST,
+    host=DB_HOST,
     port=DB_PORT,
     database=DB_NAME,
 )
