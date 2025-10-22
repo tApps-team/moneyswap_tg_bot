@@ -122,7 +122,7 @@ async def start(message: types.Message,
                 return
             
             review_msg_dict = {
-                'exchange_id': params[-1],
+                'exchange_id': int(params[-1]),
             }
 
             utm_source = 'from_site'
@@ -146,8 +146,8 @@ async def start(message: types.Message,
                 return
             
             comment_msg_dict = {
-                'exchange_id': params[1],
-                'review_id': params[-1],
+                'exchange_id': int(params[1]),
+                'review_id': int(params[-1]),
             }
 
             utm_source = 'from_site'
