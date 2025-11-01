@@ -1788,7 +1788,7 @@ async def send_mass_message(bot: Bot,
 
             mass_message = res.scalar_one_or_none()
 
-            if not mass_message_text:
+            if not mass_message:
                 return
             # try add file_id for each related file passed object
             await try_add_file_ids(bot, _session, mass_message)
