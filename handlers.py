@@ -1627,21 +1627,21 @@ async def send_mass_message_test(bot: Bot,
                     MassSendMessage
                 )\
                 .options(
-                    joinedload(MassSendMessage.general_models_masssendimage_collection),
-                    joinedload(MassSendMessage.general_models_masssendvideo_collection),
-                    joinedload(MassSendMessage.general_models_masssendfile_collection),
+                    selectinload(MassSendMessage.general_models_masssendimage_collection),
+                    selectinload(MassSendMessage.general_models_masssendvideo_collection),
+                    selectinload(MassSendMessage.general_models_masssendfile_collection),
                 )\
                 .where(MassSendMessage.name == name_send)
             )
 
             res = await _session.execute(query)
 
-            mass_message = res.unique().scalar_one_or_none()
+            mass_message = res.scalar_one_or_none()
 
             # try add file_id for each related file passed object
             await try_add_file_ids(bot, _session, mass_message)
             # refresh all DB records
-            _session.expire_all()
+            await _session.refresh()
 
             mass_message_text: str = mass_message.content
             print(mass_message_text)
@@ -1770,23 +1770,23 @@ async def send_mass_message(bot: Bot,
                     MassSendMessage
                 )\
                 .options(
-                    joinedload(MassSendMessage.general_models_masssendimage_collection),
-                    joinedload(MassSendMessage.general_models_masssendvideo_collection),
-                    joinedload(MassSendMessage.general_models_masssendfile_collection),
+                    selectinload(MassSendMessage.general_models_masssendimage_collection),
+                    selectinload(MassSendMessage.general_models_masssendvideo_collection),
+                    selectinload(MassSendMessage.general_models_masssendfile_collection),
                 )\
                 .where(MassSendMessage.name == name_send)
             )
 
             res = await _session.execute(query)
 
-            mass_message = res.unique().scalar_one_or_none()
+            mass_message = res.scalar_one_or_none()
 
             if not mass_message_text:
                 return
             # try add file_id for each related file passed object
             await try_add_file_ids(bot, _session, mass_message)
             # refresh all DB records
-            _session.expire_all()
+            await _session.refresh()
 
             mass_message_text: str = mass_message.content
 
