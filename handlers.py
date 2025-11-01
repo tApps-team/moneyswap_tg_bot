@@ -1636,7 +1636,7 @@ async def send_mass_message_test(bot: Bot,
 
             res = await _session.execute(query)
 
-            mass_message = res.scalar_one_or_none()
+            mass_message = res.unique().scalar_one_or_none()
 
             # try add file_id for each related file passed object
             await try_add_file_ids(bot, _session, mass_message)
@@ -1779,7 +1779,7 @@ async def send_mass_message(bot: Bot,
 
             res = await _session.execute(query)
 
-            mass_message = res.scalar_one_or_none()
+            mass_message = res.unique().scalar_one_or_none()
 
             if not mass_message_text:
                 return
