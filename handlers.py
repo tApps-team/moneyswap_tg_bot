@@ -1834,13 +1834,13 @@ async def send_mass_message(bot: Bot,
             # )
             
             #test for me only
-            query = (
-                select(Guest)\
-                .where(Guest.tg_id.in_([686339126]))
-            )
+            # query = (
+            #     select(Guest)\
+            #     .where(Guest.tg_id.in_([686339126]))
+            # )
 
             # mass_send for all guests
-            # query = (select(Guest))
+            query = (select(Guest))
 
             res = await _session.execute(query)
 
