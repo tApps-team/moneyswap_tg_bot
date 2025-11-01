@@ -1641,8 +1641,15 @@ async def send_mass_message_test(bot: Bot,
             # try add file_id for each related file passed object
             await try_add_file_ids(bot, _session, mass_message)
             # refresh all DB records
-            await _session.refresh()
-
+            # await _session.refresh()
+            await _session.refresh(mass_message, 
+                attribute_names=[
+                    "general_models_masssendimage_collection",
+                    "general_models_masssendvideo_collection",
+                    "general_models_masssendfile_collection"
+                ]
+            )
+            
             mass_message_text: str = mass_message.content
             print(mass_message_text)
             # validate content text
@@ -1786,8 +1793,14 @@ async def send_mass_message(bot: Bot,
             # try add file_id for each related file passed object
             await try_add_file_ids(bot, _session, mass_message)
             # refresh all DB records
-            await _session.refresh()
-
+            # await _session.refresh(mass_message)
+            await _session.refresh(mass_message, 
+                attribute_names=[
+                    "general_models_masssendimage_collection",
+                    "general_models_masssendvideo_collection",
+                    "general_models_masssendfile_collection"
+                ]
+            )
             mass_message_text: str = mass_message.content
 
             # validate content text
