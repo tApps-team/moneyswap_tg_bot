@@ -1641,7 +1641,7 @@ async def send_mass_message_test(bot: Bot,
             # try add file_id for each related file passed object
             await try_add_file_ids(bot, _session, mass_message)
             # refresh all DB records
-            await _session.expire_all()
+            _session.expire_all()
 
             mass_message_text: str = mass_message.content
             print(mass_message_text)
@@ -1786,7 +1786,7 @@ async def send_mass_message(bot: Bot,
             # try add file_id for each related file passed object
             await try_add_file_ids(bot, _session, mass_message)
             # refresh all DB records
-            await _session.expire_all()
+            _session.expire_all()
 
             mass_message_text: str = mass_message.content
 
