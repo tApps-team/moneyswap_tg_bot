@@ -1426,6 +1426,18 @@ async def new_send_review_notification_to_exchange_admin(user_id: int,
         await bot.send_message(chat_id=user_id,
                                text=_text,
                                reply_markup=_kb.as_markup())
+        update_query = (
+            update(
+                Review
+            )\
+            .values(has_send_to_admin=True)\
+            .where(
+                Review.id == review_id,
+            )
+        )
+        async with session as _session:
+            await _session.execute(update_query)
+            await _session.commit()
         print(f'SEND TO EXCHANGE ADMIN REVIEW NOTIFICATION {_text}')
     except Exception as ex:
         print(f'ERROR WITH TRY SEND MESSAGE TO EXCHANGE ADMIN REVIEW NOTIFICATION {_text}', ex)
