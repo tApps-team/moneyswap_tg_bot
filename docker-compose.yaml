@@ -52,6 +52,8 @@ networks:
     name: django_fastapi_common-network
     external: true
   redis_network:
+    name: django_fastapi_common-network
+    external: true
 
 volumes:
   redis_tg_bot_data:

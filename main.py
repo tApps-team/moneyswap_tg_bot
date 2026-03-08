@@ -41,6 +41,10 @@ from handlers import (exchange_admin_direction_notification,
                       try_send_order)
 from schemas import ExchangeAdminNotification
 
+from utils.bot import bot
+
+from utils.redis_listener import redis_listener
+
 
 #Initialize Redis storage
 redis_client = redis.asyncio.client.Redis(host=REDIS_HOST,
@@ -49,8 +53,8 @@ storage = RedisStorage(redis=redis_client)
 
 
 #TG BOT
-bot = Bot(TOKEN,
-          default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+# bot = Bot(TOKEN,
+#           default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
 dp = Dispatcher(storage=storage)
 # dp = Dispatcher()
@@ -69,7 +73,12 @@ async def lifespan(app: FastAPI):
                         #   drop_pending_updates=True,
     # Инициализация БД (reflection)
     await init_models()
+    
+    task = asyncio.create_task(redis_listener())
+
     yield  # Это место, где приложение будет работать
+
+    task.cancel()
     # Код, который будет выполнен при остановке приложения
     await bot.delete_webhook()
     print("Приложение останавливается...")
@@ -169,7 +178,7 @@ async def send_review_notification_to_admin(user_id: int,
                                               bot=bot)
     
 
-@app.get('/new_send_notification_to_exchange_admin')
+# @app.get('/new_send_notification_to_exchange_admin')
 async def new_send_review_notification_to_admin(user_id: int,
                                      exchange_id: int,
                                      review_id: int):
