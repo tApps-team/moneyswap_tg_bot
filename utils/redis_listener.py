@@ -27,9 +27,9 @@ async def redis_listener():
         print('запустил из redis`a')
 
         await new_send_review_notification_to_exchange_admin(
-            user_id=data["user_id"],
-            exchange_id=data["exchange_id"],
-            review_id=data["review_id"],
+            user_id=int(data["user_id"]),
+            exchange_id=int(data["exchange_id"]),
+            review_id=int(data["review_id"]),
             session=async_session_maker(),
             bot=bot
         )
