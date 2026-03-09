@@ -20,32 +20,30 @@ async def redis_listener():
     async for message in pubsub.listen():
 
         if message["type"] != "message":
+            print(f'type message invalid {message}')
             continue
+            
+        try:
+            print(f'получил новое событие {message}')
+            data = json.loads(message["data"])
 
-        data = json.loads(message["data"])
+            event = data.get("event")
 
-        event = data.get("event")
+            background_task = BACKGROUND_TASK_DICT.get(event)
 
-        # print('EVENT',event_from_data)
+            if not background_task:
+                print(f'не нашел фоновую задачу {event}!!!')
+                print(BACKGROUND_TASK_DICT.keys())
+                continue
 
-        # event = BACKGROUND_TASK_DICT(event_from_data)
+            print(f'запустил из redis`a {event} задачу...')
 
-        # print('new EVENT',event)
-        
-
-        background_task = BACKGROUND_TASK_DICT.get(event)
-
-        if not background_task:
-            print(f'не нашел фоновую задачу {event}!!!')
-            print(BACKGROUND_TASK_DICT.keys())
-            return
-
-        print(f'запустил из redis`a {event} задачу...')
-
-        await background_task(
-            user_id=int(data["user_id"]),
-            exchange_id=int(data["exchange_id"]),
-            review_id=int(data["review_id"]),
-            session=async_session_maker(),
-            bot=bot
-        )
+            await background_task(
+                user_id=int(data["user_id"]),
+                exchange_id=int(data["exchange_id"]),
+                review_id=int(data["review_id"]),
+                session=async_session_maker(),
+                bot=bot
+            )
+        except Exception as ex:
+            print('error inside redis listener',ex)
