@@ -84,7 +84,7 @@ async def new_send_comment_notification_to_exchange_admin(user_id: int,
                                                           review_id: int,
                                                           session: AsyncSession,
                                                           bot: Bot):
-    Review = Base.classes.general_models_newbasereview
+    Review = Base.classes.general_models_review
     Exchange = Base.classes.general_models_exchanger
 
     query = (
