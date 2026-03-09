@@ -24,23 +24,23 @@ async def redis_listener():
 
         data = json.loads(message["data"])
 
-        event_from_data = data.get("event")
+        event = data.get("event")
 
-        print('EVENT',event_from_data)
+        # print('EVENT',event_from_data)
 
-        event = BACKGROUND_TASK_DICT(event_from_data)
+        # event = BACKGROUND_TASK_DICT(event_from_data)
 
-        print('new EVENT',event)
+        # print('new EVENT',event)
         
 
         background_task = BACKGROUND_TASK_DICT.get(event)
 
         if not background_task:
-            print(f'не нашел фоновую задачу {event_from_data}!!!')
+            print(f'не нашел фоновую задачу {event}!!!')
             print(BACKGROUND_TASK_DICT.keys())
             return
 
-        print(f'запустил из redis`a {event_from_data} задачу...')
+        print(f'запустил из redis`a {event} задачу...')
 
         await background_task(
             user_id=int(data["user_id"]),

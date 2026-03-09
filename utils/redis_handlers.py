@@ -164,8 +164,8 @@ async def new_send_comment_notification_to_review_owner(user_id: int,
 
 
 BACKGROUND_TASK_DICT = {
-    EventNotificatonEnum.REVIEW_EXCHANGE_ADMIN: new_send_review_notification_to_exchange_admin,
-    EventNotificatonEnum.COMMENT_OWNER: new_send_comment_notification_to_review_owner,
-    EventNotificatonEnum.COMMENT_EXCHANGE_ADMIN: new_send_comment_notification_to_exchange_admin,
+    EventNotificatonEnum.REVIEW_EXCHANGE_ADMIN.value: new_send_review_notification_to_exchange_admin,
+    EventNotificatonEnum.COMMENT_OWNER.value: new_send_comment_notification_to_review_owner,
+    EventNotificatonEnum.COMMENT_EXCHANGE_ADMIN.value: new_send_comment_notification_to_exchange_admin,
 
 }
