@@ -24,7 +24,7 @@ async def redis_listener():
 
         data = json.loads(message["data"])
 
-        event = message["event"]
+        event = data.get("event")
 
         print('EVENT',event)
 
