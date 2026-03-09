@@ -28,9 +28,12 @@ async def redis_listener():
 
         print('EVENT',event_from_data)
 
-        # event = BACKGROUND_TASK_DICT()
+        event = BACKGROUND_TASK_DICT(event_from_data)
 
-        background_task = BACKGROUND_TASK_DICT.get(event_from_data)
+        print('new EVENT',event)
+        
+
+        background_task = BACKGROUND_TASK_DICT.get(event)
 
         if not background_task:
             print(f'не нашел фоновую задачу {event_from_data}!!!')
