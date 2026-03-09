@@ -15,7 +15,7 @@ async def redis_listener():
                     port=6379)
 
     pubsub = r.pubsub()
-    await pubsub.subscribe("review_notifications")
+    await pubsub.subscribe("notitication_events")
 
     async for message in pubsub.listen():
 
