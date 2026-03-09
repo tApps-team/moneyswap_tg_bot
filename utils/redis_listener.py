@@ -26,6 +26,8 @@ async def redis_listener():
 
         event = message["event"]
 
+        print('EVENT',event)
+
         background_task = BACKGROUND_TASK_DICT.get(event)
 
         if not background_task:
