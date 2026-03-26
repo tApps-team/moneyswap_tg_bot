@@ -459,7 +459,10 @@ async def switch_language_main_message(callback: types.CallbackQuery,
         except Exception:
             pass
     finally:
-        await callback.answer()
+        try:
+            await callback.answer()
+        except Exception:
+            pass
 
 
 @main_router.message(Command('dev'))
@@ -516,7 +519,10 @@ async def back_to_main(callback: types.CallbackQuery,
             print(ex)
             pass
     finally:
-        await callback.answer()
+        try:
+            await callback.answer()
+        except Exception:
+            pass
 
 
 ################################### SWIFT/SEPA STATE ###################################
@@ -573,7 +579,10 @@ async def invoice_swift_sepa(callback: types.CallbackQuery,
     except TelegramForbiddenError:
         return
     
-    await callback.answer()
+    try:
+        await callback.answer()
+    except Exception:
+        pass
 
 
 @main_router.callback_query(F.data.in_(('pay_payment', 'access_payment')))
@@ -912,7 +921,10 @@ async def start_support(callback: types.CallbackQuery,
     except TelegramForbiddenError:
         return
     
-    await callback.answer()
+    try:
+        await callback.answer()
+    except Exception:
+        pass
 
     
 @main_router.callback_query(F.data.startswith(FEEDBACK_REASON_PREFIX))
@@ -951,7 +963,10 @@ async def request_type_state(callback: types.CallbackQuery,
                                 message_id=message_id,
                                 reply_markup=kb.as_markup())
     
-    await callback.answer()
+    try:
+        await callback.answer()
+    except Exception:
+        pass
 
 
 @main_router.message(FeedbackFormStates.description)
