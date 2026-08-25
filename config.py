@@ -59,3 +59,5 @@ BEARER_TOKEN = os.environ.get('BEARER_TOKEN')
 
 
 FEEDBACK_REASON_PREFIX = 'feedback_reason'
+
+FRONTEND_URL = os.environ.get('FRONTEND_URL')

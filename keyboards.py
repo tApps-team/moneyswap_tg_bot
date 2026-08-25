@@ -2,7 +2,7 @@ from aiogram import types
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 from aiogram.types.web_app_info import WebAppInfo
 
-from config import WEBAPP_URL_ONE, WEBAPP_URL_TWO, WEBAPP_URL_THREE, FEEDBACK_REASON_PREFIX
+from config import WEBAPP_URL_ONE, WEBAPP_URL_TWO, WEBAPP_URL_THREE, FEEDBACK_REASON_PREFIX, FRONTEND_URL
 
 from utils.multilanguage import (start_text_dict,
                                  start_kb_text,
@@ -74,9 +74,9 @@ def create_start_inline_keyboard(user_id: int,
     start_kb = InlineKeyboardBuilder()
 
     start_kb.add(types.InlineKeyboardButton(text=tuple_text[0],
-                                            web_app=WebAppInfo(url=f'https://app.moneyswap.online/?direction=noncash&user_id={user_id}&user_lang={language_code}')))
+                                            web_app=WebAppInfo(url=f'{FRONTEND_URL}?direction=noncash&user_id={user_id}&user_lang={language_code}')))
     start_kb.add(types.InlineKeyboardButton(text=tuple_text[1],
-                                            web_app=WebAppInfo(url=f'https://app.moneyswap.online/?direction=cash&user_id={user_id}&user_lang={language_code}')))
+                                            web_app=WebAppInfo(url=f'{FRONTEND_URL}?direction=cash&user_id={user_id}&user_lang={language_code}')))
     start_kb.row(types.InlineKeyboardButton(text=tuple_text[2],
                                             callback_data='invoice_swift/sepa'))
     start_kb.row(types.InlineKeyboardButton(text=tuple_text[3],
@@ -228,7 +228,7 @@ def create_add_review_kb(exchange_id: int,
                          selected_language: str):
     _kb = InlineKeyboardBuilder()
 
-    url = f'https://app.moneyswap.online?from_site={exchange_id}'
+    url = f'{FRONTEND_URL}?from_site={exchange_id}'
     _text = 'Оставить отзыв' if selected_language == 'ru' else 'Add review'
 
     _kb.row(types.InlineKeyboardButton(text=_text,
@@ -241,7 +241,7 @@ def new_create_add_review_kb(exchange_id: int,
                              selected_language: str):
     _kb = InlineKeyboardBuilder()
 
-    url = f'https://app.moneyswap.online?from_site={exchange_id}'
+    url = f'{FRONTEND_URL}?from_site={exchange_id}'
     _text = 'Оставить отзыв' if selected_language == 'ru' else 'Add review'
     _kb.row(types.InlineKeyboardButton(text=_text,
                                        web_app=WebAppInfo(url=url)))
@@ -256,7 +256,7 @@ def create_kb_for_exchange_admin_review(exchange_id: int,
     _kb = InlineKeyboardBuilder()
 
     _kb.row(types.InlineKeyboardButton(text='Перейти к отзыву',
-                                       web_app=WebAppInfo(url=f'https://app.moneyswap.online?from_site={exchange_id}__{exchange_marker}__{review_id}')))
+                                       web_app=WebAppInfo(url=f'{FRONTEND_URL}?from_site={exchange_id}__{exchange_marker}__{review_id}')))
     
     return _kb
 
@@ -266,7 +266,7 @@ def new_create_kb_for_exchange_admin_review(exchange_id: int,
     _kb = InlineKeyboardBuilder()
 
     _kb.row(types.InlineKeyboardButton(text='Перейти к отзыву',
-                                       web_app=WebAppInfo(url=f'https://app.moneyswap.online?from_site={exchange_id}__{review_id}')))
+                                       web_app=WebAppInfo(url=f'{FRONTEND_URL}?from_site={exchange_id}__{review_id}')))
     
     return _kb
 
@@ -278,7 +278,7 @@ def create_kb_for_exchange_admin_comment(exchange_id: int,
     _kb = InlineKeyboardBuilder()
 
     _kb.row(types.InlineKeyboardButton(text='Перейти к комментарию',
-                                       web_app=WebAppInfo(url=f'https://app.moneyswap.online?from_site={exchange_id}__{exchange_marker}__{review_id}')))
+                                       web_app=WebAppInfo(url=f'{FRONTEND_URL}?from_site={exchange_id}__{exchange_marker}__{review_id}')))
     
     return _kb
 
@@ -288,7 +288,7 @@ def new_create_kb_for_exchange_admin_comment(exchange_id: int,
     _kb = InlineKeyboardBuilder()
 
     _kb.row(types.InlineKeyboardButton(text='Перейти к комментарию',
-                                       web_app=WebAppInfo(url=f'https://app.moneyswap.online?from_site={exchange_id}__{review_id}')))
+                                       web_app=WebAppInfo(url=f'{FRONTEND_URL}?from_site={exchange_id}__{review_id}')))
     
     return _kb
 
@@ -300,7 +300,7 @@ def create_add_comment_kb(comment_msg_dict: dict,
     exchange_id = comment_msg_dict.get('exchange_id')
     review_id = comment_msg_dict.get('review_id')
 
-    url = f'https://app.moneyswap.online?from_site={exchange_id}__{review_id}'
+    url = f'{FRONTEND_URL}?from_site={exchange_id}__{review_id}'
     _text = 'Оставить комментарий' if selected_language == 'ru' else 'Add comment'
 
     _kb.row(types.InlineKeyboardButton(text=_text,
@@ -318,7 +318,7 @@ def new_create_add_comment_kb(new_comment_msg_dict: dict,
     review_id = new_comment_msg_dict.get('review_id')
 
     # url = f'https://t.me/MoneySwap_robot/MoneySwap?startapp={exchange_id}__{marker}'
-    url = f'https://app.moneyswap.online?from_site={exchange_id}__{review_id}'
+    url = f'{FRONTEND_URL}?from_site={exchange_id}__{review_id}'
     _text = 'Оставить комментарий' if selected_language == 'ru' else 'Add comment'
     _kb.row(types.InlineKeyboardButton(text=_text,
                                        web_app=WebAppInfo(url=url)))
